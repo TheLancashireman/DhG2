@@ -22,6 +22,8 @@ import sys
 import cmd
 import re
 
+from DhG_Database import Database
+
 # A class to implement a command interpreter for the interactive DhG
 #
 class DhG_Shell(cmd.Cmd):
@@ -33,6 +35,11 @@ class DhG_Shell(cmd.Cmd):
 		'Type help or ? to list commands.'
 	prompt = '(DhG) '
 	file = None
+	db = None
+
+	def preloop(self):
+		self.db = Database()
+		self.db.Reload()
 
 	# Ignore blank commands
 	#
@@ -47,6 +54,8 @@ class DhG_Shell(cmd.Cmd):
 	def precmd(self, line):
 		line = line.rstrip().lstrip()
 #		print('precmd():', line)
+		if line == '':
+			return line
 		match = re.search(r'[ 0-9]', line)
 		if match:
 			keyword = line[0:match.start()]
@@ -79,6 +88,10 @@ class DhG_Shell(cmd.Cmd):
 	def do_quit(self, arg):
 		'Quit the program'
 		exit(0)
+
+	def do_unused(self, arg):
+		'List all the unused IDs in the database'
+		self.db.PrintUnused()
 
 	def do_list(self, arg):
 		'List all the persons in the database'

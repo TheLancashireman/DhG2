@@ -17,7 +17,10 @@
 # You should have received a copy of the GNU General Public License
 # along with DhG.  If not, see <http://www.gnu.org/licenses/>.
 
-
+import os
+import sys
+from pathlib import Path
+from DhG_Person import Person
 
 # A class to represent the entire database
 #
@@ -37,3 +40,24 @@ class Database:
 		else:
 			# Error: duplicate ID
 			print('Error: id', uniq, 'is not unique')
+
+	def Reload(self):
+		self.persons = []
+		for path in Path('/data1/family-history/database').rglob('*.card'):		# TODO: select location
+			p = Person()
+			try:
+				p.ReadFile(path)
+				p.AnalyseHeader()
+				if p.uniq == None:
+					print(path, ': no unique ID')
+				else:
+					self.AddPerson(p.uniq, p)
+			except:
+				print('Exception while processing ', path)
+
+	def PrintUnused(self):
+		i = 0
+		for p in self.persons:
+			if p == None:
+				print('Unused slot', i)
+			i += 1
