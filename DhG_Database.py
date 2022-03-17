@@ -61,3 +61,8 @@ class Database:
 			if p == None:
 				print('Unused slot', i)
 			i += 1
+
+	def PrintAllPersons(self):
+		for p in self.persons:
+			if p != None:
+				p.PrintBriefInfo()

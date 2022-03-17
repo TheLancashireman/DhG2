@@ -95,7 +95,7 @@ class DhG_Shell(cmd.Cmd):
 
 	def do_list(self, arg):
 		'List all the persons in the database'
-		print('do_list():', arg)
+		self.db.PrintAllPersons()
 
 	def do_family(self, arg):
 		'Show a person\'s immediate family'

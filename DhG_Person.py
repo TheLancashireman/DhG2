@@ -131,6 +131,20 @@ class Person:
 				uniq = None
 		return (self.NormaliseName(name), uniq)
 
+	# Print brief info (one line)
+	#
+	def PrintBriefInfo(self):
+		if self.uniq == None:
+			struniq = '[?]'
+		else:
+			struniq = '['+str(self.uniq)+']'
+		if self.name == None:
+			strname = '?'
+		else:
+			strname = self.name
+		strdates = '(DoB-DoD)'		# ToDo
+		print(struniq, strname, strdates)
+
 	# Print all the info
 	#
 	def Print(self):	# For debugging
