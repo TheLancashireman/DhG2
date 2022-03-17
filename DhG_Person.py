@@ -145,6 +145,16 @@ class Person:
 		strdates = '(DoB-DoD)'		# ToDo
 		print(struniq, strname, strdates)
 
+	# Print brief info if the person matched the terms
+	#
+	def PrintBriefIfMatch(self, arg):
+		if self.name != None:
+			terms = arg.split()
+			for t in terms:
+				if self.name.lower().find(t.lower()) < 0:
+					return
+			self.PrintBriefInfo()
+
 	# Print all the info
 	#
 	def Print(self):	# For debugging

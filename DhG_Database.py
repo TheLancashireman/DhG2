@@ -66,3 +66,8 @@ class Database:
 		for p in self.persons:
 			if p != None:
 				p.PrintBriefInfo()
+
+	def PrintMatchingPersons(self, arg):
+		for p in self.persons:
+			if p != None:
+				p.PrintBriefIfMatch(arg)

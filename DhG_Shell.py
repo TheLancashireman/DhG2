@@ -97,6 +97,10 @@ class DhG_Shell(cmd.Cmd):
 		'List all the persons in the database'
 		self.db.PrintAllPersons()
 
+	def do_find(self, arg):
+		'Print a list of persons that match the given terms'
+		self.db.PrintMatchingPersons(arg)
+
 	def do_family(self, arg):
 		'Show a person\'s immediate family'
 		print('do_family(): ', arg)
@@ -108,10 +112,6 @@ class DhG_Shell(cmd.Cmd):
 	def do_ancestors(self, arg):
 		'Print an ancestors tree for a given person'
 		print('do_ancestors(): ', arg)
-
-	def do_find(self, arg):
-		'Print a list of persons that match the given terms'
-		print('do_find(): ', arg)
 
 	def do_search(self, arg):
 		'Print a list of persons that match the given terms'
