@@ -55,19 +55,19 @@ class Database:
 			except:
 				print('Exception while processing ', path)
 
-	def PrintUnused(self):
+	def GetUnused(self):
+		l = []
 		i = 0
 		for p in self.persons:
 			if p == None:
-				print('Unused slot', i)
+				l.append(i)
 			i += 1
+		return l
 
-	def PrintAllPersons(self):
+	def GetMatchingPersons(self, arg):
+		l = []
 		for p in self.persons:
 			if p != None:
-				p.PrintBriefInfo()
-
-	def PrintMatchingPersons(self, arg):
-		for p in self.persons:
-			if p != None:
-				p.PrintBriefIfMatch(arg)
+				if p.IsMatch(arg):
+					l.append(p)
+		return l

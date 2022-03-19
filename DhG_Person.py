@@ -35,6 +35,8 @@ class Person:
 		self.name = None
 		self.uniq = None
 		self.sex = None
+		self.dob = None
+		self.dod = None
 		self.father_name = None
 		self.father_uniq = None
 		self.mother_name = None
@@ -50,10 +52,10 @@ class Person:
 		for line in f:
 			line = line.rstrip()	# Removes LF as well
 
-			if line.lower() == 'eof':					# Go straight to footer
+			if line.lower() == 'eof':				# Go straight to footer
 				if cur_event != None:				# Finish processing current event
 					self.events.append(cur_event)
-				cur_event = None
+					cur_event = None
 				mode = 2
 
 			if mode == 0:
@@ -72,7 +74,12 @@ class Person:
 			if mode == 2:
 				self.footlines.append(line)
 
+		if cur_event != None:
+			self.events.append(cur_event)
+
 		f.close()
+
+		self.ProcessEvents()
 
 	# Normalise a name string: remove leading and trailing whitespace, replace multiple whitespace with a single space
 	# Returns the normalised name
@@ -131,51 +138,89 @@ class Person:
 				uniq = None
 		return (self.NormaliseName(name), uniq)
 
-	# Print brief info (one line)
+	# Return True if person matches arguments
+	# arg is a list of terms. Result is true iff all terms match
 	#
-	def PrintBriefInfo(self):
-		if self.uniq == None:
-			struniq = '[?]'
-		else:
-			struniq = '['+str(self.uniq)+']'
-		if self.name == None:
-			strname = '?'
-		else:
-			strname = self.name
-		strdates = '(DoB-DoD)'		# ToDo
-		print(struniq, strname, strdates)
-
-	# Print brief info if the person matched the terms
-	#
-	def PrintBriefIfMatch(self, arg):
+	def IsMatch(self, arg):
 		if self.name != None:
 			terms = arg.split()
 			for t in terms:
 				if self.name.lower().find(t.lower()) < 0:
-					return
-			self.PrintBriefInfo()
+					return False
+			return True
+		return False
+
+	# Return a string containing vital information about the person
+	# fmt specifies what to return			ToDo
+	# datefmt spefies how to show dates		ToDo
+	#
+	def GetVitalLine(self, fmt, datefmt):
+		idx_id = 0		# ToDo work out indexes from fmt parameter
+		idx_name = 1
+		idx_dates = 2
+		parts = ['', '', '']
+		if self.uniq == None:
+			parts[idx_id] = '[?]'
+		else:
+			parts[idx_id] = '['+str(self.uniq)+']'
+		if self.name == None:
+			parts[idx_name] = '?'
+		else:
+			parts[idx_name] = self.name
+		if self.dob == None:
+			dob = '?'
+		else:
+			dob = self.dob
+		if self.dod == None:
+			dod = ''
+		else:
+			dod = self.dod
+		parts[idx_dates] = '('+dob+'-'+dod+')' # ToDo: date format
+		return ' '.join(parts)
+
+	# Process all the events for this person
+	#
+	def ProcessEvents(self):
+		for e in self.events:
+			e.DecodeEventType(self)
+			if e.etype != None:
+				if e.etype.lower() == 'birth':
+					self.dob = e.date
+				elif e.etype.lower() == 'death':
+					self.dod = e.date
 
 	# Print all the info
 	#
-	def Print(self):	# For debugging
-		print('======== Header ========')
+	def GetTimeline(self):
+		tl = []
+		tl.append('======== Header ========')
 		for ll in self.headlines:
-			print(ll)
+			tl.append(ll)
 
 		for e in self.events:
-			print('======== Event ========')
+			tl.append('======== Event ========')
 			for ll in e.lines:
-				print(ll)
+				tl.append(ll)
 
-		print('======== Footer ========')
-		for ll in self.footlines:
-			print(ll)
+		if len(self.footlines) > 0:
+			tl.append('======== Footer ========')
+			for ll in self.footlines:
+				tl.append(ll)
 
-		print()
-		print('======== Extracted data ========')
-		print('File =', self.filename)
-		print('Name =', self.name)
-		print('Uniq =', self.uniq)
-		print('Sex =', self.sex)
-		print('Father =', self.father_name, '['+str(self.father_uniq)+']')
-		print('Mother =', self.mother_name, '['+str(self.mother_uniq)+']')
+		tl.append('')
+		tl.append('======== Extracted data ========')
+		tl.append('File = ' + str(self.filename))
+		tl.append('Name = ' + self.name)
+		tl.append('Uniq = [' + str(self.uniq) + ']')
+		tl.append('Sex = ' + self.sex)
+		if (self.dob == None ):
+			tl.append('DoB = ?')
+		else:
+			tl.append('DoB = ' + self.dob)
+		if (self.dod == None ):
+			pass
+		else:
+			tl.append('DoD = '+self.dod)
+		tl.append('Father = '+self.father_name+'['+str(self.father_uniq)+']')
+		tl.append('Mother = '+self.mother_name+'['+str(self.mother_uniq)+']')
+		return tl

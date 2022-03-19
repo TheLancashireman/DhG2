@@ -24,6 +24,27 @@
 class Event:
 	def __init__(self):
 		self.lines = []
+		self.ower = None
+		self.date = None
+		self.etype = None
+		self.rest = None
 
+	# Add a line of text to the event
+	# The first line is the date and the event type
+	#
 	def AddLine(self, line):
 		self.lines.append(line)
+
+	# Decode the first line of the event
+	#
+	def DecodeEventType(self, owner):
+		self.owner = owner
+		parts = self.lines[0].split()
+		try:
+			self.date = parts[0]
+			self.etype = parts[1]
+		except:
+			print('Insufficient fields in event date line', self.lines[0])
+
+		if len(self.lines) > 2:
+			rest = ' '.join(self.lines[2:])

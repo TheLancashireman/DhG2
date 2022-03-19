@@ -78,6 +78,15 @@ class DhG_Shell(cmd.Cmd):
 				line = line + ' ' + m
 		return line
 
+	# Report that list of matches is ambiguous
+	#
+	def MatchAmbiguous(self, l, arg):
+		if len(l) < 1:
+			print('No-one matching', arg, 'found in the database')
+		else:
+			for p in l:
+				print(p.GetVitalLine(0, 0))		# ToDo: parameters
+
 	# Report the ambiguous command error
 	#
 	def do_ambiguous_command_error(self, arg):
@@ -91,15 +100,35 @@ class DhG_Shell(cmd.Cmd):
 
 	def do_unused(self, arg):
 		'List all the unused IDs in the database'
-		self.db.PrintUnused()
+		l = self.db.GetUnused()
+		for i in l:
+			print('['+str(i)+']')
 
 	def do_list(self, arg):
 		'List all the persons in the database'
-		self.db.PrintAllPersons()
+		l = self.db.GetMatchingPersons('')
+		for p in l:
+			print(p.GetVitalLine(0, 0))		# ToDo: parameters
 
 	def do_find(self, arg):
 		'Print a list of persons that match the given terms'
-		self.db.PrintMatchingPersons(arg)
+		l = self.db.GetMatchingPersons(arg)
+		for p in l:
+			print(p.GetVitalLine(0, 0))		# ToDo: parameters
+
+	def do_tl(self, arg):
+		'Print the timeline for a person'
+		self.do_timeline(arg)
+
+	def do_timeline(self, arg):
+		'Print the timeline for a person'
+		l = self.db.GetMatchingPersons(arg)
+		if len(l) == 1:
+			tl = l[0].GetTimeline()
+			for txt in tl:
+				print(txt)
+		else:
+			self.MatchAmbiguous(l, arg)
 
 	def do_family(self, arg):
 		'Show a person\'s immediate family'
