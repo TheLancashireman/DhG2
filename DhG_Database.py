@@ -73,20 +73,22 @@ class Database:
 
 	# Return a list of all the matching entries in the database
 	# If the arg is a number, or a number in brackets, return the person at that index, or None if out of range
+	# ToDo: use person.ParseCombinedNameString() to parse the argument if it isn't simply a number.
 	#
 	def GetMatchingPersons(self, arg):
 		l = []
 		arg = arg.rstrip().lstrip()
-		idx = arg
-		if idx[0] == '[' and idx[-1] == ']':
-			idx = idx[1:-1]
-		if idx.isdigit():
-			idx = int(idx)
+		if arg.isdigit():
+			idx = int(arg)
+			name = None
+		else:
+			(name, idx) = Person.ParseCombinedNameString(arg)
+		if idx != None:
 			if idx < len(self.persons) and self.persons[idx] != None:
 				l.append(self.persons[idx])
-		else:
-			for p in self.persons:
-				if p != None:
-					if p.IsMatch(arg):
-						l.append(p)
+				return l
+		for p in self.persons:
+			if p != None:
+				if p.IsMatch(name):
+					l.append(p)
 		return l

@@ -23,6 +23,7 @@ import cmd
 import re
 
 from DhG_Database import Database
+from DhG_Person import Person
 
 # A class to implement a command interpreter for the interactive DhG
 #
@@ -171,6 +172,12 @@ class DhG_Shell(cmd.Cmd):
 	def do_new(self, arg):
 		'Create a new person in the database'
 		print('do_new(): ', arg)
+	
+	def do_test(self, arg):
+		'For testing code snippets. ToDo: delete'
+		print('do_test(): ', arg)
+		(name, uniq) = Person.ParseCombinedNameString(arg)
+		print(name, uniq);
 	
 
 if __name__ == '__main__':

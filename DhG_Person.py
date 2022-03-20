@@ -82,37 +82,15 @@ class Person:
 	# Normalise a name string: remove leading and trailing whitespace, replace multiple whitespace with a single space
 	# Returns the normalised name
 	#
-	def NormaliseName(self, name):
+	@staticmethod
+	def NormaliseName(name):
 		return ' '.join(name.split())
-
-	# Extract the important information from the header lines:
-	# Name, Uniq, Sex, Father, Mother
-	#
-	def AnalyseHeader(self):
-		for line in self.headlines:
-			line = line.lstrip()	# Remove leading spaces
-			if line[0:5].lower() == 'name:':
-				name = self.NormaliseName(line[5:])
-				self.name = name
-			elif line[0:5].lower() == 'uniq:':
-				try:
-					uniq = int(line[5:].rstrip().lstrip())
-				except:
-					uniq = None
-				self.uniq = uniq
-			elif line.lower() == 'male':
-				self.sex = 'm'
-			elif line.lower() == 'female':
-				self.sex = 'f'
-			elif line[0:7].lower() == 'mother:':
-				(self.mother_name, self.mother_uniq) = self.ParseCombinedNameString(line[7:])
-			elif line[0:7].lower() == 'father:':
-				(self.father_name, self.father_uniq) = self.ParseCombinedNameString(line[7:])
 
 	# Parse a combined name/id string in the form 'Forename Name Lastname [id]'
 	# Returns normalised name and id as a tuple.
 	#
-	def ParseCombinedNameString(self, namestr):
+	@staticmethod
+	def ParseCombinedNameString(namestr):
 		idx = namestr.find('[')
 		if idx < 0:
 			# Just a name
@@ -126,6 +104,8 @@ class Person:
 				# Format error. Try to recover
 				print('Error: no closing bracket after unique id')
 			else:
+				if ustr[idx+1:] != '':
+					name = name + ' ' + ustr[idx+1:]
 				ustr = ustr[0:idx]
 			ustr = ustr.rstrip().lstrip()
 			try:
@@ -134,7 +114,31 @@ class Person:
 				# Format error: assume no unique ID
 				name = namestr
 				uniq = None
-		return (self.NormaliseName(name), uniq)
+		return (Person.NormaliseName(name), uniq)
+
+	# Extract the important information from the header lines:
+	# Name, Uniq, Sex, Father, Mother
+	#
+	def AnalyseHeader(self):
+		for line in self.headlines:
+			line = line.lstrip()	# Remove leading spaces
+			if line[0:5].lower() == 'name:':
+				name = Person.NormaliseName(line[5:])
+				self.name = name
+			elif line[0:5].lower() == 'uniq:':
+				try:
+					uniq = int(line[5:].rstrip().lstrip())
+				except:
+					uniq = None
+				self.uniq = uniq
+			elif line.lower() == 'male':
+				self.sex = 'm'
+			elif line.lower() == 'female':
+				self.sex = 'f'
+			elif line[0:7].lower() == 'mother:':
+				(self.mother_name, self.mother_uniq) = Person.ParseCombinedNameString(line[7:])
+			elif line[0:7].lower() == 'father:':
+				(self.father_name, self.father_uniq) = Person.ParseCombinedNameString(line[7:])
 
 	# Return True if person matches arguments
 	# arg is a list of terms. Result is true iff all terms match
