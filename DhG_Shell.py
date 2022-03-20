@@ -67,6 +67,8 @@ class DhG_Shell(cmd.Cmd):
 		for name in self.get_names():
 			if name != 'do_ambiguous_command_error' and name[0:3] == 'do_' and name[3:keylen+3] == keyword:
 #				print('Possible match:', name[3:])
+				if name[3:] == keyword:
+					return line				# Exact match
 				cmdmatch.append(name[3:])
 		if len(cmdmatch) == 1:
 			line = cmdmatch[0] + line[keylen:]
@@ -130,6 +132,22 @@ class DhG_Shell(cmd.Cmd):
 		else:
 			self.MatchAmbiguous(l, arg)
 
+	def do_vi(self, arg):
+		'Edit a person\'s card using vi'
+		l = self.db.GetMatchingPersons(arg)
+		if len(l) == 1:
+			os.system('vi '+ str(l[0].filename))
+		else:
+			self.MatchAmbiguous(l, arg)
+
+	def do_vim(self, arg):
+		'Edit a person\'s card using vim'
+		l = self.db.GetMatchingPersons(arg)
+		if len(l) == 1:
+			os.system('vim '+ str(l[0].filename))
+		else:
+			self.MatchAmbiguous(l, arg)
+
 	def do_family(self, arg):
 		'Show a person\'s immediate family'
 		print('do_family(): ', arg)
@@ -149,10 +167,6 @@ class DhG_Shell(cmd.Cmd):
 	def do_edit(self, arg):
 		'Edit a person\'s card using $EDITOR'
 		print('do_edit(): ', arg)
-
-	def do_vi(self, arg):
-		'Edit a person\'s card using vi'
-		print('do_vi(): ', arg)
 
 	def do_new(self, arg):
 		'Create a new person in the database'

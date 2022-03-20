@@ -32,15 +32,19 @@ class Database:
 	def __init__(self):
 		self.persons = []
 
+	# Add a person to the database, after expanding the array to ensure that the entry exists.
+	#
 	def AddPerson(self, uniq, person):
 		while len(self.persons) <= uniq:
 			self.persons.append(None)
+
 		if self.persons[uniq] == None:
 			self.persons[uniq] = person
 		else:
-			# Error: duplicate ID
 			print('Error: id', uniq, 'is not unique')
 
+	# Reload the entire database
+	#
 	def Reload(self):
 		self.persons = []
 		for path in Path('/data1/family-history/database').rglob('*.card'):		# TODO: select location
@@ -52,9 +56,12 @@ class Database:
 					print(path, ': no unique ID')
 				else:
 					self.AddPerson(p.uniq, p)
+					p.AnalyseEvents()
 			except:
 				print('Exception while processing ', path)
 
+	# Return a list of all the unused entries in the database
+	#
 	def GetUnused(self):
 		l = []
 		i = 0
@@ -64,10 +71,22 @@ class Database:
 			i += 1
 		return l
 
+	# Return a list of all the matching entries in the database
+	# If the arg is a number, or a number in brackets, return the person at that index, or None if out of range
+	#
 	def GetMatchingPersons(self, arg):
 		l = []
-		for p in self.persons:
-			if p != None:
-				if p.IsMatch(arg):
-					l.append(p)
+		arg = arg.rstrip().lstrip()
+		idx = arg
+		if idx[0] == '[' and idx[-1] == ']':
+			idx = idx[1:-1]
+		if idx.isdigit():
+			idx = int(idx)
+			if idx < len(self.persons) and self.persons[idx] != None:
+				l.append(self.persons[idx])
+		else:
+			for p in self.persons:
+				if p != None:
+					if p.IsMatch(arg):
+						l.append(p)
 		return l

@@ -44,7 +44,7 @@ class Event:
 			self.date = parts[0]
 			self.etype = parts[1]
 		except:
-			print('Insufficient fields in event date line', self.lines[0])
+			print('Insufficient fields in event date line', self.lines[0], 'in', owner.filename)
 
 		if len(self.lines) > 2:
 			rest = ' '.join(self.lines[2:])

@@ -79,8 +79,6 @@ class Person:
 
 		f.close()
 
-		self.ProcessEvents()
-
 	# Normalise a name string: remove leading and trailing whitespace, replace multiple whitespace with a single space
 	# Returns the normalised name
 	#
@@ -178,9 +176,9 @@ class Person:
 		parts[idx_dates] = '('+dob+'-'+dod+')' # ToDo: date format
 		return ' '.join(parts)
 
-	# Process all the events for this person
+	# Analyse all the events for this person
 	#
-	def ProcessEvents(self):
+	def AnalyseEvents(self):
 		for e in self.events:
 			e.DecodeEventType(self)
 			if e.etype != None:
@@ -189,7 +187,7 @@ class Person:
 				elif e.etype.lower() == 'death':
 					self.dod = e.date
 
-	# Print all the info
+	# Return an array containing the complete file contents
 	#
 	def GetTimeline(self):
 		tl = []
