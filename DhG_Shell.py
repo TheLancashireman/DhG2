@@ -29,6 +29,7 @@ from jinja2 import Template
 from DhG_Database import Database
 from DhG_Person import Person
 from DhG_Config import Config
+from DhG_Template import DoTemplate
 
 # A class to implement a command interpreter for the interactive DhG
 #
@@ -254,19 +255,12 @@ class DhG_Shell(cmd.Cmd):
 				print('Unique id', uniq, 'is already in use')
 				return
 		cardname = self.config.MakeCardfileName(name, uniq)
-		templatename = self.config.MakeTemplateName('person-card.tmpl')
-		templatefile = open(templatename, 'r')
-		templatetext = templatefile.read()
-		templatefile.close()
-		template = Template(templatetext)
-		newperson = template.render(name=name, uniq=uniq, sex='Male')	# ToDo: sex, father, mother
-		try:
-			os.mkdir(os.path.dirname(cardname))
-		except FileExistsError:
-			pass
-		cardfile = open(cardname, 'w')
-		cardfile.write(newperson)
-		cardfile.close()
+		tp = {
+			'name': name,
+			'uniq': uniq,
+			'sex': 'm'			# ToDo: sex guesstimate; father & mother
+			}
+		DoTemplate(self.config, 'xxx.tmpl', tp, cardname)
 		p = Person()
 		p.ReadFile(cardname)
 		p.AnalyseHeader()

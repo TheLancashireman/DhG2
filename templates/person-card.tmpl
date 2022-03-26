@@ -19,19 +19,21 @@
 
     $Id$
 -#}
-Name:       {{ name }}
-Uniq:       {{ uniq }}
-{% if sex == "" -%}
-sex
+Name:       {{ tp['name'] }}
+Uniq:       {{ tp['uniq'] }}
+{% if tp['sex'] == "m" -%}
+Male
+{% elif tp['sex'] == "f" -%}
+Female
 {% else -%}
-{{ sex }}
+sex
 {% endif -%}
 Version:    2
-{% if father is defined -%}
-Father:     {{ father }}
+{% if tp['father'] is defined -%}
+Father:     {{ tp['father'] }}
 {% endif -%}
-{% if mother is defined -%}
-Mother:     {{ mother }}
+{% if tp['mother'] is defined -%}
+Mother:     {{ tp['mother'] }}
 {% endif %}
 ?           Birth
 +Source     Not known
