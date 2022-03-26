@@ -67,13 +67,13 @@ class Database:
 		p.AnalyseHeader()
 		if p.uniq == None:
 			# Editing has deleted the unique ID
-			print(filename, ': unique ID no longer present. Correct the error and reload')
+			print(os.path.basename(filename), ': unique ID no longer present. Correct the error and reload')
 		elif p.uniq == uniq:
 			# Editing has not changed the unique ID
 			self.persons[uniq] = p
 			p.AnalyseEvents()
 		else:
-			print(filename, ': unique ID has changed. You should rename the file and reload')
+			print(os.path.basename(filename), ': unique ID has changed. You should rename the file and reload')
 			self.AddPerson(p.uniq, p)
 			p.AnalyseEvents()
 
