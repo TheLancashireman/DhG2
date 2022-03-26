@@ -36,7 +36,7 @@ from DhG_Template import DoTemplate
 class DhG_Shell(cmd.Cmd):
 	# Message that is displayed in response to -v/--version
 	version = 'This is DhG version 2\n\n'+\
-		'(c) David Haworth (dave@fen-net.de; http://thelancashireman.org)\n'+\
+		'(c) David Haworth (https://thelancashireman.org)\n'+\
 		'DhG comes with ABSOLUTELY NO WARRANTY. It is free free software, and you are welcome\n'+\
 		'to redistribute it under certain conditions; please read the accompanying file\n'+\
 		'gpl-3.0.txt for details.\n'
