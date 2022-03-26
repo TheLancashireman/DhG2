@@ -48,7 +48,7 @@ class Database:
 	#
 	def Reload(self):
 		self.persons = []
-		for path in Path(self.basepath).rglob('*.card'):		# TODO: select location
+		for path in Path(self.basepath).rglob('*.card'):
 			p = Person()
 			p.ReadFile(path)
 			p.AnalyseHeader()
@@ -57,6 +57,25 @@ class Database:
 			else:
 				self.AddPerson(p.uniq, p)
 				p.AnalyseEvents()
+
+	# Reload an individual card
+	#
+	def ReloadPerson(self, uniq):
+		filename = self.persons[uniq].filename
+		p = Person()
+		p.ReadFile(filename)
+		p.AnalyseHeader()
+		if p.uniq == None:
+			# Editing has deleted the unique ID
+			print(filename, ': unique ID no longer present. Correct the error and reload')
+		elif p.uniq == uniq:
+			# Editing has not changed the unique ID
+			self.persons[uniq] = p
+			p.AnalyseEvents()
+		else:
+			print(filename, ': unique ID has changed. You should rename the file and reload')
+			self.AddPerson(p.uniq, p)
+			p.AnalyseEvents()
 
 	# Return a list of all the unused entries in the database
 	#

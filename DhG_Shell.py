@@ -192,6 +192,7 @@ class DhG_Shell(cmd.Cmd):
 		l = self.db.GetMatchingPersons(arg)
 		if len(l) == 1:
 			os.system(editor + ' ' + str(l[0].filename))
+			self.db.ReloadPerson(l[0].uniq)
 		else:
 			self.PrintPersonList(l, arg)
 
