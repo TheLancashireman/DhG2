@@ -28,6 +28,7 @@ from jinja2 import Template
 
 from DhG_Database import Database
 from DhG_Person import Person
+from DhG_Config import Config
 
 # A class to implement a command interpreter for the interactive DhG
 #
@@ -61,16 +62,14 @@ class DhG_Shell(cmd.Cmd):
 	db = None
 
 	# Configuration variables can be set in the config file
-	prompt = '(DhG) '
-	cfgfile = os.path.expanduser('~') + '/.DhG/config'
-	db_dir = None
-	branch = None
-	tmpl_dir = 'templates'
+	config = None
+	prompt = '(DhG) '	# Parent class needs a copy
 
 	# In the constructor, read the command line
 	#
 	def __init__(self):
 		dropout = False
+		cfgfile = None
 		super().__init__()
 		try:
 			(opts, args) = getopt.gnu_getopt(sys.argv[1:], "hvc:", ["help", "version", "config="])
@@ -87,11 +86,12 @@ class DhG_Shell(cmd.Cmd):
 				self.Version()
 				dropout = True
 			if opt == '-c' or opt == '--config':
-				self.cfgfile = optarg
+				cfgfile = optarg
 		self.scripts = args
 		if dropout:
 			exit(0)
-		self.ReadConfig()
+		self.config = Config(cfgfile)
+		self.prompt = self.config.prompt
 
 	def Usage(self):
 		print(self.usage)
@@ -99,47 +99,10 @@ class DhG_Shell(cmd.Cmd):
 	def Version(self):
 		print(self.version)
 
-	def ReadConfig(self):
-		line_no = 0
-		f = open(self.cfgfile, 'r')
-		for l in f:
-			line_no += 1
-			l = l.rstrip().lstrip()
-			if l == '' or l[0] == '#':
-				pass			# Ignore comment lines and blank lines
-			else:
-				# Split on the '=' sign. There should be exactly one
-				parts = l.split('=')
-				if len(parts) == 2:
-					# Remove leading and trailing whitespace
-					var = parts[0].rstrip().lstrip().lower()
-					value = parts[1].rstrip().lstrip()
-
-					# Remove quotes from the value, if they match
-					if value[0] == '"' and value[-1] == '"':
-						value = value[1:-1]
-					elif value[0] == "'" and value[-1] == "'":
-						value = value[1:-1]
-
-					# Set the variable
-					if var == 'db':
-						self.db_dir = value
-					elif var == 'branch':
-						self.branch = value
-					elif var == 'prompt':
-						self.prompt = value
-					elif var == 'templates':
-						self.tmpl_dir = value
-					else:
-						print('Error in', self.cfgfile, 'line', line_no, ': unknown variable')
-				else:
-					print('Error in', self.cfgfile, 'line', line_no, ': invalid syntax')
-		f.close()
-
 	# Before the command loop, create and load the database
 	#
 	def preloop(self):
-		self.db = Database(self.db_dir)
+		self.db = Database(self.config.db_dir)
 		self.db.Reload()
 
 	def onecmd(self, str):
@@ -201,6 +164,7 @@ class DhG_Shell(cmd.Cmd):
 	def EditCard(self, editor, arg):
 		l = self.db.GetMatchingPersons(arg)
 		if len(l) == 1:
+			print('Editing', os.path.basename(l[0].filename))
 			os.system(editor + ' ' + str(l[0].filename))
 			self.db.ReloadPerson(l[0].uniq)
 		else:
@@ -216,6 +180,10 @@ class DhG_Shell(cmd.Cmd):
 	def do_quit(self, arg):
 		'Quit the program'
 		exit(0)
+
+	def do_set(self, arg):
+		'Set a config parameter'
+		self.config.SetParameter(arg)
 
 	def do_reload(self, arg):
 		'Reload the database'
@@ -264,12 +232,13 @@ class DhG_Shell(cmd.Cmd):
 		self.EditCard('vim', arg)
 
 	def do_edit(self, arg):
-		'Edit a card using $VISUAL'
-		self.EditCard('vi', arg)			# ToDo: environment variable or config
+		'Edit a card using config.editor'
+		self.EditCard(self.config.editor, arg)
 
 	def do_new(self, arg):					# ToDo: refactor this function
 		'Create a new person in the database'
 		(name, uniq) = Person.ParseCombinedNameString(arg)
+		#db.CreateNewPerson(name, uniq)
 		if name == '':
 			print('Use "new forname(s) surname" to add a new person')
 			return
@@ -284,16 +253,8 @@ class DhG_Shell(cmd.Cmd):
 			if uniq < len(self.db.persons) and self.db.persons[uniq] != None:
 				print('Unique id', uniq, 'is already in use')
 				return
-		cardname = self.db_dir + '/'
-		if self.branch != None and self.branch != '':
-			cardname = cardname + self.branch + '/'
-		names = name.split()
-		cardname = cardname + names[-1] + '/' + ''.join(names) + '-' + str(uniq) + '.card'
-		print('new: filename is', cardname)
-		if self.tmpl_dir != None and self.tmpl_dir != '':
-			templatename = self.tmpl_dir + '/person-card.tmpl'
-		else:
-			templatename = 'person-card.tmpl'
+		cardname = self.config.MakeCardfileName(name, uniq)
+		templatename = self.config.MakeTemplateName('person-card.tmpl')
 		templatefile = open(templatename, 'r')
 		templatetext = templatefile.read()
 		templatefile.close()
