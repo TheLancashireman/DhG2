@@ -260,7 +260,7 @@ class DhG_Shell(cmd.Cmd):
 			'uniq': uniq,
 			'sex': 'm'			# ToDo: sex guesstimate; father & mother
 			}
-		DoTemplate(self.config, 'xxx.tmpl', tp, cardname)
+		DoTemplate(self.config, 'person-card.tmpl', tp, cardname)
 		p = Person()
 		p.ReadFile(cardname)
 		p.AnalyseHeader()
