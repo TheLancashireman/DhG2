@@ -29,8 +29,9 @@ from DhG_Person import Person
 # with None as the loading proceeeds.
 #
 class Database:
-	def __init__(self):
+	def __init__(self, basepath):
 		self.persons = []
+		self.basepath = basepath
 
 	# Add a person to the database, after expanding the array to ensure that the entry exists.
 	#
@@ -47,18 +48,15 @@ class Database:
 	#
 	def Reload(self):
 		self.persons = []
-		for path in Path('/data1/family-history/database').rglob('*.card'):		# TODO: select location
+		for path in Path(self.basepath).rglob('*.card'):		# TODO: select location
 			p = Person()
-			try:
-				p.ReadFile(path)
-				p.AnalyseHeader()
-				if p.uniq == None:
-					print(path, ': no unique ID')
-				else:
-					self.AddPerson(p.uniq, p)
-					p.AnalyseEvents()
-			except:
-				print('Exception while processing ', path)
+			p.ReadFile(path)
+			p.AnalyseHeader()
+			if p.uniq == None:
+				print(path, ': no unique ID')
+			else:
+				self.AddPerson(p.uniq, p)
+				p.AnalyseEvents()
 
 	# Return a list of all the unused entries in the database
 	#
@@ -72,8 +70,8 @@ class Database:
 		return l
 
 	# Return a list of all the matching entries in the database
-	# If the arg is a number, or a number in brackets, return the person at that index, or None if out of range
-	# ToDo: use person.ParseCombinedNameString() to parse the argument if it isn't simply a number.
+	# If the arg is a number, or contains a number in brackets, return the person at that index,
+	# or None if out of range
 	#
 	def GetMatchingPersons(self, arg):
 		l = []
@@ -84,9 +82,12 @@ class Database:
 		else:
 			(name, idx) = Person.ParseCombinedNameString(arg)
 		if idx != None:
-			if idx < len(self.persons) and self.persons[idx] != None:
-				l.append(self.persons[idx])
-				return l
+			if idx < len(self.persons):
+				if self.persons[idx] != None:
+					l.append(self.persons[idx])
+					return l
+		if name == None:
+			return l
 		for p in self.persons:
 			if p != None:
 				if p.IsMatch(name):

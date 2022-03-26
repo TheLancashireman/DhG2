@@ -21,6 +21,8 @@ import os
 import sys
 import cmd
 import re
+import traceback
+import getopt
 
 from DhG_Database import Database
 from DhG_Person import Person
@@ -28,19 +30,113 @@ from DhG_Person import Person
 # A class to implement a command interpreter for the interactive DhG
 #
 class DhG_Shell(cmd.Cmd):
-	intro = 'This is DhG\n\n'+\
+	# Message that is displayed in response to -v/--version
+	version = 'This is DhG version 2\n\n'+\
 		'(c) David Haworth (dave@fen-net.de; http://thelancashireman.org)\n'+\
 		'DhG comes with ABSOLUTELY NO WARRANTY. It is free free software, and you are welcome\n'+\
 		'to redistribute it under certain conditions; please read the accompanying file\n'+\
-		'gpl-3.0.txt for details.\n\n'+\
-		'Type help or ? to list commands.'
+		'gpl-3.0.txt for details.\n'
+
+	# Message that is displayed in response to -h/--help and when the command line is incorrect
+	usage = 'Usage: ' + sys.argv[0] + ' [options] [script-file ...]\n'+\
+		'  Valid options:\n'+\
+		'    -h --help                     print some help text and exit\n'+\
+		'    -v --version                  print the version and exit\n'+\
+		'    -c cfgfile  --config=cfgfile  use cfgfile as the configuration file. Default ~/.DhG/config\n'+\
+		'  If more than one cfgfile is specified, the last one is used.\n'+\
+		'  Each argument is treated as a script file.\n'+\
+		'  The commands in the scripts are executed after loading the database.\n'+\
+		'  After executing the scripts, ' + sys.argv[0] + ' drops into interactive mode.\n'+\
+		'  A quit command in one of the scripts terminates the program immediately.'
+
+	# Message that is displayed on startup
+	intro = version + '\nType help or ? to list commands.'
+
 	prompt = '(DhG) '
-	file = None
+	cfgfile = os.path.expanduser('~') + '/.DhG/config'
+	scripts = []
+	db_dir = None
+	branch = None
 	db = None
 
+	# In the constructor, read the command line
+	#
+	def __init__(self):
+		dropout = False
+		super().__init__()
+		try:
+			(opts, args) = getopt.gnu_getopt(sys.argv[1:], "hvc:", ["help", "version", "config="])
+		except getopt.GetoptError as err:
+			# print help information and exit:
+			print(err)  # will print something like "option -a not recognized"
+			self.Usage()
+			exit(1)
+		for (opt, optarg) in opts:
+			if opt == '-h' or opt == '--help':
+				self.Usage()
+				dropout = True
+			if opt == '-v' or opt == '--version':
+				self.Version()
+				dropout = True
+			if opt == '-c' or opt == '--config':
+				self.cfgfile = optarg
+		self.scripts = args
+		if dropout:
+			exit(0)
+		self.ReadConfig()
+
+	def Usage(self):
+		print(self.usage)
+
+	def Version(self):
+		print(self.version)
+
+	def ReadConfig(self):
+		line_no = 0
+		f = open(self.cfgfile, 'r')
+		for l in f:
+			line_no += 1
+			l = l.rstrip().lstrip()
+			if l == '' or l[0] == '#':
+				pass			# Ignore comment lines and blank lines
+			else:
+				# Split on the '=' sign. There should be exactly one
+				parts = l.split('=')
+				if len(parts) == 2:
+					# Remove leading and trailing whitespace
+					var = parts[0].rstrip().lstrip().lower()
+					value = parts[1].rstrip().lstrip()
+
+					# Remove quotes from the value, if they match
+					if value[0] == '"' and value[-1] == '"':
+						value = value[1:-1]
+					elif value[0] == "'" and value[-1] == "'":
+						value = value[1:-1]
+
+					# Set the variable
+					if var == 'db':
+						self.db_dir = value
+					elif var == 'branch':
+						self.branch = value
+					elif var == 'prompt':
+						self.prompt = value
+					else:
+						print('Error in', self.cfgfile, 'line', line_no, ': unknown variable')
+				else:
+					print('Error in', self.cfgfile, 'line', line_no, ': invalid syntax')
+		f.close()
+
+	# Before the command loop, create and load the database
+	#
 	def preloop(self):
-		self.db = Database()
+		self.db = Database(self.db_dir)
 		self.db.Reload()
+
+	def onecmd(self, str):
+		try:
+			super().onecmd(str)
+		except Exception:
+			print(traceback.format_exc())
 
 	# Ignore blank commands
 	#
@@ -83,12 +179,21 @@ class DhG_Shell(cmd.Cmd):
 
 	# Report that list of matches is ambiguous
 	#
-	def MatchAmbiguous(self, l, arg):
+	def PrintPersonList(self, l, arg):
 		if len(l) < 1:
-			print('No-one matching', arg, 'found in the database')
+			print('No entry', arg, 'found in the database')
 		else:
 			for p in l:
 				print(p.GetVitalLine(0, 0))		# ToDo: parameters
+
+	# Edit a card using the specified editor
+	#
+	def EditCard(self, editor, arg):
+		l = self.db.GetMatchingPersons(arg)
+		if len(l) == 1:
+			os.system(editor + ' ' + str(l[0].filename))
+		else:
+			self.PrintPersonList(l, arg)
 
 	# Report the ambiguous command error
 	#
@@ -101,6 +206,10 @@ class DhG_Shell(cmd.Cmd):
 		'Quit the program'
 		exit(0)
 
+	def do_reload(self, arg):
+		'Reload the database'
+		self.db.Reload()
+
 	def do_unused(self, arg):
 		'List all the unused IDs in the database'
 		l = self.db.GetUnused()
@@ -109,15 +218,17 @@ class DhG_Shell(cmd.Cmd):
 
 	def do_list(self, arg):
 		'List all the persons in the database'
-		l = self.db.GetMatchingPersons('')
-		for p in l:
-			print(p.GetVitalLine(0, 0))		# ToDo: parameters
+		self.do_find('')
 
 	def do_find(self, arg):
 		'Print a list of persons that match the given terms'
 		l = self.db.GetMatchingPersons(arg)
 		for p in l:
 			print(p.GetVitalLine(0, 0))		# ToDo: parameters
+
+	def do_search(self, arg):
+		'Print a list of persons that match the given terms'
+		do_find(arg)
 
 	def do_tl(self, arg):
 		'Print the timeline for a person'
@@ -131,24 +242,24 @@ class DhG_Shell(cmd.Cmd):
 			for txt in tl:
 				print(txt)
 		else:
-			self.MatchAmbiguous(l, arg)
+			self.PrintPersonList(l, arg)
 
 	def do_vi(self, arg):
 		'Edit a person\'s card using vi'
-		l = self.db.GetMatchingPersons(arg)
-		if len(l) == 1:
-			os.system('vi '+ str(l[0].filename))
-		else:
-			self.MatchAmbiguous(l, arg)
+		self.EditCard('vi', arg)
 
 	def do_vim(self, arg):
 		'Edit a person\'s card using vim'
-		l = self.db.GetMatchingPersons(arg)
-		if len(l) == 1:
-			os.system('vim '+ str(l[0].filename))
-		else:
-			self.MatchAmbiguous(l, arg)
+		self.EditCard('vim', arg)
 
+	def do_edit(self, arg):
+		'Edit a card using $VISUAL'
+		self.EditCard('vi', arg)			# ToDo: environment variable or config
+
+	def do_new(self, arg):
+		'Create a new person in the database'
+		print('do_new(): ', arg)
+	
 	def do_family(self, arg):
 		'Show a person\'s immediate family'
 		print('do_family(): ', arg)
@@ -161,18 +272,6 @@ class DhG_Shell(cmd.Cmd):
 		'Print an ancestors tree for a given person'
 		print('do_ancestors(): ', arg)
 
-	def do_search(self, arg):
-		'Print a list of persons that match the given terms'
-		print('do_search(): ', arg)
-
-	def do_edit(self, arg):
-		'Edit a person\'s card using $EDITOR'
-		print('do_edit(): ', arg)
-
-	def do_new(self, arg):
-		'Create a new person in the database'
-		print('do_new(): ', arg)
-	
 	def do_test(self, arg):
 		'For testing code snippets. ToDo: delete'
 		print('do_test(): ', arg)
@@ -181,4 +280,5 @@ class DhG_Shell(cmd.Cmd):
 	
 
 if __name__ == '__main__':
-	DhG_Shell().cmdloop()
+	while True:
+		DhG_Shell().cmdloop()

@@ -46,9 +46,25 @@ class Person:
 	#
 	def ReadFile(self, filename):
 		self.filename = filename
+		self.Read()
+
+	def Read(self):
+		# Clear out any old stuff
+		self.headlines = []
+		self.events = []
+		self.footlines = []
+		self.name = None
+		self.uniq = None
+		self.sex = None
+		self.dob = None
+		self.dod = None
+		self.father_name = None
+		self.father_uniq = None
+		self.mother_name = None
+		self.mother_uniq = None
 		mode = 0	# 0 = head, 1 = timeline, 2 = tail
 		cur_event = None
-		f = open(filename, 'r')
+		f = open(self.filename, 'r')
 		for line in f:
 			line = line.rstrip()	# Removes LF as well
 
