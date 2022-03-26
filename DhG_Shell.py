@@ -184,7 +184,18 @@ class DhG_Shell(cmd.Cmd):
 
 	def do_set(self, arg):
 		'Set a config parameter'
-		self.config.SetParameter(arg)
+		if arg == '':
+			self.config.Print()
+			return
+		e = self.config.SetParameter(arg)
+		if e == 0:
+			pass
+		elif e == 1:
+			print('Error : unknown variable')
+		elif e == 2:
+			print('Error : invalid syntax')
+		else:
+			print('Error : to do')
 
 	def do_reload(self, arg):
 		'Reload the database'

@@ -24,12 +24,14 @@ import os
 # The configuration variables can be initialised from the config file at startup
 #
 class Config():
-	cfgfile = os.path.expanduser('~') + '/.DhG/config'
-	prompt = '(DhG) '
-	db_dir = None
-	branch = None
-	tmpl_dir = 'templates'
-	editor = 'vi'
+	cfgfile = os.path.expanduser('~') + '/.DhG/config'		# Set on command line with -c
+	prompt = '(DhG) '										# Command prompt
+	db_dir = None											# Location of database (must be set!)
+	branch = None											# Current family branch
+	tmpl_dir = 'templates'									# Location of templates
+	editor = 'vi'											# Editor to use for 'edit' command
+	father = None											# Father for 'new' command
+	mother = None											# Mother for 'new' command
 
 	# In the constructor, set and read the config file
 	#
@@ -37,6 +39,19 @@ class Config():
 		if cfgfile != None:
 			self.cfgfile = cfgfile
 		self.ReadConfig()
+
+	# Print the config
+	#
+	def Print(self):
+		print('Config parameters:')
+		print('cfgfile  =', self.cfgfile)
+		print('prompt   =', '"'+self.prompt+'"')
+		print('db_dir   =', self.db_dir)
+		print('branch   =', self.branch)
+		print('tmpl_dir =', self.tmpl_dir)
+		print('editor   =', self.editor)
+		print('father   =', self.father)
+		print('mother   =', self.mother)
 
 	# Read the config file
 	#
