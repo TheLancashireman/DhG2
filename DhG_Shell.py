@@ -24,6 +24,8 @@ import re
 import traceback
 import getopt
 
+from jinja2 import Template
+
 from DhG_Database import Database
 from DhG_Person import Person
 
@@ -52,12 +54,18 @@ class DhG_Shell(cmd.Cmd):
 	# Message that is displayed on startup
 	intro = version + '\nType help or ? to list commands.'
 
+	# List of scripts, taken from the command line
+	scripts = []
+
+	# The database
+	db = None
+
+	# Configuration variables can be set in the config file
 	prompt = '(DhG) '
 	cfgfile = os.path.expanduser('~') + '/.DhG/config'
-	scripts = []
 	db_dir = None
 	branch = None
-	db = None
+	tmpl_dir = 'templates'
 
 	# In the constructor, read the command line
 	#
@@ -120,6 +128,8 @@ class DhG_Shell(cmd.Cmd):
 						self.branch = value
 					elif var == 'prompt':
 						self.prompt = value
+					elif var == 'templates':
+						self.tmpl_dir = value
 					else:
 						print('Error in', self.cfgfile, 'line', line_no, ': unknown variable')
 				else:
@@ -257,10 +267,55 @@ class DhG_Shell(cmd.Cmd):
 		'Edit a card using $VISUAL'
 		self.EditCard('vi', arg)			# ToDo: environment variable or config
 
-	def do_new(self, arg):
+	def do_new(self, arg):					# ToDo: refactor this function
 		'Create a new person in the database'
-		print('do_new(): ', arg)
-	
+		(name, uniq) = Person.ParseCombinedNameString(arg)
+		if name == '':
+			print('Use "new forname(s) surname" to add a new person')
+			return
+		if uniq == None:
+			uniq = len(self.db.persons)
+			if uniq < 1:
+				uniq = 1
+		else:
+			if uniq < 1:
+				print('Unique id must be a positive number')
+				return
+			if uniq < len(self.db.persons) and self.db.persons[uniq] != None:
+				print('Unique id', uniq, 'is already in use')
+				return
+		cardname = self.db_dir + '/'
+		if self.branch != None and self.branch != '':
+			cardname = cardname + self.branch + '/'
+		names = name.split()
+		cardname = cardname + names[-1] + '/' + ''.join(names) + '-' + str(uniq) + '.card'
+		print('new: filename is', cardname)
+		if self.tmpl_dir != None and self.tmpl_dir != '':
+			templatename = self.tmpl_dir + '/person-card.tmpl'
+		else:
+			templatename = 'person-card.tmpl'
+		templatefile = open(templatename, 'r')
+		templatetext = templatefile.read()
+		templatefile.close()
+		template = Template(templatetext)
+		newperson = template.render(name=name, uniq=uniq, sex='Male')	# ToDo: sex, father, mother
+		try:
+			os.mkdir(os.path.dirname(cardname))
+		except FileExistsError:
+			pass
+		cardfile = open(cardname, 'w')
+		cardfile.write(newperson)
+		cardfile.close()
+		p = Person()
+		p.ReadFile(cardname)
+		p.AnalyseHeader()
+		if p.uniq == None:
+			print(path, ': no unique ID')
+		else:
+			self.db.AddPerson(p.uniq, p)
+			p.AnalyseEvents()
+		print('Created new person ', name, '['+str(uniq)+']')
+
 	def do_family(self, arg):
 		'Show a person\'s immediate family'
 		print('do_family(): ', arg)
