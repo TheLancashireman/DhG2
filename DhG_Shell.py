@@ -261,15 +261,8 @@ class DhG_Shell(cmd.Cmd):
 			'sex': 'm'			# ToDo: sex guesstimate; father & mother
 			}
 		DoTemplate(self.config, 'person-card.tmpl', tp, cardname)
-		p = Person()
-		p.ReadFile(cardname)
-		p.AnalyseHeader()
-		if p.uniq == None:
-			print(path, ': no unique ID')
-		else:
-			self.db.AddPerson(p.uniq, p)
-			p.AnalyseEvents()
-		print('Created new person ', name, '['+str(uniq)+']')
+		if self.db.LoadPerson(cardname) == 0:
+			print('Created new person ', name, '['+str(uniq)+']')
 
 	def do_family(self, arg):
 		'Show a person\'s immediate family'

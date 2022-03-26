@@ -49,14 +49,21 @@ class Database:
 	def Reload(self):
 		self.persons = []
 		for path in Path(self.basepath).rglob('*.card'):
-			p = Person()
-			p.ReadFile(path)
-			p.AnalyseHeader()
-			if p.uniq == None:
-				print(path, ': no unique ID')
-			else:
-				self.AddPerson(p.uniq, p)
-				p.AnalyseEvents()
+			self.LoadPerson(path)
+
+	# Load a new person
+	#
+	def LoadPerson(self, path):
+		p = Person()
+		p.ReadFile(path)
+		p.AnalyseHeader()
+		if p.uniq == None:
+			print(path, ': no unique ID')
+			return 1
+		else:
+			self.AddPerson(p.uniq, p)
+			p.AnalyseEvents()
+		return 0
 
 	# Reload an individual card
 	#
