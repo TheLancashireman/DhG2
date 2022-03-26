@@ -102,6 +102,10 @@ class Config():
 				self.tmpl_dir = value
 			elif var == 'editor':
 				self.editor = value
+			elif var == 'father':
+				self.father = value
+			elif var == 'mother':
+				self.mother = value
 			else:
 				return 1
 		else:
