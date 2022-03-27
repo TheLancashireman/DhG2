@@ -32,6 +32,7 @@ class Database:
 	def __init__(self, basepath):
 		self.persons = []
 		self.basepath = basepath
+		self.mf = {}				# Male or female per name
 
 	# Add a person to the database, after expanding the array to ensure that the entry exists.
 	#
@@ -48,8 +49,10 @@ class Database:
 	#
 	def Reload(self):
 		self.persons = []
+		self.mf = {}
 		for path in Path(self.basepath).rglob('*.card'):
 			self.LoadPerson(path)
+		self.MFGuess()
 
 	# Load a new person
 	#
@@ -83,6 +86,24 @@ class Database:
 			print(os.path.basename(filename), ': unique ID has changed. You should rename the file and reload')
 			self.AddPerson(p.uniq, p)
 			p.AnalyseEvents()
+
+	# Guess the sex based on existing persons
+	#
+	def MFGuess(self):
+		self.mf = {}
+		for p in self.persons:
+			if p == None:
+				pass
+			else:
+				firstname = p.name.split()[0]
+				try:
+					if self.mf[firstname] == p.sex or self.mf[firstname] == '?':
+						pass
+					else:
+						self.mf[firstname] = '?'
+						print(firstname, 'can be male or female')
+				except:
+					self.mf[firstname] = p.sex
 
 	# Return a list of all the unused entries in the database
 	#
