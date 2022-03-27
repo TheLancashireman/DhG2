@@ -26,13 +26,14 @@ Female
 {% else -%}
 sex
 {% endif -%}
-Version:    2
 {% if tp['father'] is defined -%}
 Father:     {{ tp['father'] }}
 {% endif -%}
 {% if tp['mother'] is defined -%}
 Mother:     {{ tp['mother'] }}
-{% endif %}
+{% endif -%}
+Version:    2
+
 ?           Birth
 +Source     Not known
 

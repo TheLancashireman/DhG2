@@ -275,7 +275,9 @@ class DhG_Shell(cmd.Cmd):
 		tp = {
 			'name': name,
 			'uniq': uniq,
-			'sex': s
+			'sex': s,
+			'father': self.config.father,
+			'mother': self.config.mother
 			}
 		DoTemplate(self.config, 'person-card.tmpl', tp, cardname)
 		if self.db.LoadPerson(cardname) == 0:
@@ -283,7 +285,12 @@ class DhG_Shell(cmd.Cmd):
 
 	def do_family(self, arg):
 		'Show a person\'s immediate family'
-		print('do_family(): ', arg)
+		l = self.db.GetMatchingPersons(arg)
+		if len(l) == 1:
+			fam = self.db.GetFamily(l[0].uniq)
+			DoTemplate(self.config, 'family-text.tmpl', fam, None)
+		else:
+			self.PrintPersonList(l, arg)
 
 	def do_descendants(self, arg):
 		'Print a descendants tree for a given person'
@@ -297,7 +304,7 @@ class DhG_Shell(cmd.Cmd):
 		'For testing code snippets. ToDo: delete'
 		print('do_test(): ', arg)
 		(name, uniq) = Person.ParseCombinedNameString(arg)
-		print(name, uniq);
+		self.db.GetSiblings(uniq)
 	
 
 if __name__ == '__main__':

@@ -256,12 +256,13 @@ class Person:
 		else:
 			tl.append('DoB = ' + self.birth.GetDate(0))
 		for m in self.partnerships:
-			print(m.date, m.etype, m.rest)
 			tl.append(m.etype + '  ' + m.GetDate(0) + ' with ' + m.rest)
 		if (self.death == None ):
 			pass
 		else:
 			tl.append('DoD = '+self.death.GetDate(0))
-		tl.append('Father = '+self.father_name+' ['+str(self.father_uniq)+']')
-		tl.append('Mother = '+self.mother_name+' ['+str(self.mother_uniq)+']')
+		if self.father_name != None:
+			tl.append('Father = '+self.father_name+' ['+str(self.father_uniq)+']')
+		if self.mother_name != None:
+			tl.append('Mother = '+self.mother_name+' ['+str(self.mother_uniq)+']')
 		return tl
