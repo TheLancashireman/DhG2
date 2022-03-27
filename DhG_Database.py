@@ -140,3 +140,117 @@ class Database:
 				if p.IsMatch(name):
 					l.append(p)
 		return l
+
+	# Returns a list of siblings of a person, in order of data-of-birth
+	#
+	def GetSiblings(self, uniq):
+		try:
+			p = self.persons[uniq]
+			if p == None:
+				return None
+		except:
+			return None
+
+		f_uniq = p.father_uniq
+		m_uniq = p.mother_uniq
+
+		if f_uniq == None and m_uniq == None:
+			return []
+
+		if f_uniq == None:
+			f_uniq = -1			# No match with person whose father is unknown or name only
+		if m_uniq == None:
+			m_uniq = -1			# No match with person whose mother is unknown or name only
+
+		sibs = []
+		for pp in self.persons:
+			if pp != None and (pp.father_uniq == f_uniq or pp.mother_uniq == m_uniq):
+				sibs.append((pp.GetDoB(0), pp))
+		sibs_in_order = sorted(sibs, key=lambda xx: xx[0])
+
+		sibs = []
+		for xx in sibs_in_order:
+			sibs.append(xx[1])
+		return sibs
+
+	# Returns a list of children of a person, in order of data-of-birth
+	#
+	def GetChildren(self, uniq):
+		try:
+			p = self.persons[uniq]
+			if p == None:
+				return None
+		except:
+			return None
+
+		children = []
+		for pp in self.persons:
+			if pp != None and (pp.father_uniq == uniq or pp.mother_uniq == uniq):
+				children.append((pp.GetDoB(0), pp))
+		children_in_order = sorted(children, key=lambda xx: xx[0])
+
+		children = []
+		for xx in children_in_order:
+			children.append(xx[1])
+		return children
+
+	# Return a dictionary containing the parents, siblings and children of a person
+	#
+	def GetFamily(self, uniq):
+		try:
+			p = self.persons[uniq]
+			if p == None:
+				return None
+		except:
+			return None
+
+		family = {}
+
+		# The person
+		family['vital'] = p.GetVitalLine(0,0)
+
+		# Father
+		pp = None
+		if p.father_uniq != None:
+			try:
+				pp = self.persons[p.father_uniq]
+				family['father_vital'] = pp.GetVitalLine(0,0)
+			except:
+				pp = None
+		if pp == None:
+			if p.father_name != None:
+				family['father_vital'] = p.father_name
+
+		# Mother
+		pp = None
+		if p.mother_uniq != None:
+			try:
+				pp = self.persons[p.mother_uniq]
+				family['mother_vital'] = pp.GetVitalLine(0,0)
+			except:
+				pp = None
+		if pp == None:
+			if p.mother_name != None:
+				family['mother_vital'] = p.mother_name
+
+		siblings = []
+		sibs = self.GetSiblings(p.uniq)
+		for pp in sibs:
+			s_vital = pp.GetVitalLine(0,0)
+			if pp.uniq == p.uniq:
+				s_vital = s_vital + '    (self)'
+			elif pp.father_uniq == p.father_uniq and pp.mother_uniq == p.mother_uniq:
+				pass
+			else:
+				s_vital = s_vital + '    (half)'
+			siblings.append(s_vital)
+		family['siblings'] = siblings
+
+		children = []
+		cc = self.GetChildren(p.uniq)
+		for pp in cc:
+			c_vital = pp.GetVitalLine(0,0)
+			children.append(c_vital)
+		family['children'] = children
+
+		return family

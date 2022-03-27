@@ -1,0 +1,107 @@
+{# person-family-text.tmpl - a template for an individual person's family details in plain text
+
+    (c) David Haworth
+   
+    This file is part of DhG.
+   
+    DhG is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+   
+    DhG is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+   
+    You should have received a copy of the GNU General Public License
+    along with DhG.  If not, see <http://www.gnu.org/licenses/>.
+#}
+
+{{ '  ' }}Family of {{ tp['vital'] }}
+
+{% if tp['father_vital'] != '' -%}
+{{ '    ' }}Father:  {{ tp['father_vital'] -}}
+{% endif %}
+{% if tp['mother_vital'] != '' -%}
+{{ '    ' }}Mother:  {{ tp['mother_vital'] -}}
+{% endif -%}
+{% for s in tp['siblings'] -%}
+{% if loop.first %}
+
+{{ '    ' }}Siblings:
+{% endif -%}
+{{ '      ' }}{{ s }}
+{% endfor -%}
+{% for c in tp['children'] -%}
+{% if loop.first %}
+{{ '    ' }}Children:
+{% endif -%}
+{{ '      ' }}{{ c }}
+{% endfor -%}
+
+{#
+{% IF tp['n_sibs > 0 -%}
+
+    Siblings:
+{%   other_i = 0 -%}
+{%   other_par.0 = "" -%}
+{%   other_id.0 = "" -%}
+{%   other_rel.0 = "" -%}
+{%   other_file.0 = "" -%}
+{%   s = 0 -%}
+{%   WHILE s < n_sibs -%}
+      {% tp['sibs.$s -%}
+{%     IF tp['sibs_id.$s != "" -%}
+   [{% tp['sibs_id.$s %}]{% -%}
+{%     END -%}
+{%     IF sibs_other_rel.$s != "" -%}
+{%       IF sibs_other.$s != other_par.$other_i -%}
+{%         other_i = other_i + 1 -%}
+{%         other_par.$other_i = sibs_other.$s -%}
+{%         other_id.$other_i = sibs_other_id.$s -%}
+{%         other_rel.$other_i = sibs_other_rel.$s -%}
+{%         other_file.$other_i = sibs_other_file.$s -%}
+{%       END -%}
+{%        %} (*{% other_i %})
+{%     ELSE -%}
+
+{%     END -%}
+{%     s = s + 1 -%}
+{%   END -%}
+{%   IF other_i > 0 -%}
+
+    Other parents of half-siblings:
+{%     s = 0 -%}
+{%     WHILE s < other_i -%}
+{%       s = s + 1 -%}
+      (*{% s %}) {% other_rel.$s %}: {% other_par.$s -%}
+{%       IF other_id.$s != "" -%}
+   [{% other_id.$s %}]{% -%}
+{%       END -%}
+
+{%     END -%}
+{%   END -%}
+{% END -%}
+{% IF n_children > 0 -%}
+{%   c = 0 -%}
+{%   parent = "" -%}
+{%   WHILE c < n_children -%}
+{%     IF c_parent.$c != parent -%}
+{%       parent = c_parent.$c -%}
+
+    Children of {% name %} + {% c_parent.$c -%}
+{%       IF c_parent_id.$c != "" -%}
+   [{% c_parent_id.$c %}]{% -%}
+{%       END -%}
+
+{%     END -%}
+      {% children.$c -%}
+{%     IF children_id.$c != "" -%}
+   [{% children_id.$c %}]{% -%}
+{%     END -%}
+
+{%     c = c + 1 -%}
+{%   END -%}
+{% END -%}
+-#}

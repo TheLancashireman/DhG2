@@ -170,6 +170,21 @@ class Person:
 			return True
 		return False
 
+
+	# Returns DoB as a string
+	#
+	def GetDoB(self, fmt):
+		if self.birth == None:
+			return '?'
+		return self.birth.GetDate(fmt)
+
+	# Returns DoD as a string
+	#
+	def GetDoD(self, fmt):
+		if self.death == None:
+			return ''
+		return self.death.GetDate(fmt)
+
 	# Return a string containing vital information about the person
 	# fmt specifies what to return			ToDo
 	# datefmt spefies how to show dates		ToDo
