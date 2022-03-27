@@ -266,10 +266,16 @@ class DhG_Shell(cmd.Cmd):
 				print('Unique id', uniq, 'is already in use')
 				return
 		cardname = self.config.MakeCardfileName(name, uniq)
+		try:
+			names = name.split()
+			firstname = names[0]
+			s = self.db.mf[firstname]
+		except:
+			s = '?'
 		tp = {
 			'name': name,
 			'uniq': uniq,
-			'sex': 'm'			# ToDo: sex guesstimate; father & mother
+			'sex': s
 			}
 		DoTemplate(self.config, 'person-card.tmpl', tp, cardname)
 		if self.db.LoadPerson(cardname) == 0:

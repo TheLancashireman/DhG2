@@ -43,7 +43,10 @@ class DoTemplate():
 		if out == None:
 			print(out_text)
 		else:
-			os.makedirs(os.path.dirname(out))
+			try:
+				os.makedirs(os.path.dirname(out))
+			except FileExistsError:
+				pass
 			outfile = open(out, 'w')
 			outfile.write(out_text)
 			outfile.close()
