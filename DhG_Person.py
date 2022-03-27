@@ -35,8 +35,9 @@ class Person:
 		self.name = None
 		self.uniq = None
 		self.sex = None
-		self.dob = None
-		self.dod = None
+		self.birth = None
+		self.death = None
+		self.partnerships = []
 		self.father_name = None
 		self.father_uniq = None
 		self.mother_name = None
@@ -56,8 +57,9 @@ class Person:
 		self.name = None
 		self.uniq = None
 		self.sex = None
-		self.dob = None
-		self.dod = None
+		self.birth = None
+		self.death = None
+		self.partnerships = []
 		self.father_name = None
 		self.father_uniq = None
 		self.mother_name = None
@@ -185,15 +187,15 @@ class Person:
 			parts[idx_name] = '?'
 		else:
 			parts[idx_name] = self.name
-		if self.dob == None:
+		if self.birth == None:
 			dob = '?'
 		else:
-			dob = self.dob
-		if self.dod == None:
+			dob = self.birth.GetDate(0)
+		if self.death == None:
 			dod = ''
 		else:
-			dod = self.dod
-		parts[idx_dates] = '('+dob+'-'+dod+')' # ToDo: date format
+			dod = self.death.GetDate(0)
+		parts[idx_dates] = '('+dob+'-'+dod+')'
 		return ' '.join(parts)
 
 	# Analyse all the events for this person
@@ -202,10 +204,13 @@ class Person:
 		for e in self.events:
 			e.DecodeEventType(self)
 			if e.etype != None:
-				if e.etype.lower() == 'birth':
-					self.dob = e.date
-				elif e.etype.lower() == 'death':
-					self.dod = e.date
+				typ = e.etype.lower()
+				if typ == 'birth':
+					self.birth = e
+				elif typ == 'death':
+					self.death = e
+				elif typ == 'marriage' or typ == 'partnership':
+					self.partnerships.append(e)
 
 	# Return an array containing the complete file contents
 	#
@@ -231,14 +236,17 @@ class Person:
 		tl.append('Name = ' + self.name)
 		tl.append('Uniq = [' + str(self.uniq) + ']')
 		tl.append('Sex = ' + self.sex)
-		if (self.dob == None ):
+		if (self.birth == None ):
 			tl.append('DoB = ?')
 		else:
-			tl.append('DoB = ' + self.dob)
-		if (self.dod == None ):
+			tl.append('DoB = ' + self.birth.GetDate(0))
+		for m in self.partnerships:
+			print(m.date, m.etype, m.rest)
+			tl.append(m.etype + '  ' + m.GetDate(0) + ' with ' + m.rest)
+		if (self.death == None ):
 			pass
 		else:
-			tl.append('DoD = '+self.dod)
-		tl.append('Father = '+self.father_name+'['+str(self.father_uniq)+']')
-		tl.append('Mother = '+self.mother_name+'['+str(self.mother_uniq)+']')
+			tl.append('DoD = '+self.death.GetDate(0))
+		tl.append('Father = '+self.father_name+' ['+str(self.father_uniq)+']')
+		tl.append('Mother = '+self.mother_name+' ['+str(self.mother_uniq)+']')
 		return tl
