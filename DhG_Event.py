@@ -46,5 +46,13 @@ class Event:
 		except:
 			print('Insufficient fields in event date line', self.lines[0], 'in', owner.filename)
 
-		if len(self.lines) > 2:
-			rest = ' '.join(self.lines[2:])
+		if len(parts) > 2:
+			self.rest = ' '.join(parts[2:])
+
+	# Return the date  (TODO: in the specified format)
+	#
+	def GetDate(self, fmt):
+		if self.date == None:
+			return '?'
+		else:
+			return self.date
