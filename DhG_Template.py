@@ -22,19 +22,20 @@ import sys
 
 from jinja2 import Template
 
+from DhG_Config import Config
+
 # A class to create a file from a template
 #
 class DoTemplate():
 
 	# Do everything in the constructor
 	#
-	#	cfg		= config parameters
 	#	tmpl	= template name
 	#	tp		= template parameters
 	#	out		= output file. None ==> stdout
 	#
-	def __init__(self, cfg, tmpl, tp, out):
-		tmpl_name = cfg.MakeTemplateName(tmpl)
+	def __init__(self, tmpl, tp, out):
+		tmpl_name = Config.MakeTemplateName(tmpl)
 		tmpl_file = open(tmpl_name, 'r')
 		tmpl_text = tmpl_file.read()
 		tmpl_file.close()

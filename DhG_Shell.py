@@ -63,7 +63,6 @@ class DhG_Shell(cmd.Cmd):
 	db = None
 
 	# Configuration variables can be set in the config file
-	config = None
 	prompt = '(DhG) '	# Parent class needs a copy
 
 	# In the constructor, read the command line
@@ -91,8 +90,8 @@ class DhG_Shell(cmd.Cmd):
 		self.scripts = args
 		if dropout:
 			exit(0)
-		self.config = Config(cfgfile)
-		self.prompt = self.config.prompt
+		Config.Init(cfgfile)
+		self.prompt = Config.prompt
 
 	def Usage(self):
 		print(self.usage)
@@ -103,7 +102,7 @@ class DhG_Shell(cmd.Cmd):
 	# Before the command loop, create and load the database
 	#
 	def preloop(self):
-		self.db = Database(self.config.db_dir)
+		self.db = Database(Config.db_dir)
 		self.db.Reload()
 
 	def onecmd(self, str):
@@ -185,9 +184,9 @@ class DhG_Shell(cmd.Cmd):
 	def do_set(self, arg):
 		'Set a config parameter'
 		if arg == '':
-			self.config.Print()
+			Config.Print()
 			return
-		e = self.config.SetParameter(arg)
+		e = Config.SetParameter(arg)
 		if e == 0:
 			pass
 		elif e == 1:
@@ -245,7 +244,7 @@ class DhG_Shell(cmd.Cmd):
 
 	def do_edit(self, arg):
 		'Edit a card using config.editor'
-		self.EditCard(self.config.editor, arg)
+		self.EditCard(Config.editor, arg)
 
 	def do_new(self, arg):					# ToDo: refactor this function
 		'Create a new person in the database'
@@ -265,7 +264,7 @@ class DhG_Shell(cmd.Cmd):
 			if uniq < len(self.db.persons) and self.db.persons[uniq] != None:
 				print('Unique id', uniq, 'is already in use')
 				return
-		cardname = self.config.MakeCardfileName(name, uniq)
+		cardname = Config.MakeCardfileName(name, uniq)
 		try:
 			names = name.split()
 			firstname = names[0]
@@ -276,10 +275,10 @@ class DhG_Shell(cmd.Cmd):
 			'name': name,
 			'uniq': uniq,
 			'sex': s,
-			'father': self.config.father,
-			'mother': self.config.mother
+			'father': Config.father,
+			'mother': Config.mother
 			}
-		DoTemplate(self.config, 'person-card.tmpl', tp, cardname)
+		DoTemplate('person-card.tmpl', tp, cardname)
 		if self.db.LoadPerson(cardname) == 0:
 			print('Created new person ', name, '['+str(uniq)+']')
 
@@ -288,7 +287,7 @@ class DhG_Shell(cmd.Cmd):
 		l = self.db.GetMatchingPersons(arg)
 		if len(l) == 1:
 			fam = self.db.GetFamily(l[0].uniq)
-			DoTemplate(self.config, 'family-text.tmpl', fam, None)
+			DoTemplate('family-text.tmpl', fam, None)
 		else:
 			self.PrintPersonList(l, arg)
 

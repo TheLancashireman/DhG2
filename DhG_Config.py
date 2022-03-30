@@ -21,8 +21,10 @@ import os
 
 # A class to hold the configuration for DhG
 #
+# The class only contains static variables and methods.
 # The configuration variables can be initialised from the config file at startup
 #
+
 class Config():
 	cfgfile = os.path.expanduser('~') + '/.DhG/config'		# Set on command line with -c
 	prompt = '(DhG) '										# Command prompt
@@ -33,51 +35,54 @@ class Config():
 	father = None											# Father for 'new' command
 	mother = None											# Mother for 'new' command
 
-	# In the constructor, set and read the config file
-	#
-	def __init__(self, cfgfile):
+	# Initialize the class
+	@staticmethod
+	def Init(cfgfile):
 		if cfgfile != None:
-			self.cfgfile = cfgfile
-		self.ReadConfig()
+			Config.cfgfile = cfgfile
+		Config.ReadConfig()
 
 	# Print the config
 	#
-	def Print(self):
+	@staticmethod
+	def Print():
 		print('Config parameters:')
-		print('cfgfile  =', self.cfgfile)
-		print('prompt   =', '"'+self.prompt+'"')
-		print('db_dir   =', self.db_dir)
-		print('branch   =', self.branch)
-		print('tmpl_dir =', self.tmpl_dir)
-		print('editor   =', self.editor)
-		print('father   =', self.father)
-		print('mother   =', self.mother)
+		print('cfgfile  =', Config.cfgfile)
+		print('prompt   =', '"'+Config.prompt+'"')
+		print('db_dir   =', Config.db_dir)
+		print('branch   =', Config.branch)
+		print('tmpl_dir =', Config.tmpl_dir)
+		print('editor   =', Config.editor)
+		print('father   =', Config.father)
+		print('mother   =', Config.mother)
 
 	# Read the config file
 	#
-	def ReadConfig(self):
+	@staticmethod
+	def ReadConfig():
 		line_no = 0
-		f = open(self.cfgfile, 'r')
+		f = open(Config.cfgfile, 'r')
 		for l in f:
 			line_no += 1
 			l = l.rstrip().lstrip()
 			if l == '' or l[0] == '#':
 				pass			# Ignore comment lines and blank lines
 			else:
-				e = self.SetParameter(l)
+				e = Config.SetParameter(l)
 				if e == 0:
 					pass
 				elif e == 1:
-					print('Error in', self.cfgfile, 'line', line_no, ': unknown variable')
+					print('Error in', Config.cfgfile, 'line', line_no, ': unknown variable')
 				elif e == 2:
-					print('Error in', self.cfgfile, 'line', line_no, ': invalid syntax')
+					print('Error in', Config.cfgfile, 'line', line_no, ': invalid syntax')
 				else:
-					print('Error in', self.cfgfile, 'line', line_no, ': to do')
+					print('Error in', Config.cfgfile, 'line', line_no, ': to do')
 		f.close()
 
 	# Parse a parameter assignment and set an inidividual parameter
 	#
-	def SetParameter(self, l):
+	@staticmethod
+	def SetParameter(l):
 		# Split on the '=' sign. There should be exactly one
 		parts = l.split('=')
 		if len(parts) == 2:
@@ -93,19 +98,19 @@ class Config():
 
 			# Set the variable
 			if var == 'prompt':
-				self.prompt = value
+				Config.prompt = value
 			elif var == 'db':
-				self.db_dir = value
+				Config.db_dir = value
 			elif var == 'branch':
-				self.branch = value
+				Config.branch = value
 			elif var == 'templates':
-				self.tmpl_dir = value
+				Config.tmpl_dir = value
 			elif var == 'editor':
-				self.editor = value
+				Config.editor = value
 			elif var == 'father':
-				self.father = value
+				Config.father = value
 			elif var == 'mother':
-				self.mother = value
+				Config.mother = value
 			else:
 				return 1
 		else:
@@ -114,17 +119,19 @@ class Config():
 
 	# Construct a file name for a card file
 	#
-	def MakeCardfileName(self, name, uniq):
-		cardname = self.db_dir + '/'
-		if self.branch != None and self.branch != '':
-			cardname = cardname + self.branch + '/'
+	@staticmethod
+	def MakeCardfileName(name, uniq):
+		cardname = Config.db_dir + '/'
+		if Config.branch != None and Config.branch != '':
+			cardname = cardname + Config.branch + '/'
 		names = name.split()
 		cardname = cardname + names[-1] + '/' + ''.join(names) + '-' + str(uniq) + '.card'
 		return cardname
 
 	# Construct a file name for a template file
 	#
-	def MakeTemplateName(self, tmpl):
-		if self.tmpl_dir != None and self.tmpl_dir != '':
-			return self.tmpl_dir + '/' + tmpl
+	@staticmethod
+	def MakeTemplateName(tmpl):
+		if Config.tmpl_dir != None and Config.tmpl_dir != '':
+			return Config.tmpl_dir + '/' + tmpl
 		return tmpl
