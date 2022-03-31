@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with DhG.  If not, see <http://www.gnu.org/licenses/>.
 
-
+from DhG_Config import Config
 
 # Event class - represents an event on a person's timeline
 #
@@ -52,7 +52,4 @@ class Event:
 	# Return the date  (TODO: in the specified format)
 	#
 	def GetDate(self, fmt):
-		if self.date == None:
-			return '?'
-		else:
-			return self.date
+		return Config.FormatDate(self.date, None, None)

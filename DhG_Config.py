@@ -32,6 +32,7 @@ class Config():
 	branch = None											# Current family branch
 	tmpl_dir = 'templates'									# Location of templates
 	editor = 'vi'											# Editor to use for 'edit' command
+	dateformat = 'raw'										# Format for dates
 	father = None											# Father for 'new' command
 	mother = None											# Mother for 'new' command
 
@@ -107,6 +108,8 @@ class Config():
 				Config.tmpl_dir = value
 			elif var == 'editor':
 				Config.editor = value
+			elif var == 'dateformat':
+				Config.dateformat = value
 			elif var == 'father':
 				Config.father = value
 			elif var == 'mother':
@@ -135,3 +138,50 @@ class Config():
 		if Config.tmpl_dir != None and Config.tmpl_dir != '':
 			return Config.tmpl_dir + '/' + tmpl
 		return tmpl
+
+	# Returns a "normalised" version of a given date according to the specified format
+	#
+	@staticmethod
+	def FormatDate(date, dflt, fmt):
+		if date == None:
+			if dflt == None:
+				return '?'
+			return dflt
+		if fmt == None:
+			fmt = Config.dateformat
+		if fmt == 'raw':
+			return date
+
+		odate = date
+		mod = odate[-1]
+		if mod == '~':
+			mod = 'abt.'
+		elif mod == '<':
+			mod = 'bef.'
+		elif mod == '>':
+			mod = 'aft.'
+		else:
+			mod = ''
+		if mod != '':
+			odate = odate[0:-1]
+
+		parts = odate.split('-')
+		if len(parts) <= 1:
+			# Only the year is available. Modifier applies to year
+			return mod+odate
+
+		yy = parts[0]
+		if fmt == 'yearonly':
+			# More than the year is available, but only the year is required.
+			# Assume that the year is correct, so modifier doesn't apply. Not entirely true (ToDo)
+			return yy
+
+		mm = parts[1]
+		if mm[0].upper() == 'Q':
+			# Convert quarter to middle month of quarter and use 'abt.'
+			qmm = [ '?', '02', '05', '08', '11' ]
+			mm = qmm[int(mm[1])]
+			return 'abt.'+yy+'-'+'mm'
+
+		# Nothing else specified. Return "raw" date but with standardise modifier as prefix
+		return mod+odate
