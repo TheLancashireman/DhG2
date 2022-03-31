@@ -52,4 +52,4 @@ class Event:
 	# Return the date  (TODO: in the specified format)
 	#
 	def GetDate(self, fmt):
-		return Config.FormatDate(self.date, None, None)
+		return Config.FormatDate(self.date, None, fmt)

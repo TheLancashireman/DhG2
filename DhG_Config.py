@@ -181,7 +181,7 @@ class Config():
 			# Convert quarter to middle month of quarter and use 'abt.'
 			qmm = [ '?', '02', '05', '08', '11' ]
 			mm = qmm[int(mm[1])]
-			return 'abt.'+yy+'-'+'mm'
+			return 'abt.'+yy+'-'+mm
 
 		# Nothing else specified. Return "raw" date but with standardise modifier as prefix
 		return mod+odate

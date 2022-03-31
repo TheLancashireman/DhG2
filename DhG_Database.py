@@ -165,7 +165,7 @@ class Database:
 		sibs = []
 		for pp in self.persons:
 			if pp != None and (pp.father_uniq == f_uniq or pp.mother_uniq == m_uniq):
-				sibs.append((pp.GetDoB(0), pp))
+				sibs.append((pp.GetDoB(None), pp))
 		sibs_in_order = sorted(sibs, key=lambda xx: xx[0])
 
 		sibs = []
@@ -186,7 +186,7 @@ class Database:
 		children = []
 		for pp in self.persons:
 			if pp != None and (pp.father_uniq == uniq or pp.mother_uniq == uniq):
-				children.append((pp.GetDoB(0), pp))
+				children.append((pp.GetDoB(None), pp))
 		children_in_order = sorted(children, key=lambda xx: xx[0])
 
 		children = []
@@ -207,14 +207,14 @@ class Database:
 		family = {}
 
 		# The person
-		family['vital'] = p.GetVitalLine(0,0)
+		family['vital'] = p.GetVitalLine(None, None)
 
 		# Father
 		pp = None
 		if p.father_uniq != None:
 			try:
 				pp = self.persons[p.father_uniq]
-				family['father_vital'] = pp.GetVitalLine(0,0)
+				family['father_vital'] = pp.GetVitalLine(None, None)
 			except:
 				pp = None
 		if pp == None:
@@ -226,7 +226,7 @@ class Database:
 		if p.mother_uniq != None:
 			try:
 				pp = self.persons[p.mother_uniq]
-				family['mother_vital'] = pp.GetVitalLine(0,0)
+				family['mother_vital'] = pp.GetVitalLine(None, None)
 			except:
 				pp = None
 		if pp == None:
@@ -236,7 +236,7 @@ class Database:
 		siblings = []
 		sibs = self.GetSiblings(p.uniq)
 		for pp in sibs:
-			s_vital = pp.GetVitalLine(0,0)
+			s_vital = pp.GetVitalLine(None, None)
 			if pp.uniq == p.uniq:
 				s_vital = s_vital + '    (self)'
 			elif pp.father_uniq == p.father_uniq and pp.mother_uniq == p.mother_uniq:
@@ -249,7 +249,7 @@ class Database:
 		children = []
 		cc = self.GetChildren(p.uniq)
 		for pp in cc:
-			c_vital = pp.GetVitalLine(0,0)
+			c_vital = pp.GetVitalLine(None, None)
 			children.append(c_vital)
 		family['children'] = children
 

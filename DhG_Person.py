@@ -205,12 +205,12 @@ class Person:
 		if self.birth == None:
 			dob = '?'
 		else:
-			dob = self.birth.GetDate(0)
+			dob = self.birth.GetDate(datefmt)
 		if self.death == None:
 			dod = ''
 		else:
-			dod = self.death.GetDate(0)
-		parts[idx_dates] = '('+dob+'-'+dod+')'
+			dod = self.death.GetDate(datefmt)
+		parts[idx_dates] = '('+dob+' - '+dod+')'
 		return ' '.join(parts)
 
 	# Analyse all the events for this person
@@ -254,13 +254,13 @@ class Person:
 		if (self.birth == None ):
 			tl.append('DoB = ?')
 		else:
-			tl.append('DoB = ' + self.birth.GetDate(0))
+			tl.append('DoB = ' + self.birth.GetDate(None))
 		for m in self.partnerships:
-			tl.append(m.etype + '  ' + m.GetDate(0) + ' with ' + m.rest)
+			tl.append(m.etype + '  ' + m.GetDate(None) + ' with ' + m.rest)
 		if (self.death == None ):
 			pass
 		else:
-			tl.append('DoD = '+self.death.GetDate(0))
+			tl.append('DoD = '+self.death.GetDate(None))
 		if self.father_name != None:
 			tl.append('Father = '+self.father_name+' ['+str(self.father_uniq)+']')
 		if self.mother_name != None:
