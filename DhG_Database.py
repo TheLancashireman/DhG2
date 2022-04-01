@@ -194,6 +194,15 @@ class Database:
 			children.append(xx[1])
 		return children
 
+	# Return a list of dates and partners for a person, sorted by date
+	#
+	def GetPartners(self, uniq):
+		try:
+			p = self.persons[uniq]
+			return p.GetPartners()
+		except:
+			return None
+
 	# Return a dictionary containing the parents, siblings and children of a person
 	#
 	def GetFamily(self, uniq):

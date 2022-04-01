@@ -227,6 +227,20 @@ class Person:
 				elif typ == 'marriage' or typ == 'partnership':
 					self.partnerships.append(e)
 
+	# Return a sorted list of partnership dates and partners
+	#
+	def GetPartners(self):
+		if len(self.partnerships) == 0:
+			return None
+
+		p = []
+		for m in self.partnerships:
+			t = (m.date, m.rest)
+			p.append(t)
+		p = sorted(p, key=lambda xx: xx[0])
+		return p
+		
+
 	# Return an array containing the complete file contents
 	#
 	def GetTimeline(self):
