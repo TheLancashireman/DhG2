@@ -254,3 +254,47 @@ class Database:
 		family['children'] = children
 
 		return family
+
+	# Return an array containing a descendant tree of a person
+	#
+	# ToDo: insert childless partnerships
+	#
+	def GetDtree(self, p, level):
+		vital = p.GetVitalLine(None, None)
+		lines = []
+		sp_cur = -1
+		cc = self.GetChildren(p.uniq)
+		if len(cc) == 0:
+			lines.append({'level': level, 'name': vital, 'spouse': ''})
+			return lines
+
+		for c in cc:
+			if p.uniq == c.father_uniq:
+				sp_uniq = c.mother_uniq
+			else:
+				sp_uniq = c.father_uniq
+			if sp_uniq != sp_cur:
+				if sp_uniq == None:
+					sp_vital = ''
+				else:
+					sp_vital = self.persons[sp_uniq].GetVitalLine(None, None)
+				lines.append({'level': level, 'name': vital, 'spouse': sp_vital})
+				sp_cur = sp_uniq
+			lines.extend(self.GetDtree(c, level+1))
+		return lines
+
+	# Return a descendant tree dictionary for a person.
+	# The return value can be passed to a template.
+	#
+	def GetDescendants(self, uniq):
+		try:
+			p = self.persons[uniq]
+			if p == None:
+				return None
+		except:
+			return None
+
+		desc = {}
+		desc['title'] = p.GetVitalLine(None, None)
+		desc['lines'] = self.GetDtree(p, 1)
+		return desc

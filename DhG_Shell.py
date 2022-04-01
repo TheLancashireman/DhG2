@@ -293,7 +293,12 @@ class DhG_Shell(cmd.Cmd):
 
 	def do_descendants(self, arg):
 		'Print a descendants tree for a given person'
-		print('do_descendants(): ', arg)
+		l = self.db.GetMatchingPersons(arg)
+		if len(l) == 1:
+			desc = self.db.GetDescendants(l[0].uniq)
+			DoTemplate('descendant-tree-text.tmpl', desc, None)
+		else:
+			self.PrintPersonList(l, arg)
 
 	def do_ancestors(self, arg):
 		'Print an ancestors tree for a given person'
@@ -303,8 +308,8 @@ class DhG_Shell(cmd.Cmd):
 		'For testing code snippets. ToDo: delete'
 		print('do_test(): ', arg)
 		(name, uniq) = Person.ParseCombinedNameString(arg)
-		self.db.GetSiblings(uniq)
-	
+		x = self.db.GetDescendants(uniq)
+		print(x)
 
 if __name__ == '__main__':
 	while True:
