@@ -92,10 +92,14 @@ class Config():
 			value = parts[1].rstrip().lstrip()
 
 			# Remove quotes from the value, if they match
-			if value[0] == '"' and value[-1] == '"':
-				value = value[1:-1]
-			elif value[0] == "'" and value[-1] == "'":
-				value = value[1:-1]
+
+			try:
+				if value[0] == '"' and value[-1] == '"':
+					value = value[1:-1]
+				elif value[0] == "'" and value[-1] == "'":
+					value = value[1:-1]
+			except:
+				pass
 
 			# Set the variable
 			if var == 'prompt':
@@ -141,6 +145,12 @@ class Config():
 
 	# Returns a "normalised" version of a given date according to the specified format
 	#
+	# Date formats are:
+	#	raw      -- exactly as entered
+	#	cooked	 -- approximations rendered as abt, bef and aft, quarters changed to abt <middle month>
+	#	yearonly -- only the year, approxmations ignored if they come after month or day.
+	# Any format not lists above is treated as cooked.
+	#
 	@staticmethod
 	def FormatDate(date, dflt, fmt):
 		if date == None:
@@ -180,7 +190,10 @@ class Config():
 		if mm[0].upper() == 'Q':
 			# Convert quarter to middle month of quarter and use 'abt.'
 			qmm = [ '?', '02', '05', '08', '11' ]
-			mm = qmm[int(mm[1])]
+			try:
+				mm = qmm[int(mm[1])]
+			except:
+				pass
 			return 'abt.'+yy+'-'+mm
 
 		# Nothing else specified. Return "raw" date but with standardise modifier as prefix
