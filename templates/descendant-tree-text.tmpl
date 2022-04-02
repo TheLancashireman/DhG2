@@ -21,6 +21,6 @@
 {{ '  ' }}Descendants of {{ tp['title'] }}
 
 {% for line in tp['lines'] -%}
-{%   for j in range(line['level']) %}{{ '    ' }}{% endfor %}{{ line['level'] }}.  {{ line['name'] -}}
+{%   for j in range(line['level']) %}{{ '  ' }}{% endfor %}{{ line['level'] }}.  {{ line['name'] -}}
 {%   if line['spouse'] != '' -%}{{ ' === ' }}{{ line['spouse'] }}{% endif %}
 {% endfor %}
