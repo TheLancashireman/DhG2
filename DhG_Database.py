@@ -272,24 +272,55 @@ class Database:
 		vital = p.GetVitalLine(None, None)
 		lines = []
 		sp_cur = -1
+		pp = p.GetPartners()
 		cc = self.GetChildren(p.uniq)
-		if len(cc) == 0:
-			lines.append({'level': level, 'name': vital, 'spouse': ''})
+		if cc == None or len(cc) == 0:
+			# No children. Just name if no partners
+			if pp == None or len(pp) == 0:
+				lines.append({'level': level, 'name': vital, 'spouse': ''})
+				return lines
+			# List of partnerships
+			for (date, sp_uniq) in pp:
+				try:
+					sp = self.persons[sp_uniq]
+					sp_vital = sp.GetVitalLine(None, None)
+					lines.append({'level': level, 'name': vital, 'spouse': sp_vital})
+				except:
+					lines.append({'level': level, 'name': vital, 'spouse': '???'})
 			return lines
 
+		if pp == None:
+			pp = []
+
+		# Add assumed partnerships
 		for c in cc:
+			to_add = True
 			if p.uniq == c.father_uniq:
 				sp_uniq = c.mother_uniq
 			else:
 				sp_uniq = c.father_uniq
-			if sp_uniq != sp_cur:
-				if sp_uniq == None:
-					sp_vital = ''
+			for (d, u) in pp:
+				if u == sp_uniq:
+					to_add = False
+					break
+			if to_add:
+				t = (c.birth.GetDate('raw'), c.uniq)
+				pp.append(t)
+
+		# Re-sort the partnerships
+		pp = sorted(pp, key=lambda xx: xx[0])
+
+		# Now go through the partnerships and print the tree for each child
+		for (d, sp_cur) in pp:
+			sp_vital = self.persons[sp_cur].GetVitalLine(None, None)
+			lines.append({'level': level, 'name': vital, 'spouse': sp_vital})
+			for c in cc:
+				if p.uniq == c.father_uniq:
+					sp_uniq = c.mother_uniq
 				else:
-					sp_vital = self.persons[sp_uniq].GetVitalLine(None, None)
-				lines.append({'level': level, 'name': vital, 'spouse': sp_vital})
-				sp_cur = sp_uniq
-			lines.extend(self.GetDtree(c, level+1))
+					sp_uniq = c.father_uniq
+				if sp_uniq == sp_cur:
+					lines.extend(self.GetDtree(c, level+1))
 		return lines
 
 	# Return a descendant tree dictionary for a person.

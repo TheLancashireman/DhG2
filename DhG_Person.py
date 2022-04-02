@@ -235,7 +235,8 @@ class Person:
 
 		p = []
 		for m in self.partnerships:
-			t = (m.date, m.rest)
+			(sp_name, sp_uniq) = Person.ParseCombinedNameString(m.rest)
+			t = (m.date, sp_uniq)
 			p.append(t)
 		p = sorted(p, key=lambda xx: xx[0])
 		return p

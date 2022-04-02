@@ -141,7 +141,7 @@ class DhG_Shell(cmd.Cmd):
 					return line				# Exact match
 				cmdmatch.append(name[3:])
 		if len(cmdmatch) == 1:
-			line = cmdmatch[0] + line[keylen:]
+			line = cmdmatch[0] + ' ' + line[keylen:]
 #			print('Completed command:', line)
 		elif len(cmdmatch) > 1:
 #			print('Ambiguous command: \''+keyword+'\'')
@@ -307,9 +307,11 @@ class DhG_Shell(cmd.Cmd):
 	def do_test(self, arg):
 		'For testing code snippets. ToDo: delete'
 		print('do_test(): ', arg)
-		(name, uniq) = Person.ParseCombinedNameString(arg)
-		x = self.db.GetDescendants(uniq)
-		print(x)
+		l = self.db.GetMatchingPersons(arg)
+		if len(l) == 1:
+			print(l[0].GetPartners())
+		else:
+			self.PrintPersonList(l, arg)
 
 if __name__ == '__main__':
 	while True:
