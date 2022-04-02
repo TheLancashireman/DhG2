@@ -338,3 +338,34 @@ class Database:
 		desc['title'] = p.GetVitalLine(None, None)
 		desc['lines'] = self.GetDtree(p, 1)
 		return desc
+
+	# Verify that all reference links between people exist.
+	# Also check that the names are correct.
+	#
+	def VerifyRefs(self):
+		for p in self.persons:
+			if p == None:
+				continue
+			if p.father_uniq != None:
+				self.VerifyPerson(p.father_uniq, p.father_name, p, 'father')
+			if p.mother_uniq != None:
+				self.VerifyPerson(p.mother_uniq, p.mother_name, p, 'mother')
+			for ev in p.partnerships:
+				(sp_name, sp_uniq) = Person.ParseCombinedNameString(ev.rest)
+				self.VerifyPerson(sp_uniq, sp_name, p, 'spouse')
+
+	# Verify an individual name/id against the database
+	#
+	def VerifyPerson(self, uniq, name, p, rel):
+		msg = None
+		if uniq < len(self.persons):
+			pp = self.persons[uniq]
+			if pp == None:
+				msg = 'no person with that unique ID'
+			elif pp.name != name:
+				msg = 'does not match name in database ('+pp.name+')'
+		else:
+			msg = 'unique ID is out of range'
+
+		if msg != None:
+			print(p.GetVitalLine(None, None), rel, name, '['+str(uniq)+'] :', msg)

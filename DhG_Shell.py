@@ -304,14 +304,13 @@ class DhG_Shell(cmd.Cmd):
 		'Print an ancestors tree for a given person'
 		print('do_ancestors(): ', arg)
 
+	def do_verify(self, arg):
+		'Verify all the person references in the database'
+		self.db.VerifyRefs()
+
 	def do_test(self, arg):
 		'For testing code snippets. ToDo: delete'
 		print('do_test(): ', arg)
-		l = self.db.GetMatchingPersons(arg)
-		if len(l) == 1:
-			print(l[0].GetPartners())
-		else:
-			self.PrintPersonList(l, arg)
 
 if __name__ == '__main__':
 	while True:
