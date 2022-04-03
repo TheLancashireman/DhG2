@@ -26,10 +26,10 @@ Female
 {% else -%}
 sex
 {% endif -%}
-{% if tp['father'] != None -%}
+{% if tp['father'] != None and tp['father'] != '' -%}
 Father:     {{ tp['father'] }}
 {% endif -%}
-{% if tp['mother'] != None -%}
+{% if tp['mother'] != None and tp['mother'] != '' -%}
 Mother:     {{ tp['mother'] }}
 {% endif -%}
 Version:    2
