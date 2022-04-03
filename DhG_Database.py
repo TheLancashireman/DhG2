@@ -52,6 +52,7 @@ class Database:
 		self.mf = {}
 		for path in Path(self.basepath).rglob('*.card'):
 			self.LoadPerson(path)
+		self.VerifyRefs()
 		self.MFGuess()
 
 	# Load a new person
@@ -304,7 +305,7 @@ class Database:
 					to_add = False
 					break
 			if to_add:
-				t = (c.birth.GetDate('raw'), c.uniq)
+				t = (c.birth.GetDate('raw'), sp_uniq)
 				pp.append(t)
 
 		# Re-sort the partnerships
@@ -343,16 +344,38 @@ class Database:
 	# Also check that the names are correct.
 	#
 	def VerifyRefs(self):
+		n_errs = 0
 		for p in self.persons:
 			if p == None:
 				continue
 			if p.father_uniq != None:
-				self.VerifyPerson(p.father_uniq, p.father_name, p, 'father')
+				n_errs += self.VerifyPerson(p.father_uniq, p.father_name, p, 'father')
 			if p.mother_uniq != None:
-				self.VerifyPerson(p.mother_uniq, p.mother_name, p, 'mother')
+				n_errs += self.VerifyPerson(p.mother_uniq, p.mother_name, p, 'mother')
 			for ev in p.partnerships:
 				(sp_name, sp_uniq) = Person.ParseCombinedNameString(ev.rest)
-				self.VerifyPerson(sp_uniq, sp_name, p, 'spouse')
+				e = self.VerifyPerson(sp_uniq, sp_name, p, 'spouse')
+				if e == 0:
+					sp = self.persons[sp_uniq]
+					found = 0
+					for sp_ev in sp.partnerships:
+						(xx_name, xx_uniq) = Person.ParseCombinedNameString(sp_ev.rest)
+						if xx_uniq == p.uniq and xx_name == p.name:
+							if sp_ev.date == ev.date:
+								found = 1
+								break
+							else:
+								found = 2
+					if found == 0:
+						print(sp.GetVitalLine(None, None), 'has no spouse', p.GetVitalLine(None, None))
+						n_errs += 1
+					elif found == 2:
+						print(p.GetVitalLine(None, None), 'has spouse', sp.GetVitalLine(None, None),
+									'with different date')
+						n_errs += 1
+				else:
+					n_errs += e
+		return n_errs
 
 	# Verify an individual name/id against the database
 	#
@@ -369,3 +392,5 @@ class Database:
 
 		if msg != None:
 			print(p.GetVitalLine(None, None), rel, name, '['+str(uniq)+'] :', msg)
+			return 1
+		return 0

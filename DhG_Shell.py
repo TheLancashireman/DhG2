@@ -306,7 +306,8 @@ class DhG_Shell(cmd.Cmd):
 
 	def do_verify(self, arg):
 		'Verify all the person references in the database'
-		self.db.VerifyRefs()
+		if self.db.VerifyRefs() == 0:
+			print('Verification complete; no errors')
 
 	def do_test(self, arg):
 		'For testing code snippets. ToDo: delete'
