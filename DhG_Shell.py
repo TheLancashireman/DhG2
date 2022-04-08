@@ -302,7 +302,12 @@ class DhG_Shell(cmd.Cmd):
 
 	def do_ancestors(self, arg):
 		'Print an ancestors tree for a given person'
-		print('do_ancestors(): ', arg)
+		l = self.db.GetMatchingPersons(arg)
+		if len(l) == 1:
+			anc = self.db.GetAncestors(l[0].uniq)
+			DoTemplate('ancestor-tree-text.tmpl', anc, None)
+		else:
+			self.PrintPersonList(l, arg)
 
 	def do_verify(self, arg):
 		'Verify all the person references in the database'

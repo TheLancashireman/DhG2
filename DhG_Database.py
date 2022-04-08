@@ -340,6 +340,71 @@ class Database:
 		desc['lines'] = self.GetDtree(p, 1)
 		return desc
 
+	# Return a partial ancestor tree
+	#
+	def GetAtree(self, p, lvl):
+		l = []
+		if p.father_name == None and p.mother_name == None:
+			return l
+		if p.father_uniq == None:
+			if p.father_name == None:
+				a = {}
+				a['level'] = lvl
+				a['fm'] = 'F'
+				a['name'] = 'unknown'
+				l.append(a)
+			else:
+				a = {}
+				a['level'] = lvl
+				a['fm'] = 'F'
+				a['name'] = p.father_name
+				l.append(a)
+		else:
+			a = {}
+			a['level'] = lvl
+			a['fm'] = 'F'
+			a['name'] = self.persons[p.father_uniq].GetVitalLine(None, None)
+			l.append(a)
+			l.extend(self.GetAtree(self.persons[p.father_uniq], lvl+1))
+		if p.mother_uniq == None:
+			if p.mother_name == None:
+				a = {}
+				a['level'] = lvl
+				a['fm'] = 'M'
+				a['name'] = 'unknown'
+				l.append(a)
+			else:
+				a = {}
+				a['level'] = lvl
+				a['fm'] = 'M'
+				a['name'] = p.mother_name
+				l.append(a)
+		else:
+			a = {}
+			a['level'] = lvl
+			a['fm'] = 'M'
+			a['name'] = self.persons[p.mother_uniq].GetVitalLine(None, None)
+			l.append(a)
+			l.extend(self.GetAtree(self.persons[p.mother_uniq], lvl+1))
+		return l
+			
+
+	# Return an ancestor tree dictionary for a person.
+	# The return value can be passed to a template.
+	#
+	def GetAncestors(self, uniq):
+		try:
+			p = self.persons[uniq]
+			if p == None:
+				return None
+		except:
+			return None
+
+		anc = {}
+		anc['title'] = p.GetVitalLine(None, None)
+		anc['lines'] = self.GetAtree(p, 1)
+		return anc
+
 	# Verify that all reference links between people exist.
 	# Also check that the names are correct.
 	#
