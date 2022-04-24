@@ -298,8 +298,12 @@ class Database:
 			to_add = True
 			if p.uniq == c.father_uniq:
 				sp_uniq = c.mother_uniq
+				if sp_uniq == None:
+					sp_uniq = c.mother_name
 			else:
 				sp_uniq = c.father_uniq
+				if sp_uniq == None:
+					sp_uniq = c.father_name
 			for (d, u) in pp:
 				if u == sp_uniq:
 					to_add = False
@@ -313,7 +317,11 @@ class Database:
 
 		# Now go through the partnerships and print the tree for each child
 		for (d, sp_cur) in pp:
-			sp_vital = self.persons[sp_cur].GetVitalLine(None, None)
+			try:
+				sp_vital = self.persons[sp_cur].GetVitalLine(None, None)
+			except:
+				print('Partner', sp_cur, 'of', vital, 'has no unique ID')
+				sp_vital = sp_cur
 			lines.append({'level': level, 'name': vital, 'spouse': sp_vital})
 			for c in cc:
 				if p.uniq == c.father_uniq:
