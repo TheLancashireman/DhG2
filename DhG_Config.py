@@ -33,6 +33,7 @@ class Config():
 	tmpl_dir = 'templates'									# Location of templates
 	editor = 'vi'											# Editor to use for 'edit' command
 	dateformat = 'raw'										# Format for dates
+	depth = 999999											# Max depth for trees
 	father = None											# Father for 'new' command
 	mother = None											# Mother for 'new' command
 
@@ -48,14 +49,16 @@ class Config():
 	@staticmethod
 	def Print():
 		print('Config parameters:')
-		print('cfgfile  =', Config.cfgfile)
-		print('prompt   =', '"'+Config.prompt+'"')
-		print('db_dir   =', Config.db_dir)
-		print('branch   =', Config.branch)
-		print('tmpl_dir =', Config.tmpl_dir)
-		print('editor   =', Config.editor)
-		print('father   =', Config.father)
-		print('mother   =', Config.mother)
+		print('cfgfile     =', Config.cfgfile)
+		print('prompt      =', '"'+Config.prompt+'"')
+		print('db_dir      =', Config.db_dir)
+		print('branch      =', Config.branch)
+		print('tmpl_dir    =', Config.tmpl_dir)
+		print('editor      =', Config.editor)
+		print('dateformat  =', Config.dateformat)
+		print('depth       =', Config.depth)
+		print('father      =', Config.father)
+		print('mother      =', Config.mother)
 
 	# Read the config file
 	#
@@ -114,6 +117,11 @@ class Config():
 				Config.editor = value
 			elif var == 'dateformat':
 				Config.dateformat = value
+			elif var == 'depth':
+				try:
+					Config.depth = int(value)
+				except:
+					print('The value of "depth" must be an integer')
 			elif var == 'father':
 				Config.father = value
 			elif var == 'mother':

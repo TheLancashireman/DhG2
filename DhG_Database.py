@@ -20,6 +20,7 @@
 import os
 import sys
 from pathlib import Path
+from DhG_Config import Config
 from DhG_Person import Person
 
 # A class to represent the entire database
@@ -270,8 +271,8 @@ class Database:
 	# ToDo: insert childless partnerships
 	#
 	def GetDtree(self, p, level):
-		vital = p.GetVitalLine(None, None)
 		lines = []
+		vital = p.GetVitalLine(None, None)
 		sp_cur = -1
 		pp = p.GetPartners()
 		cc = self.GetChildren(p.uniq)
@@ -323,13 +324,16 @@ class Database:
 				print('Partner', sp_cur, 'of', vital, 'has no unique ID')
 				sp_vital = sp_cur
 			lines.append({'level': level, 'name': vital, 'spouse': sp_vital})
-			for c in cc:
-				if p.uniq == c.father_uniq:
-					sp_uniq = c.mother_uniq
-				else:
-					sp_uniq = c.father_uniq
-				if sp_uniq == sp_cur:
-					lines.extend(self.GetDtree(c, level+1))
+			if level < Config.depth:
+				for c in cc:
+					if p.uniq == c.father_uniq:
+						sp_uniq = c.mother_uniq
+					else:
+						sp_uniq = c.father_uniq
+					if sp_uniq == sp_cur:
+						lines.extend(self.GetDtree(c, level+1))
+			else:
+				lines.append({'level': level+1, 'name': '...', 'spouse': ''})
 		return lines
 
 	# Return a descendant tree dictionary for a person.
@@ -350,50 +354,54 @@ class Database:
 
 	# Return a partial ancestor tree
 	#
-	def GetAtree(self, p, lvl):
+	def GetAtree(self, p, level):
 		l = []
+
+		if level > Config.depth:
+			a = {}
+			a['level'] = level+1
+			a['fm'] = ''
+			a['name'] = '...'
+			l.append(a)
+			return l
+				
 		if p.father_name == None and p.mother_name == None:
 			return l
 		if p.father_uniq == None:
 			if p.father_name == None:
 				a = {}
-				a['level'] = lvl
+				a['level'] = level
 				a['fm'] = 'F'
 				a['name'] = 'unknown'
 				l.append(a)
 			else:
 				a = {}
-				a['level'] = lvl
+				a['level'] = level
 				a['fm'] = 'F'
 				a['name'] = p.father_name
 				l.append(a)
 		else:
 			a = {}
-			a['level'] = lvl
+			a['level'] = level
 			a['fm'] = 'F'
 			a['name'] = self.persons[p.father_uniq].GetVitalLine(None, None)
 			l.append(a)
-			l.extend(self.GetAtree(self.persons[p.father_uniq], lvl+1))
+			l.extend(self.GetAtree(self.persons[p.father_uniq], level+1))
+
 		if p.mother_uniq == None:
 			if p.mother_name == None:
 				a = {}
-				a['level'] = lvl
+				a['level'] = level
 				a['fm'] = 'M'
 				a['name'] = 'unknown'
 				l.append(a)
-			else:
-				a = {}
-				a['level'] = lvl
-				a['fm'] = 'M'
-				a['name'] = p.mother_name
-				l.append(a)
 		else:
 			a = {}
-			a['level'] = lvl
+			a['level'] = level
 			a['fm'] = 'M'
 			a['name'] = self.persons[p.mother_uniq].GetVitalLine(None, None)
 			l.append(a)
-			l.extend(self.GetAtree(self.persons[p.mother_uniq], lvl+1))
+			l.extend(self.GetAtree(self.persons[p.mother_uniq], level+1))
 		return l
 			
 
