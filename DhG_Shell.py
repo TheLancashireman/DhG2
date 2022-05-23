@@ -37,7 +37,7 @@ class DhG_Shell(cmd.Cmd):
 	# Message that is displayed in response to -v/--version
 	version = 'This is DhG version 2\n\n'+\
 		'(c) David Haworth (https://thelancashireman.org)\n'+\
-		'DhG comes with ABSOLUTELY NO WARRANTY. It is free free software, and you are welcome\n'+\
+		'DhG comes with ABSOLUTELY NO WARRANTY. It is free software, and you are welcome\n'+\
 		'to redistribute it under certain conditions; please read the accompanying file\n'+\
 		'gpl-3.0.txt for details.\n'
 
@@ -54,7 +54,7 @@ class DhG_Shell(cmd.Cmd):
 		'  A quit command in one of the scripts terminates the program immediately.'
 
 	# Message that is displayed on startup
-	intro = version + '\nType help or ? to list commands.'
+	intro = '\nType help or ? to list commands.'
 
 	# List of scripts, taken from the command line
 	scripts = []
@@ -319,5 +319,7 @@ class DhG_Shell(cmd.Cmd):
 		print('do_test(): ', arg)
 
 if __name__ == '__main__':
+	print(DhG_Shell.version)
+	print('Loading database ...')
 	while True:
 		DhG_Shell().cmdloop()
