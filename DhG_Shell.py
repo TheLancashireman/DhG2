@@ -126,6 +126,8 @@ class DhG_Shell(cmd.Cmd):
 #		print('precmd():', line)
 		if line == '':
 			return line
+		if line[0] == '!':
+			return 'shell ' + line[1:]
 		match = re.search(r'[ 0-9\[]', line)
 		if match:
 			keyword = line[0:match.start()]
@@ -313,6 +315,10 @@ class DhG_Shell(cmd.Cmd):
 		'Verify all the person references in the database'
 		if self.db.VerifyRefs() == 0:
 			print('Verification complete; no errors')
+
+	def do_shell(self, arg):
+		'Run a command in a shell'
+		os.system(arg)
 
 	def do_test(self, arg):
 		'For testing code snippets. ToDo: delete'
