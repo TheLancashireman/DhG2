@@ -126,7 +126,7 @@ class DhG_Shell(cmd.Cmd):
 #		print('precmd():', line)
 		if line == '':
 			return line
-		match = re.search(r'[ 0-9]', line)
+		match = re.search(r'[ 0-9\[]', line)
 		if match:
 			keyword = line[0:match.start()]
 #			print('Digit/space found at', match.start(), 'keyword:', keyword)
