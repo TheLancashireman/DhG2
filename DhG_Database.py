@@ -395,6 +395,12 @@ class Database:
 				a['fm'] = 'M'
 				a['name'] = 'unknown'
 				l.append(a)
+			else:
+				a = {}
+				a['level'] = level
+				a['fm'] = 'M'
+				a['name'] = p.mother_name
+				l.append(a)
 		else:
 			a = {}
 			a['level'] = level
