@@ -5,9 +5,9 @@ This is a rewrite of the original, using python instead of perl and cleaning up 
 cruft caused by major concept and design changes over the years.
 
 At the moment the program is very much under development. Adding and editing card files is supported,
-but the analysis of relationships and html generation is missing.
+as is the analysis of relationships and display of trees. HTML generation is missing.
 
-If you want a usable program, go for the original DhG. The database format will remain the same.
+If you want to generate HTML, you can use the original DhG. The file formats are the same.
 
 Released under GPL version 3.0 - see LICENSE and gpl-3.0.txt
 
