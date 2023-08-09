@@ -18,6 +18,7 @@
 # along with DhG.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import re
 
 # A class to hold the configuration for DhG
 #
@@ -139,7 +140,9 @@ class Config():
 		cardname = Config.db_dir + '/'
 		if Config.branch != None and Config.branch != '':
 			cardname = cardname + Config.branch + '/'
-		names = name.split()
+		# Remove unwanted characters from name and split on spaces
+		# At the moment, only ' is removed (e.g. as in O'Brien)
+		names = re.sub('[\']', '', name).split()
 		cardname = cardname + names[-1] + '/' + ''.join(names) + '-' + str(uniq) + '.card'
 		return cardname
 
