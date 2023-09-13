@@ -42,6 +42,7 @@ class Person:
 		self.father_uniq = None
 		self.mother_name = None
 		self.mother_uniq = None
+		self.importer_info = None			# Used for storing extra information used by importers etc.
 
 	# Read and store all the data from a person's card file
 	#

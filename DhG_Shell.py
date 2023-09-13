@@ -316,6 +316,10 @@ class DhG_Shell(cmd.Cmd):
 		if self.db.VerifyRefs() == 0:
 			print('Verification complete; no errors')
 
+	def do_gedi(self, arg):
+		'Import a GEDCOM file'
+		self.db.ImportGedcom(arg)
+
 	def do_shell(self, arg):
 		'Run a command in a shell'
 		os.system(arg)

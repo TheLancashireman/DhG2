@@ -22,6 +22,7 @@ import sys
 from pathlib import Path
 from DhG_Config import Config
 from DhG_Person import Person
+from DhG_Gedcom import GedcomImporter
 
 # A class to represent the entire database
 #
@@ -480,4 +481,15 @@ class Database:
 		if msg != None:
 			print(p.GetVitalLine(None, None), rel, name, '['+str(uniq)+'] :', msg)
 			return 1
+		return 0
+
+	# Import a GEDCOM file
+	#
+	def ImportGedcom(self, path):
+		if len(self.persons) > 0:
+			print("Merging a GEDCOM file is not supported.")
+			return 1
+
+		g = GedcomImporter(path, self)
+
 		return 0
