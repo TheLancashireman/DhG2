@@ -223,7 +223,8 @@ class GedcomImporter():
 				else:
 					print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; unknown tag')
 			elif p[0] == '2':
-				if p[1] == 'DATE':
+				l2 = p[1]
+				if l2 == 'DATE':
 					if len(p) < 3:
 						print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; no date given')
 					elif ev == None:
@@ -231,11 +232,26 @@ class GedcomImporter():
 					else:
 						date = self.ConvertGedcomDate(p[2])
 						ev.lines[0] = date + ev.lines[0][len(date):]
-				elif p[1] == 'PLAC':
-					if len(p) < 3 and ev != None:
-						ev.AddLine('+Place      '+p[2])
+				elif l2 == 'PLAC':
+					if ev != None:
+						if len(p) > 2:
+							ev.AddLine('+Place      '+p[2])
+						else:
+							ev.AddLine('+Place      not given')
 				else:
 					print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; unknown tag')
+			elif p[0] == '3':
+				l3 = p[1]
+				if l2 == 'PLAC' and l3 == 'MAP':
+					if len(p) > 2 and ev != None:
+						ev.AddLine('-Mapref')
+			elif p[0] == '4':
+				l4 = p[1]
+				if l3 == 'MAP' and l4 == 'LATI' or l4 == 'LONG':
+					if ev.lines[-1] == '-Mapref':
+						ev.lines[-1] = ev.lines[-1] + '     ' + p[2]
+					else:
+						ev.lines[-1] = ev.lines[-1] + ' ' + p[2]
 			else:
 				print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; level > 2')
 		return
@@ -250,6 +266,10 @@ class GedcomImporter():
 		else:
 			print('Line '+str(self.rec_start)+': "'+ged_rec[0].rstrip()+'" has no Xref')
 			return
+
+		l1 = None	# Tag of level 1 line
+		grno = 0
+
 		# Create a family record
 		family = GedcomFamily(ged_rec)
 		self.families[xref] = family
@@ -266,13 +286,18 @@ class GedcomImporter():
 				elif l1 == 'CHIL':
 					family.chil.append(p[2])
 				elif l1 == 'MARR':
-					pass
+					family.marr = '?'
 				else:
 					print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; unknown tag')
 			elif p[0] == '2':
-				l2 = p[2]
+				l2 = p[1]
 				if l2 == '_MREL' or l2 == '_FREL':
-					print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; children assumed natural')
+					if p[2] != 'Natural':
+						print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; children assumed natural')
+				elif l2 == 'DATE' and l1 == 'MARR':
+					family.marr = self.ConvertGedcomDate(p[2])
+				elif l2 == 'PLAC' and l1 == 'MARR':
+					family.plac = p[2]
 				else:
 					print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored')
 			else:
@@ -407,4 +432,6 @@ class GedcomFamily():
 		self.xref = None
 		self.husb = None
 		self.wife = None
+		self.marr = None	# Marriage date: None ==> no record, '?' ==> no date, else date
+		self.plac = None	# Marriage place
 		self.chil = []
