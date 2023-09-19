@@ -56,6 +56,7 @@ class GedcomImporter():
 		self.rec_start = 0
 		self.persons = {}
 		self.families = {}
+		self.indi_xref_ok = True	# All INDI xrefs are of the form @In@
 		line_no = 0
 		ged_file = open(ged_name, 'r')
 		ged_text = ged_file.readlines()
@@ -73,14 +74,12 @@ class GedcomImporter():
 #			print('Parts', p)
 
 			if p[0] == '0':
-				# Start of a new record.
-				self.rec_start = line_no
-
 				# If there's already a record, process it
 				if ged_rec != []:
 					self.ProcessRecord(ged_rec)
 
-				# Start a new record
+				# Start of a new record.
+				self.rec_start = line_no
 				ged_rec = [l]
 
 			elif ged_rec != []:
@@ -88,9 +87,17 @@ class GedcomImporter():
 
 			else:
 				print('Line '+str(line_no)+': "'+l.rstrip()+'" ignored; not part of a record')
-				
+
+		# This is unlikely to have any effect because of the TRLR record
 		if ged_rec != []:
 			self.ProcessRecord(ged_rec)
+
+		# Add individuals whose xref isn't the standard form
+		if not self.indi_xref_ok:
+			self.AllocateNonstandardIndividuals()
+
+		# Connect all the persons together using the FAM records
+		self.ConnectFamilies()
 
 		return
 
@@ -160,11 +167,19 @@ class GedcomImporter():
 		person.headlines.append('')		# Father
 		person.headlines.append('')		# Mother
 		person.headlines.append('Version:    2')
+		person.headlines.append('')		# Blank line
 
 		# Store the gedcom data and add the person to the list
 		person.importer_info = GedcomInfo(ged_rec)
 		person.importer_info.xref = xref
 		self.persons[xref] = person
+
+		# Calculate a uniq from the xref, if possible
+		person.uniq = self.ExtractUniqFromXref(xref)
+		if person.uniq != None:
+			person.headlines[1] = 'Uniq        '+str(person.uniq)
+#			print(person.headlines[1])
+			self.db.AddPerson(person.uniq, person)
 
 		# Assume that every person was born and add a Birth event.
 		# Use a dedicated variable because more information might be coming along.
@@ -195,13 +210,46 @@ class GedcomImporter():
 						person.headlines[2] = 'Male'
 					elif p[2] == 'F':
 						person.headlines[2] = 'Female'
+					elif p[2] == 'U':		# Special for Dobbs: most seem to be male
+						person.headlines[2] = 'Male'
 					else:
 						print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; sex not known')
+				elif l1 == 'EVEN':
+					# This appears to be a remark about the name of the person
+					# See TYPE at L2
+					person.headlines.append('Note:       '+p[2])
 				elif l1 == 'BIRT':
 					# Recall the default birth record
 					ev = birth_ev
 					# Default Birth event has already been added.
 					# If there's text (other than Y) on the line after BIRT, record it as a note.
+					if len(p) > 2 and p[2] != 'Y':
+						ev.AddLine('+Note       '+p[2])
+				elif l1 == 'EMIG':
+					# Add a Travel event.
+					# Special for Dobbs
+					ev = Event()
+					person.events.append(ev)
+					ev.AddLine('?           Emigration')
+					# If there's text on the line after EMIG, record it as the destination.
+					if len(p) > 2 and p[2] != 'Y':
+						ev.AddLine('+Where      '+p[2])
+				elif l1 == 'PROP':
+					# Add a miscellaneous event for property acquisition.
+					# Special for Dobbs
+					ev = Event()
+					person.events.append(ev)
+					ev.AddLine('?           Misc        Property acquisition')
+					# If there's text on the line after PROP, record it as a note.
+					if len(p) > 2 and p[2] != 'Y':
+						ev.AddLine('+Note       '+p[2])
+				elif l1 == 'OCCU':
+					# Add a miscellaneous event for occupation
+					# Special for Dobbs
+					ev = Event()
+					person.events.append(ev)
+					ev.AddLine('?           Misc        Occupation')
+					# If there's text on the line after PROP, record it as a note.
 					if len(p) > 2 and p[2] != 'Y':
 						ev.AddLine('+Note       '+p[2])
 				elif l1 == 'DEAT':
@@ -230,14 +278,19 @@ class GedcomImporter():
 					elif ev == None:
 						pass	# No event to add the date to
 					else:
-						date = self.ConvertGedcomDate(p[2])
+						(date, date1) = self.ConvertGedcomDate(p[2])
 						ev.lines[0] = date + ev.lines[0][len(date):]
+						if date1 != None:
+							ev.lines.insert(1, '+Before     '+date1)
 				elif l2 == 'PLAC':
 					if ev != None:
 						if len(p) > 2:
 							ev.AddLine('+Place      '+p[2])
 						else:
 							ev.AddLine('+Place      not given')
+				elif l2 == 'TYPE' and l1 == 'EVEN':
+					if p[2] != 'Surname' and p[2] != 'Family Genealogy':
+						print('Warning: previous EVEN line has "TYPE '+p[2]+'". Expected "Surname"')
 				else:
 					print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; unknown tag')
 			elif p[0] == '3':
@@ -295,9 +348,18 @@ class GedcomImporter():
 					if p[2] != 'Natural':
 						print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; children assumed natural')
 				elif l2 == 'DATE' and l1 == 'MARR':
-					family.marr = self.ConvertGedcomDate(p[2])
+					(family.marr, family.mar1) = self.ConvertGedcomDate(p[2])
 				elif l2 == 'PLAC' and l1 == 'MARR':
 					family.plac = p[2]
+			elif p[0] == '3':
+				l3 = p[1]
+			elif p[0] == '4':
+				l4 = p[1]
+				if l3 == 'MAP' and l4 == 'LATI' or l4 == 'LONG':
+					if family.mapr == None:
+						family.mapr = p[2]
+					else:
+						family.mapr += ' ' + p[2]
 				else:
 					print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored')
 			else:
@@ -316,6 +378,17 @@ class GedcomImporter():
 #		print('ProcessTrlr()')
 		return
 
+	# If there are any individuals whose xref is not in the standard @In@ form,
+	# this function is called.
+	# The intention is to add them to the database with uniq upwards of the highest
+	#
+	def AllocateNonstandardIndividuals():
+		print('Warning: there are individuals whose xref is not the standard form/')
+		return
+
+	def ConnectFamilies():
+		return
+
 	# Remove the surname indicators and any multiple spaces
 	# Warn if the surname is not the last name element
 	#
@@ -330,9 +403,47 @@ class GedcomImporter():
 			# Family name is last - nothing to do
 			pass
 		else:
-			# Family name is not last - handle this later
+			# Family name is not last
 			print('Warning: in "'+gedname+'": family name is not last')
 		return re.sub('/', '', ' '.join(parts))
+
+	# Extract an integer from an INDI xref
+	# Warn and return None if the xref is not of the form @Id...d@
+	#
+	def ExtractUniqFromXref(self, xref):
+		# Check the non-digit characters
+		if xref[0] == '@' and xref[1] == 'I' and xref[-1] == '@':
+			try:
+				uniq = int(xref[2:-1], 10)
+				if uniq <= 0:
+					uniq = None
+			except:
+				uniq = None
+		else:
+			uniq = None
+
+		if uniq == None:
+			print('Warning: "'+xref+'": not in expected form')
+			self.indi_xref_ok = False
+		return uniq
+
+	# Construct a date out of component parts, some of which might not exist
+	#
+	def BuildDate(self, year, month, day, mod):
+		if year == None:
+			date = '?'
+		else:
+			date = year
+			if month == None:
+				pass
+			else:
+				date = date+'-'+month
+				if day == None:
+					pass
+				else:
+					date = date+'-'+day
+			date = date+mod
+		return date
 
 	# Each part is either:
 	#	a month
@@ -346,6 +457,7 @@ class GedcomImporter():
 		day = None
 		month = None
 		year = None
+		date0 = None
 		for p in parts:
 			if len(p) == 0:
 				pass	# Ignore extra spaces
@@ -384,8 +496,10 @@ class GedcomImporter():
 			elif p == 'AFT':
 				mod = '>'
 			elif p == 'BET':
-				print('Warning: in date "'+geddate+'": BET not supported; using ABT <upper limit>')
-				mod = '~'
+				date0 = self.BuildDate(year, month, day, '>')
+				year = None
+				month = None
+				day = None
 			elif p == 'AND':
 				pass	# Ignore AND (goes with BET)
 			elif len(p) == 1:
@@ -397,20 +511,11 @@ class GedcomImporter():
 			else:
 				print('Warning: in date "'+geddate+'": syntax not completely understood')
 
-		if year == None:
-			date = '?'
+		date = self.BuildDate(year, month, day, mod)
+		if date0 == None:
+			return (date, None)
 		else:
-			date = year
-			if month == None:
-				pass
-			else:
-				date = date+'-'+month
-				if day == None:
-					pass
-				else:
-					date = date+'-'+day
-			date = date+mod
-		return date
+			return (date0, date)
 
 # A class to hold extra GEDCOM information for a person
 #
@@ -433,5 +538,7 @@ class GedcomFamily():
 		self.husb = None
 		self.wife = None
 		self.marr = None	# Marriage date: None ==> no record, '?' ==> no date, else date
+		self.mar1 = None	# Marriage date: later limit
 		self.plac = None	# Marriage place
+		self.mapr = None	# Marriage map reference
 		self.chil = []
