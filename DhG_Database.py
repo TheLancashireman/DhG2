@@ -22,7 +22,7 @@ import sys
 from pathlib import Path
 from DhG_Config import Config
 from DhG_Person import Person
-from DhG_Gedcom import GedcomImporter
+from DhG_GedcomImporter import GedcomImporter
 
 # A class to represent the entire database
 #
@@ -311,7 +311,7 @@ class Database:
 					to_add = False
 					break
 			if to_add:
-				t = (c.birth.GetDate('raw'), sp_uniq)
+				t = (c.GetDoB('raw'), sp_uniq)
 				pp.append(t)
 
 		# Re-sort the partnerships
