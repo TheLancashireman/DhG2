@@ -27,6 +27,11 @@ from DhG_Event import Event
 
 # A class to import a simple GEDCOM file
 #
+# This class is developed to import a GEDCOM file from Family Tree Maker (FTM), specifically
+# a genealogy from the Dobbs report related to the Hutchinson bequest (Co. Antrim).
+# Some of the syntax and semantics in that file are questionable to say the least. I don't know
+# whether that is because of the dataset itself or a characteristic of FTM generally.
+#
 # Notes:
 #	- A birth or death event in an INDI record should not have any text (other than Y) following the BIRT/DEAT tag
 #	on the opening line. If there is such text, this importer treats it as a "Note" for the event.
@@ -39,7 +44,8 @@ from DhG_Event import Event
 #		- Fields that exactly match months or reserved words like AFT, BEF etc. are handled as intended
 #		- Other fields: 4 characters means year, 1 or 2 characters are day-of-month.
 #	The result is that the fields can be in any order. For example JAN 1876 AFT 2 means exactly the same
-#	as AFT 2 JAN 1876. Dates with a range (BET dd mmm yyyy AND dd mmm yyyy) are not supported yet.
+#	as AFT 2 JAN 1876. Events with a dates range (BET dd mmm yyyy AND dd mmm yyyy) are recorded as
+#	AFT <first date> with a qualifer '+Before <second date>. That keeps the ordering correct (I hope).
 #	- Date ranges FROM dd mmm yyyy TO dd mmm yyyy are similarly not processed. The gedcom spec warns against
 #	using this form for events because it implies something that happened continuously over a period and thus
 #	isn't an event. Unclear how things like military service are represented.
@@ -57,6 +63,7 @@ class GedcomImporter():
 		self.persons = {}
 		self.families = {}
 		self.indi_xref_ok = True	# All INDI xrefs are of the form @In@
+		self.max_uniq = 0
 		line_no = 0
 		ged_file = open(ged_name, 'r')
 		ged_text = ged_file.readlines()
@@ -177,15 +184,18 @@ class GedcomImporter():
 		# Calculate a uniq from the xref, if possible
 		person.uniq = self.ExtractUniqFromXref(xref)
 		if person.uniq != None:
+								#  123456789012
 			person.headlines[1] = 'Uniq        '+str(person.uniq)
 #			print(person.headlines[1])
 			self.db.AddPerson(person.uniq, person)
+			if person.uniq > self.max_uniq:
+				self.max_uniq = person.uniq
 
 		# Assume that every person was born and add a Birth event.
-		# Use a dedicated variable because more information might be coming along.
-		birth_ev = Event()
-		person.events.append(birth_ev)
-		birth_ev.AddLine('?           Birth')
+		ev = Event()
+		ev.AddLine('?           Birth')
+		person.birth = ev
+		person.events.append(ev)
 
 		l1 = None	# Tag of level 1 line
 		ev = None	# Event object associated with the level 1 line
@@ -200,7 +210,10 @@ class GedcomImporter():
 				if l1 == 'NAME':
 					if len(p) > 2:
 						person.importer_info.name = p[2]
-						person.headlines[0] = 'Name:       '+self.ConvertGedcomName(p[2])
+						n = self.ConvertGedcomName(p[2])
+						person.name = n
+											#  123456789012
+						person.headlines[0] = 'Name:       '+n
 					else:
 						print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; no name given')
 				elif l1 == 'SEX':
@@ -208,10 +221,13 @@ class GedcomImporter():
 						print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; no sex given')
 					elif p[2] == 'M':
 						person.headlines[2] = 'Male'
+						person.sex = 'm'
 					elif p[2] == 'F':
 						person.headlines[2] = 'Female'
+						person.sex = 'f'
 					elif p[2] == 'U':		# Special for Dobbs: most seem to be male
 						person.headlines[2] = 'Male'
+						person.sex = 'm'
 					else:
 						print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; sex not known')
 				elif l1 == 'EVEN':
@@ -220,7 +236,7 @@ class GedcomImporter():
 					person.headlines.append('Note:       '+p[2])
 				elif l1 == 'BIRT':
 					# Recall the default birth record
-					ev = birth_ev
+					ev = person.birth
 					# Default Birth event has already been added.
 					# If there's text (other than Y) on the line after BIRT, record it as a note.
 					if len(p) > 2 and p[2] != 'Y':
@@ -253,9 +269,9 @@ class GedcomImporter():
 					if len(p) > 2 and p[2] != 'Y':
 						ev.AddLine('+Note       '+p[2])
 				elif l1 == 'DEAT':
-					# Add a Death event.
+					# Add a Death event, but don't append to the list yet.
 					ev = Event()
-					person.events.append(ev)
+					person.death = ev
 					ev.AddLine('?           Death')
 					# If there's text (other than Y) on the line after DEAT, record it as a note.
 					if len(p) > 2 and p[2] != 'Y':
@@ -279,6 +295,7 @@ class GedcomImporter():
 						pass	# No event to add the date to
 					else:
 						(date, date1) = self.ConvertGedcomDate(p[2])
+						ev.date = date
 						ev.lines[0] = date + ev.lines[0][len(date):]
 						if date1 != None:
 							ev.lines.insert(1, '+Before     '+date1)
@@ -382,11 +399,85 @@ class GedcomImporter():
 	# this function is called.
 	# The intention is to add them to the database with uniq upwards of the highest
 	#
-	def AllocateNonstandardIndividuals():
-		print('Warning: there are individuals whose xref is not the standard form/')
+	def AllocateNonstandardIndividuals(self):
+		print('Warning: there are individuals whose xref is not the standard form.')
+		for pi in self.persons:
+			p = self.persons[pi]
+			if p.uniq == None:
+				self.max_uniq += 1
+				p.uniq = self.max_uniq
+								# 123456789012
+				p.headlines[1] = 'Uniq:       '+str(p.uniq)
+				self.db.AddPerson(p.uniq, p)
 		return
 
-	def ConnectFamilies():
+	# Connect the families by adding HUSB and WIFE from each FAM record as father and mother
+	# of each CHIL listed in the FAM record. Also add marriage event (if present) to the HUSB and WIFE
+	#
+	# An interesting conundrum here:
+	# There's a two-way relationship between persons and families, because each INDI
+	# has a FAMS (family in which person is a spouse) and FAMC (family in which person is a child).
+	# It is possible to ignore the FAM records and just use the references in the INDI records.
+	# Similarly it is possible to ignore the FAMS/FAMC attributes and just use the FAM records. The
+	# latter has the advantage that perhaps it's possible to infer the sex of an individual
+	# who is a HUSB or WIFE in a FAM record.
+	# This function ignores the FAMS/FAMC lists.
+	#
+	# It would be possible to use the bidirectional relationships as a check; we won't go there yet.
+	# Open question: what if an individual is listed as a child in two families?
+	#
+	def ConnectFamilies(self):
+		for fref in self.families:
+			f = self.families[fref]
+			if f.husb == None:
+				father = None
+			else:
+				try:
+					father = self.persons[f.husb]
+								 # 123456789012
+				except:
+					print('Warning: HUSB '+f.husb+' not found in database')
+					father = None
+			if father == None:
+				father_line = ''
+			else:
+				father_line = 'Father:     '+father.name+' ['+str(father.uniq)+']'
+
+			if f.wife == None:
+				mother = None
+			else:
+				try:
+					mother = self.persons[f.wife]
+								 # 123456789012
+				except:
+					print('Warning: WIFE '+f.wife+' not found in database')
+					mother = None
+			if mother == None:
+				mother_line = ''
+			else:
+				mother_line = 'Mother:     '+mother.name+' ['+str(mother.uniq)+']'
+
+			for c in f.chil:
+				try:
+					child = self.persons[c]
+				except:
+					print('Warning: CHIL '+c+' not found in database')
+					child = None
+				if child != None:
+					if child.headlines[3] == '':
+						if father != None:
+							child.headlines[3] = father_line
+							child.father_name = father.name
+							child.father_uniq = father.uniq
+					elif child.headlines[3] != father_line:
+						print('Warning:', child.name, '['+str(child.uniq)+'] (', c, ') has than one father')
+					if child.headlines[4] == '':
+						if mother != None:
+							child.headlines[4] = mother_line
+							child.mother_name = mother.name
+							child.mother_uniq = mother.uniq
+					elif child.headlines[4] != mother_line:
+						print('Warning:', child.name, '['+str(child.uniq)+'] (', c, ') has than one mother')
 		return
 
 	# Remove the surname indicators and any multiple spaces
@@ -396,16 +487,29 @@ class GedcomImporter():
 		# Split the gedcom name into parts and remove duplicate spaces
 		x = gedname.split(' ')
 		parts = []
+		extra = []
+		found_surname = False
 		for n in x:
-			if n != '':
+			if n == '':
+				pass		# Ignore empty parts
+			elif found_surname:
+				extra.append(n)
+			else:
+				if n[0] == '/' and n[-1] == '/':
+					found_surname = True
+					n = n[1:-1]
 				parts.append(n)
-		if parts[-1][0] == '/' and parts[-1][-1] == '/':
-			# Family name is last - nothing to do
-			pass
-		else:
+		if len(extra) != 0:
 			# Family name is not last
 			print('Warning: in "'+gedname+'": family name is not last')
-		return re.sub('/', '', ' '.join(parts))
+			# Put all remaining parts in brackets before the family name
+			# Dobbs special: this is a hack for names like "Joe Bloggs Sr."
+			parts.insert(-1, '('+' '.join(extra)+')')
+			print('ConvertGedname(): Name is', ' '.join(parts))
+		elif not found_surname:
+			# Explicit family name not found
+			print('Warning: in "'+gedname+'": family name not found. Last name will be family name as usual')
+		return ' '.join(parts)
 
 	# Extract an integer from an INDI xref
 	# Warn and return None if the xref is not of the form @Id...d@
