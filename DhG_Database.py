@@ -319,11 +319,14 @@ class Database:
 
 		# Now go through the partnerships and print the tree for each child
 		for (d, sp_cur) in pp:
-			try:
-				sp_vital = self.persons[sp_cur].GetVitalLine(None, None)
-			except:
-				print('Partner', sp_cur, 'of', vital, 'has no unique ID')
-				sp_vital = sp_cur
+			if sp_cur == None:
+				sp_vital = 'not known'
+			else:
+				try:
+					sp_vital = self.persons[sp_cur].GetVitalLine(None, None)
+				except:
+					print('Partner', sp_cur, 'of', vital, 'has no unique ID')
+					sp_vital = sp_cur
 			lines.append({'level': level, 'name': vital, 'spouse': sp_vital})
 			if level < Config.depth:
 				for c in cc:
@@ -373,7 +376,7 @@ class Database:
 				a = {}
 				a['level'] = level
 				a['fm'] = 'F'
-				a['name'] = 'unknown'
+				a['name'] = 'not known'
 				l.append(a)
 			else:
 				a = {}
@@ -394,7 +397,7 @@ class Database:
 				a = {}
 				a['level'] = level
 				a['fm'] = 'M'
-				a['name'] = 'unknown'
+				a['name'] = 'not known'
 				l.append(a)
 			else:
 				a = {}
