@@ -203,14 +203,8 @@ class Person:
 			parts[idx_name] = '?'
 		else:
 			parts[idx_name] = self.name
-		if self.birth == None:
-			dob = '?'
-		else:
-			dob = self.birth.GetDate(datefmt)
-		if self.death == None:
-			dod = ''
-		else:
-			dod = self.death.GetDate(datefmt)
+		dob = self.GetDoB(datefmt)
+		dod = self.GetDoD(datefmt)
 		parts[idx_dates] = '('+dob+' - '+dod+')'
 		return ' '.join(parts)
 
@@ -267,16 +261,13 @@ class Person:
 		tl.append('Name = ' + self.name)
 		tl.append('Uniq = [' + str(self.uniq) + ']')
 		tl.append('Sex = ' + self.sex)
-		if (self.birth == None ):
-			tl.append('DoB = ?')
-		else:
-			tl.append('DoB = ' + self.birth.GetDate(None))
+		tl.append('DoB = ' + self.GetDoB(None))
 		for m in self.partnerships:
 			tl.append(m.etype + '  ' + m.GetDate(None) + ' with ' + m.rest)
 		if (self.death == None ):
 			pass
 		else:
-			tl.append('DoD = '+self.death.GetDate(None))
+			tl.append('DoD = '+self.GetDoD(None))
 		if self.father_name != None:
 			tl.append('Father = '+self.father_name+' ['+str(self.father_uniq)+']')
 		if self.mother_name != None:
