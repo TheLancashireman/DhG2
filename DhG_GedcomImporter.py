@@ -439,8 +439,10 @@ class GedcomImporter():
 					print('Warning: HUSB '+f.husb+' not found in database')
 					father = None
 			if father == None:
-				father_line = ''
+							#  123456789012
+				father_line = 'Father:     not known'
 			else:
+							#  123456789012
 				father_line = 'Father:     '+father.name+' ['+str(father.uniq)+']'
 
 			if f.wife == None:
@@ -453,8 +455,10 @@ class GedcomImporter():
 					print('Warning: WIFE '+f.wife+' not found in database')
 					mother = None
 			if mother == None:
-				mother_line = ''
+							#  123456789012
+				mother_line = 'Mother:     not known'
 			else:
+							#  123456789012
 				mother_line = 'Mother:     '+mother.name+' ['+str(mother.uniq)+']'
 
 			for c in f.chil:
@@ -464,20 +468,21 @@ class GedcomImporter():
 					print('Warning: CHIL '+c+' not found in database')
 					child = None
 				if child != None:
-					if child.headlines[3] == '':
+					if child.headlines[3] == '' and child.headlines[4] == '':
 						if father != None:
 							child.headlines[3] = father_line
 							child.father_name = father.name
 							child.father_uniq = father.uniq
-					elif child.headlines[3] != father_line:
-						print('Warning:', child.name, '['+str(child.uniq)+'] (', c, ') has than one father')
-					if child.headlines[4] == '':
 						if mother != None:
 							child.headlines[4] = mother_line
 							child.mother_name = mother.name
 							child.mother_uniq = mother.uniq
-					elif child.headlines[4] != mother_line:
-						print('Warning:', child.name, '['+str(child.uniq)+'] (', c, ') has than one mother')
+					else:
+						print('Warning:', child.name, '['+str(child.uniq)+'] (', c, ') has two sets of parents:')
+						print('   Existing: ', child.headlines[3])
+						print('             ', child.headlines[4])
+						print('   Found:    ', father_line)
+						print('             ', mother_line)
 		return
 
 	# Remove the surname indicators and any multiple spaces
