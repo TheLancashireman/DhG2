@@ -32,6 +32,8 @@ class Config():
 	db_dir = None											# Location of database (must be set!)
 	branch = None											# Current family branch
 	tmpl_dir = 'templates'									# Location of templates
+	html_dir = None											# Where to put the HTML output
+	server_path = None										# Path to htmldir on server (for links)
 	editor = 'vi'											# Editor to use for 'edit' command
 	dateformat = 'raw'										# Format for dates
 	depth = 999999											# Max depth for trees
@@ -114,6 +116,10 @@ class Config():
 				Config.branch = value
 			elif var == 'templates':
 				Config.tmpl_dir = value
+			elif var == 'htmldir':
+				Config.html_dir = value
+			elif var == 'serverpath':
+				Config.server_path = value
 			elif var == 'editor':
 				Config.editor = value
 			elif var == 'dateformat':
@@ -137,13 +143,32 @@ class Config():
 	#
 	@staticmethod
 	def MakeCardfileName(name, uniq):
-		cardname = Config.db_dir + '/'
+		path = Config.db_dir
 		if Config.branch != None and Config.branch != '':
-			cardname = cardname + Config.branch + '/'
+			path = path + '/' + Config.branch
+		return Config.MakePersonfileName(name, uniq, path)
+
+	# Construct a file name for a descendants tree
+	#
+	@staticmethod
+	def MakeDescTreeName(name, uniq):
+		path = Config.html_dir + '/trees'
+		return Config.MakePersonfileName(name, uniq, path, '-descendants.html', False)
+
+	# Construct a file name for a person's file
+	#
+	@staticmethod
+	def MakePersonfileName(name, uniq, prefix, suffix='.card', surname_dir=True):
+		if prefix == None:
+			prefix = ''
+		elif prefix != '':
+			prefix = prefix + '/'
 		# Remove unwanted characters from name and split on spaces
 		# At the moment, only ' is removed (e.g. as in O'Brien)
 		names = re.sub('[\']', '', name).split()
-		cardname = cardname + names[-1] + '/' + ''.join(names) + '-' + str(uniq) + '.card'
+		if surname_dir:
+			prefix = prefix + names[-1] + '/'
+		cardname = prefix + ''.join(names) + '-' + str(uniq) + suffix
 		return cardname
 
 	# Construct a file name for a template file
