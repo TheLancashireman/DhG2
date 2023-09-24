@@ -219,8 +219,7 @@ class Config():
 		yy = parts[0]
 		if fmt == 'yearonly':
 			# More than the year is available, but only the year is required.
-			# Assume that the year is correct, so modifier doesn't apply. Not entirely true (ToDo)
-			return yy
+			return mod+yy
 
 		mm = parts[1]
 		if mm[0].upper() == 'Q':

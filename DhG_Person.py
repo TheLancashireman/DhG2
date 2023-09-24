@@ -186,6 +186,11 @@ class Person:
 			return ''
 		return self.death.GetDate(fmt)
 
+	# Returns (DoB - DoD) as a string
+	#
+	def GetDates(self, fmt):
+		return '(' + self.GetDoB(fmt) + ' - ' + self.GetDoD(fmt) + ')'
+
 	# Return a string containing vital information about the person
 	# fmt specifies what to return			ToDo
 	# datefmt spefies how to show dates		ToDo

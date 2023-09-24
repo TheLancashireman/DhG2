@@ -56,7 +56,7 @@
 
   <hr/>
 
-  <h1>Descendants of {{ tp['title'] }}</h1>
+  <h1>Descendants of {{ tp['name'] }} {{ tp['dates'] }}</h1>
   <hr/>
 
   <div id="pagetorso" class="familytree">
@@ -82,8 +82,8 @@
 {%     for j in range(line['level']*2) -%}{{ '  ' }}{% endfor -%}<ul>
 {%     for j in range(line['level']*2+1) -%}{{ '  ' }}{% endfor -%}<li>
 {%   endif -%}
-{%   for j in range(line['level']*2+2) -%}{{ '  ' }}{% endfor -%}{{ line['level'] }}.&nbsp;&nbsp;{{ line['name'] -}}
-{%   if line['spouse'] != '' -%}{{ ' === ' }}{{ line['spouse'] }}{% endif %}
+{%   for j in range(line['level']*2+2) -%}{{ '  ' }}{% endfor -%}{{ line['level'] }}.&nbsp;&nbsp;{{ line['name'] -}}&nbsp;{{ line['dates'] -}}
+{%   if line['spouse_name'] != '' -%}{{ '&nbsp;===&nbsp;' }}{{ line['spouse_name'] }}&nbsp;{{ line['spouse_dates'] -}}{% endif %}
 {%   if not (loop.nextitem is defined) -%}
 {%     set n = line['level'] -%}
 {%     for k in range(n) -%}

@@ -271,25 +271,39 @@ class Database:
 	#
 	# ToDo: insert childless partnerships
 	#
-	def GetDtree(self, p, level):
+	def GetDtree(self, p, level, datefmt):
 		lines = []
-		vital = p.GetVitalLine(None, None)
 		sp_cur = -1
 		pp = p.GetPartners()
 		cc = self.GetChildren(p.uniq)
 		if cc == None or len(cc) == 0:
-			# No children. Just name if no partners
+			# No children. Just person if no partners
 			if pp == None or len(pp) == 0:
-				lines.append({'level': level, 'name': vital, 'spouse': ''})
+				line = {'level': level, 'name': p.name, 'uniq': p.uniq, 'dates': p.GetDates(datefmt),
+							'vital': p.GetVitalLine(None, datefmt)}
+				line['spouse_name'] = ''
+				line['spouse_uniq'] = ''
+				line['spouse_dates'] = ''
+				line['spouse_vital'] = ''
+				lines.append(line)
 				return lines
 			# List of partnerships
 			for (date, sp_uniq) in pp:
+				line = {'level': level, 'name': p.name, 'uniq': p.uniq, 'dates': p.GetDates(datefmt),
+							'vital': p.GetVitalLine(None, datefmt)}
 				try:
 					sp = self.persons[sp_uniq]
-					sp_vital = sp.GetVitalLine(None, None)
-					lines.append({'level': level, 'name': vital, 'spouse': sp_vital})
+					sp_vital = sp.GetVitalLine(None, datefmt)
+					line['spouse_name'] = sp.name
+					line['spouse_uniq'] = sp.uniq
+					line['spouse_dates'] = sp.GetDates(datefmt)
+					line['spouse_vital'] = sp.GetVitalLine(None, datefmt)
 				except:
-					lines.append({'level': level, 'name': vital, 'spouse': '???'})
+					line['spouse_name'] = '???'
+					line['spouse_uniq'] = ''
+					line['spouse_dates'] = ''
+					line['spouse_vital'] = '???'
+				lines.append(line)
 			return lines
 
 		if pp == None:
@@ -319,15 +333,28 @@ class Database:
 
 		# Now go through the partnerships and print the tree for each child
 		for (d, sp_cur) in pp:
+			line = {'level': level, 'name': p.name, 'uniq': p.uniq, 'dates': p.GetDates(datefmt),
+						'vital': p.GetVitalLine(None, datefmt)}
 			if sp_cur == None:
-				sp_vital = 'not known'
+				line['spouse_name'] = 'not known'
+				line['spouse_uniq'] = ''
+				line['spouse_dates'] = ''
+				line['spouse_vital'] = 'not known'
 			else:
 				try:
-					sp_vital = self.persons[sp_cur].GetVitalLine(None, None)
+					sp = self.persons[sp_cur]
+					line['spouse_name'] = sp.name
+					line['spouse_uniq'] = sp.uniq
+					line['spouse_dates'] = sp.GetDates(datefmt)
+					line['spouse_vital'] = sp.GetVitalLine(None, datefmt)
 				except:
 					print('Partner', sp_cur, 'of', vital, 'has no unique ID')
+					line['spouse_name'] = sp_cur
+					line['spouse_uniq'] = ''
+					line['spouse_dates'] = ''
+					line['spouse_vital'] = sp_cur
 					sp_vital = sp_cur
-			lines.append({'level': level, 'name': vital, 'spouse': sp_vital})
+			lines.append(line)
 			if level < Config.depth:
 				for c in cc:
 					if p.uniq == c.father_uniq:
@@ -335,15 +362,20 @@ class Database:
 					else:
 						sp_uniq = c.father_uniq
 					if sp_uniq == sp_cur:
-						lines.extend(self.GetDtree(c, level+1))
+						lines.extend(self.GetDtree(c, level+1, datefmt))
 			else:
-				lines.append({'level': level+1, 'name': '...', 'spouse': ''})
+				line = {'level': level+1, 'name': '...', 'uniq': '', 'dates': '', 'vital': '...'}
+				line['spouse_name'] = ''
+				line['spouse_uniq'] = ''
+				line['spouse_dates'] = ''
+				line['spouse_vital'] = ''
+				lines.append(line)
 		return lines
 
 	# Return a descendant tree dictionary for a person.
 	# The return value can be passed to a template.
 	#
-	def GetDescendants(self, uniq):
+	def GetDescendants(self, uniq, fmt='raw'):
 		try:
 			p = self.persons[uniq]
 			if p == None:
@@ -353,7 +385,10 @@ class Database:
 
 		desc = {}
 		desc['title'] = p.GetVitalLine(None, None)
-		desc['lines'] = self.GetDtree(p, 1)
+		desc['name'] = p.name
+		desc['uniq'] = p.uniq
+		desc['dates'] = p.GetDates(fmt)
+		desc['lines'] = self.GetDtree(p, 1, fmt)
 		return desc
 
 	# Return a partial ancestor tree

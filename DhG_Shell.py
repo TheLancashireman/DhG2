@@ -330,7 +330,7 @@ class DhG_Shell(cmd.Cmd):
 		if len(l) == 1:
 			person = l[0]
 			file = Config.MakeDescTreeName(person.name, person.uniq)
-			desc = self.db.GetDescendants(person.uniq)
+			desc = self.db.GetDescendants(person.uniq, 'yearonly')
 			DoTemplate('descendant-tree-html.tmpl', desc, file)
 		else:
 			self.PrintPersonList(l, arg)
