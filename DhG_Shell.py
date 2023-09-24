@@ -324,6 +324,21 @@ class DhG_Shell(cmd.Cmd):
 		'Run a command in a shell'
 		os.system(arg)
 
+	def do_htmldescendants(self, arg):
+		'Create a descendants tree in HTML for a given person'
+		l = self.db.GetMatchingPersons(arg)
+		if len(l) == 1:
+			person = l[0]
+			file = Config.MakeDescTreeName(person.name, person.uniq)
+			desc = self.db.GetDescendants(person.uniq)
+			DoTemplate('descendant-tree-html.tmpl', desc, file)
+		else:
+			self.PrintPersonList(l, arg)
+
+	def do_hd(self, arg):
+		'Create a descendants tree in HTML for a given person'
+		self.do_htmldescendants(arg)
+
 	def do_test(self, arg):
 		'For testing code snippets. ToDo: delete'
 		print('do_test(): ', arg)
