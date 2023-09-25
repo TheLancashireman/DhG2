@@ -24,7 +24,7 @@ from DhG_Config import Config
 class Event:
 	def __init__(self):
 		self.lines = []
-		self.ower = None
+		self.owner = None
 		self.date = None
 		self.etype = None
 		self.rest = None
@@ -48,6 +48,7 @@ class Event:
 
 		if len(parts) > 2:
 			self.rest = ' '.join(parts[2:])
+		return
 
 	# Return the date  (TODO: in the specified format)
 	#

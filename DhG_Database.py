@@ -219,14 +219,14 @@ class Database:
 		family = {}
 
 		# The person
-		family['vital'] = p.GetVitalLine(None, None)
+		family['vital'] = p.GetVitalLine()
 
 		# Father
 		pp = None
 		if p.father_uniq != None:
 			try:
 				pp = self.persons[p.father_uniq]
-				family['father_vital'] = pp.GetVitalLine(None, None)
+				family['father_vital'] = pp.GetVitalLine()
 			except:
 				pp = None
 		if pp == None:
@@ -238,7 +238,7 @@ class Database:
 		if p.mother_uniq != None:
 			try:
 				pp = self.persons[p.mother_uniq]
-				family['mother_vital'] = pp.GetVitalLine(None, None)
+				family['mother_vital'] = pp.GetVitalLine()
 			except:
 				pp = None
 		if pp == None:
@@ -248,7 +248,7 @@ class Database:
 		siblings = []
 		sibs = self.GetSiblings(p.uniq)
 		for pp in sibs:
-			s_vital = pp.GetVitalLine(None, None)
+			s_vital = pp.GetVitalLine()
 			if pp.uniq == p.uniq:
 				s_vital = s_vital + '    (self)'
 			elif pp.father_uniq == p.father_uniq and pp.mother_uniq == p.mother_uniq:
@@ -261,7 +261,7 @@ class Database:
 		children = []
 		cc = self.GetChildren(p.uniq)
 		for pp in cc:
-			c_vital = pp.GetVitalLine(None, None)
+			c_vital = pp.GetVitalLine()
 			children.append(c_vital)
 		family['children'] = children
 
@@ -280,7 +280,7 @@ class Database:
 			# No children. Just person if no partners
 			if pp == None or len(pp) == 0:
 				line = {'level': level, 'name': p.name, 'uniq': p.uniq, 'dates': p.GetDates(datefmt),
-							'vital': p.GetVitalLine(None, datefmt)}
+							'vital': p.GetVitalLine(datefmt=datefmt)}
 				line['spouse_name'] = ''
 				line['spouse_uniq'] = ''
 				line['spouse_dates'] = ''
@@ -290,14 +290,14 @@ class Database:
 			# List of partnerships
 			for (date, sp_uniq) in pp:
 				line = {'level': level, 'name': p.name, 'uniq': p.uniq, 'dates': p.GetDates(datefmt),
-							'vital': p.GetVitalLine(None, datefmt)}
+							'vital': p.GetVitalLine(datefmt=datefmt)}
 				try:
 					sp = self.persons[sp_uniq]
-					sp_vital = sp.GetVitalLine(None, datefmt)
+					sp_vital = sp.GetVitalLine(datefmt=datefmt)
 					line['spouse_name'] = sp.name
 					line['spouse_uniq'] = sp.uniq
 					line['spouse_dates'] = sp.GetDates(datefmt)
-					line['spouse_vital'] = sp.GetVitalLine(None, datefmt)
+					line['spouse_vital'] = sp.GetVitalLine(datefmt=datefmt)
 				except:
 					line['spouse_name'] = '???'
 					line['spouse_uniq'] = ''
@@ -334,7 +334,7 @@ class Database:
 		# Now go through the partnerships and print the tree for each child
 		for (d, sp_cur) in pp:
 			line = {'level': level, 'name': p.name, 'uniq': p.uniq, 'dates': p.GetDates(datefmt),
-						'vital': p.GetVitalLine(None, datefmt)}
+						'vital': p.GetVitalLine(datefmt=datefmt)}
 			if sp_cur == None:
 				line['spouse_name'] = 'not known'
 				line['spouse_uniq'] = ''
@@ -346,7 +346,7 @@ class Database:
 					line['spouse_name'] = sp.name
 					line['spouse_uniq'] = sp.uniq
 					line['spouse_dates'] = sp.GetDates(datefmt)
-					line['spouse_vital'] = sp.GetVitalLine(None, datefmt)
+					line['spouse_vital'] = sp.GetVitalLine(datefmt=datefmt)
 				except:
 					print('Partner', sp_cur, 'of', vital, 'has no unique ID')
 					line['spouse_name'] = sp_cur
@@ -384,7 +384,7 @@ class Database:
 			return None
 
 		desc = {}
-		desc['title'] = p.GetVitalLine(None, None)
+		desc['title'] = p.GetVitalLine()
 		desc['name'] = p.name
 		desc['uniq'] = p.uniq
 		desc['dates'] = p.GetDates(fmt)
@@ -423,7 +423,7 @@ class Database:
 			a = {}
 			a['level'] = level
 			a['fm'] = 'F'
-			a['name'] = self.persons[p.father_uniq].GetVitalLine(None, None)
+			a['name'] = self.persons[p.father_uniq].GetVitalLine()
 			l.append(a)
 			l.extend(self.GetAtree(self.persons[p.father_uniq], level+1))
 
@@ -444,7 +444,7 @@ class Database:
 			a = {}
 			a['level'] = level
 			a['fm'] = 'M'
-			a['name'] = self.persons[p.mother_uniq].GetVitalLine(None, None)
+			a['name'] = self.persons[p.mother_uniq].GetVitalLine()
 			l.append(a)
 			l.extend(self.GetAtree(self.persons[p.mother_uniq], level+1))
 		return l
@@ -462,7 +462,7 @@ class Database:
 			return None
 
 		anc = {}
-		anc['title'] = p.GetVitalLine(None, None)
+		anc['title'] = p.GetVitalLine()
 		anc['lines'] = self.GetAtree(p, 1)
 		return anc
 
@@ -493,10 +493,10 @@ class Database:
 							else:
 								found = 2
 					if found == 0:
-						print(sp.GetVitalLine(None, None), 'has no spouse', p.GetVitalLine(None, None))
+						print(sp.GetVitalLine(), 'has no spouse', p.GetVitalLine())
 						n_errs += 1
 					elif found == 2:
-						print(p.GetVitalLine(None, None), 'has spouse', sp.GetVitalLine(None, None),
+						print(p.GetVitalLine(), 'has spouse', sp.GetVitalLine(),
 									'with different date')
 						n_errs += 1
 				else:
@@ -517,7 +517,7 @@ class Database:
 			msg = 'unique ID is out of range'
 
 		if msg != None:
-			print(p.GetVitalLine(None, None), rel, name, '['+str(uniq)+'] :', msg)
+			print(p.GetVitalLine(), rel, name, '['+str(uniq)+'] :', msg)
 			return 1
 		return 0
 

@@ -159,7 +159,7 @@ class DhG_Shell(cmd.Cmd):
 			print('No entry', arg, 'found in the database')
 		else:
 			for p in l:
-				print(p.GetVitalLine(None, None))		# ToDo: parameters
+				print(p.GetVitalLine())		# ToDo: parameters
 
 	# Edit a card using the specified editor
 	#
@@ -216,7 +216,7 @@ class DhG_Shell(cmd.Cmd):
 		'Print a list of persons that match the given terms'
 		l = self.db.GetMatchingPersons(arg)
 		for p in l:
-			print(p.GetVitalLine(None, None))		# ToDo: parameters
+			print(p.GetVitalLine())		# ToDo: parameters
 
 	def do_search(self, arg):
 		'Print a list of persons that match the given terms'

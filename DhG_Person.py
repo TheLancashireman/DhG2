@@ -192,25 +192,38 @@ class Person:
 		return '(' + self.GetDoB(fmt) + ' - ' + self.GetDoD(fmt) + ')'
 
 	# Return a string containing vital information about the person
-	# fmt specifies what to return			ToDo
-	# datefmt spefies how to show dates		ToDo
+	# fmt specifies what to return
+	# datefmt spefies how to show dates
 	#
-	def GetVitalLine(self, fmt, datefmt):
-		idx_id = 0		# ToDo work out indexes from fmt parameter
-		idx_name = 1
-		idx_dates = 2
-		parts = ['', '', '']
-		if self.uniq == None:
-			parts[idx_id] = '[?]'
-		else:
-			parts[idx_id] = '['+str(self.uniq)+']'
-		if self.name == None:
-			parts[idx_name] = '?'
-		else:
-			parts[idx_name] = self.name
-		dob = self.GetDoB(datefmt)
-		dod = self.GetDoD(datefmt)
-		parts[idx_dates] = '('+dob+' - '+dod+')'
+	def GetVitalLine(self, fmt='display', datefmt='raw'):
+		if fmt == 'card':	# cardfile format, e.g. Fred Bloggs [1234]
+			idx_name = 0
+			idx_id = 1
+			idx_dates = -1
+			parts = ['', '']
+		else:				# display format, e.g. [1234] Fred Bloggs (1930-1969)
+			idx_id = 0
+			idx_name = 1
+			idx_dates = 2
+			parts = ['', '', '']
+
+		if idx_uniq >= 0:
+			if self.uniq == None:
+				parts[idx_id] = '[?]'
+			else:
+				parts[idx_id] = '['+str(self.uniq)+']'
+
+		if idx_name >= 0:
+			if self.name == None:
+				parts[idx_name] = 'not known'
+			else:
+				parts[idx_name] = self.name
+
+		if idx_dates >= 0:
+			dob = self.GetDoB(datefmt)
+			dod = self.GetDoD(datefmt)
+			parts[idx_dates] = '('+dob+' - '+dod+')'
+
 		return ' '.join(parts)
 
 	# Analyse all the events for this person
