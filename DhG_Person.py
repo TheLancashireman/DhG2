@@ -198,20 +198,20 @@ class Person:
 	def GetVitalLine(self, fmt='display', datefmt='raw'):
 		if fmt == 'card':	# cardfile format, e.g. Fred Bloggs [1234]
 			idx_name = 0
-			idx_id = 1
+			idx_uniq = 1
 			idx_dates = -1
 			parts = ['', '']
 		else:				# display format, e.g. [1234] Fred Bloggs (1930-1969)
-			idx_id = 0
+			idx_uniq = 0
 			idx_name = 1
 			idx_dates = 2
 			parts = ['', '', '']
 
 		if idx_uniq >= 0:
 			if self.uniq == None:
-				parts[idx_id] = '[?]'
+				parts[idx_uniq] = '[?]'
 			else:
-				parts[idx_id] = '['+str(self.uniq)+']'
+				parts[idx_uniq] = '['+str(self.uniq)+']'
 
 		if idx_name >= 0:
 			if self.name == None:
