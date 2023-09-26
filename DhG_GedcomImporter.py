@@ -357,6 +357,8 @@ class GedcomImporter():
 					family.chil.append(p[2])
 				elif l1 == 'MARR':
 					family.marr = '?'
+					if len(p) > 2:
+						family.mnot = p[2]
 				else:
 					print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; unknown tag')
 			elif p[0] == '2':
@@ -424,7 +426,8 @@ class GedcomImporter():
 	# This function ignores the FAMS/FAMC lists.
 	#
 	# It would be possible to use the bidirectional relationships as a check; we won't go there yet.
-	# Open question: what if an individual is listed as a child in two families?
+	# What if an individual is listed as a child in two families? Answer: there were a few; all were errors
+	# in the gedcom.
 	#
 	def ConnectFamilies(self):
 		for fref in self.families:
@@ -483,6 +486,45 @@ class GedcomImporter():
 						print('             ', child.headlines[4])
 						print('   Found:    ', father_line)
 						print('             ', mother_line)
+
+			if f.marr != None:
+				el0 = f.marr
+				for i in range(len(f.marr), 12):
+					el0 += ' '
+				el0 += 'Marriage    '
+				elines = ['']
+				if f.mar1 != None:
+								#  123456789012
+					elines.append('+Before     '+f.mar1)
+				if f.mnot != None:
+								#  123456789012
+					elines.append('+Note       '+f.mnot)
+				if f.plac != None:
+								#  123456789012
+					elines.append('+Place      '+f.plac)
+					if f.mapr != None:
+									#  123456789012
+						elines.append('-Mapref     '+f.mapr)
+
+				if father != None:
+					ev = Event()
+					if mother == None:
+						elines[0] = el0 + 'not known'
+					else:
+						elines[0] = el0 + mother.GetVitalLine(fmt='card')
+					ev.lines += elines
+					ev.DecodeEventType(father)
+					father.events.append(ev)
+
+				if mother != None:
+					ev = Event()
+					if father == None:
+						elines[0] = el0 + 'not known'
+					else:
+						elines[0] = el0 + father.GetVitalLine(fmt='card')
+					ev.lines += elines
+					ev.DecodeEventType(mother)
+					mother.events.append(ev)
 		return
 
 	# Remove the surname indicators and any multiple spaces
@@ -650,4 +692,5 @@ class GedcomFamily():
 		self.mar1 = None	# Marriage date: later limit
 		self.plac = None	# Marriage place
 		self.mapr = None	# Marriage map reference
+		self.mnot = None	# Marriage note (extra text on MARR line)
 		self.chil = []
