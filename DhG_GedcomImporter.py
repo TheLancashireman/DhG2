@@ -38,6 +38,8 @@ from DhG_Event import Event
 #	- A death event with no additional attributes should have a Y after the opening DEAT tag. This importer
 #	ignores that requirement and assumes a death at an unknown date.
 #	- It isn't clear whether birth events follow the same rule. However, the mere existence of an individual
+#	- A MARR event (usually in a FAM object) should similarly have either Y or nothing. This importer adds
+#	any additional text as a Note for the event. In some cases it looks a bit strange.
 #	should be enough to infer a birth, even if there's no information. This importer automatically creates
 #	a birth event for every individual, regardless of whether the gedcom has one.
 #	- Dates are handled flexibly, assuming English text:
@@ -49,6 +51,11 @@ from DhG_Event import Event
 #	- Date ranges FROM dd mmm yyyy TO dd mmm yyyy are similarly not processed. The gedcom spec warns against
 #	using this form for events because it implies something that happened continuously over a period and thus
 #	isn't an event. Unclear how things like military service are represented.
+#
+#	From GEDCOM551.pdf:
+#		CONT means concatenate the text with the previous text with a newline between.
+#		CONC means concatenate the text with the previous text without any white space.
+#	Seems only to be used in NOTE objects.
 # 
 class GedcomImporter():
 
@@ -62,6 +69,8 @@ class GedcomImporter():
 		self.rec_start = 0
 		self.persons = {}
 		self.families = {}
+		self.notes = {}		# 0 <id> NOTE objects
+		self.sources = {}	# 0 <id> SOUR objects
 		self.indi_xref_ok = True	# All INDI xrefs are of the form @In@
 		self.max_uniq = 0
 		line_no = 0
@@ -315,6 +324,8 @@ class GedcomImporter():
 				if l2 == 'PLAC' and l3 == 'MAP':
 					if len(p) > 2 and ev != None:
 						ev.AddLine('-Mapref')
+				else:
+					print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; unknown tag')
 			elif p[0] == '4':
 				l4 = p[1]
 				if l3 == 'MAP' and l4 == 'LATI' or l4 == 'LONG':
@@ -323,7 +334,7 @@ class GedcomImporter():
 					else:
 						ev.lines[-1] = ev.lines[-1] + ' ' + p[2]
 			else:
-				print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; level > 2')
+				print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; level > 4')
 		return
 
 	def ProcessFam(self, ged_rec):
@@ -357,7 +368,7 @@ class GedcomImporter():
 					family.chil.append(p[2])
 				elif l1 == 'MARR':
 					family.marr = '?'
-					if len(p) > 2:
+					if len(p) > 2 and p[2] != 'Y':
 						family.mnot = p[2]
 				else:
 					print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; unknown tag')
@@ -370,8 +381,14 @@ class GedcomImporter():
 					(family.marr, family.mar1) = self.ConvertGedcomDate(p[2])
 				elif l2 == 'PLAC' and l1 == 'MARR':
 					family.plac = p[2]
+				else:
+					print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored')
 			elif p[0] == '3':
 				l3 = p[1]
+				if l3 == 'MAP':
+					pass
+				else:
+					print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored')
 			elif p[0] == '4':
 				l4 = p[1]
 				if l3 == 'MAP' and l4 == 'LATI' or l4 == 'LONG':
@@ -382,11 +399,57 @@ class GedcomImporter():
 				else:
 					print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored')
 			else:
-				print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; level > 2')
+				print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; level > 4')
 		return
 
 	def ProcessNote(self, ged_rec):
 #		print('ProcessNote()')
+		p = ged_rec[0].strip().split(' ', 2)
+		
+		if p[1][0] == '@' and p[1][-1] == '@':
+			xref = p[1]
+#			print('ProcessNote(): Xref = "'+xref+'"')
+		else:
+			print('Line '+str(self.rec_start)+': "'+ged_rec[0].rstrip()+'" has no Xref')
+			return
+
+		# Text of note.
+		note = ''
+		multiline = False
+		grno = 0
+
+		for l in ged_rec[1:]:
+			grno += 1
+			p =l.strip().split(' ', 2)
+			if p[0] == '1':
+				if p[1] == 'CONT':
+					# Concatenate with newline. See comment at top of file
+					# In DhG, multi-line notes usa a continuation indicator "| "
+					if len(p) < 3:
+						note += '\n|'
+					else:
+						note += '\n| ' + p[2]
+					multiline = True
+				elif p[1] == 'CONC':
+					# Concatenate without newline. See comment at top of file
+					if len(p) < 3:
+						pass		# Nothing to concatenate
+					else:
+						note += p[2]
+				else:
+					print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; unknown tag')
+			else:
+				print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; level > 1')
+
+		if multiline:
+			# Add note with newline and continuation indicator
+			self.notes[xref] = '+Note\n| ' + note + '\n'
+		else:
+			# Add single-line note
+			self.notes[xref] = '+Note       ' + note + '\n'
+
+		print('ProcessNote(): Xref = "'+xref+'"')
+		print(self.notes[xref])
 		return
 
 	def ProcessSour(self, ged_rec):
