@@ -56,7 +56,8 @@ from DhG_Event import Event
 #		CONT means concatenate the text with the previous text with a newline between.
 #		CONC means concatenate the text with the previous text without any white space.
 #	Seems only to be used in NOTE objects.
-# 
+
+
 class GedcomImporter():
 
 	# Do the import in the constructor
@@ -65,51 +66,31 @@ class GedcomImporter():
 	#	db		= DhG database
 	#
 	def __init__(self, ged_name, db):
+		# The DhG2 memory-resident database that we're importing into.
 		self.db = db
-		self.rec_start = 0
-		self.persons = {}
-		self.families = {}
-		self.notes = {}		# 0 <id> NOTE objects
-		self.sources = {}	# 0 <id> SOUR objects
-		self.indi_xref_ok = True	# All INDI xrefs are of the form @In@
-		self.max_uniq = 0
-		line_no = 0
-		ged_file = open(ged_name, 'r')
-		ged_text = ged_file.readlines()
-		ged_file.close()
-		ged_rec = []
 
-		for l in ged_text:
-			line_no += 1
-			# Remove a byte-order marker if there is one. Usually on first line only
-			if l[0] == '\ufeff':
-#				print('BOM \\ufeff found')
-				l = l[1:]
-#			print('Line', l.rstrip())
-			p = l.strip().split(' ', 1)
-#			print('Parts', p)
+		# Gedcom records. Each record starts with a level 0 line
+		self.head = None		# Single record. Are we interested in this?
+		self.subm = None		# Single record. Are we interested in this?
+		self.indi = {}			# Multiple records. Each should have an xref to identify it
+		self.fam = {}			# Multiple records. Each should have an xref to identify it
+		self.note = {}			# Multiple records. Each should have an xref to identify it
+		self.sour = {}			# Multiple records. Each should have an xref to identify it
+		self.trlr = None		# Single record. Are we interested in this?
 
-			if p[0] == '0':
-				# If there's already a record, process it
-				if ged_rec != []:
-					self.ProcessRecord(ged_rec)
+		self.persons = {}		# A list of all the persons in the database, indexed by xref
+		self.indiref_ok = True	# All INDI xrefs are of the form @In@
+		self.max_uniq = 0		# Largest uniq in the gedcom
 
-				# Start of a new record.
-				self.rec_start = line_no
-				ged_rec = [l]
+		# Read the file and split up into individual records
+		self.ReadFile(ged_name)
 
-			elif ged_rec != []:
-				ged_rec.append(l)
-
-			else:
-				print('Line '+str(line_no)+': "'+l.rstrip()+'" ignored; not part of a record')
-
-		# This is unlikely to have any effect because of the TRLR record
-		if ged_rec != []:
-			self.ProcessRecord(ged_rec)
+		# Now process all the INDI records
+		for i in self.indi:
+			self.ProcessIndi(self.indi[i])
 
 		# Add individuals whose xref isn't the standard form
-		if not self.indi_xref_ok:
+		if not self.indiref_ok:
 			self.AllocateNonstandardIndividuals()
 
 		# Connect all the persons together using the FAM records
@@ -117,57 +98,93 @@ class GedcomImporter():
 
 		return
 
-	# Process a single (multi-line) record
+	# Read the GEDCOM file and split into different record objects
 	#
-	#	ged_rec	= the record, as an array of lines
+	def ReadFile(self, ged_name):
+		line_no = 0
+		ged_file = open(ged_name, 'r')
+		ged_text = ged_file.readlines()
+		ged_file.close()
+		ged_obj = None
+
+		for l in ged_text:
+			line_no += 1
+			# Remove a byte-order marker if there is one. Usually on first line only
+			if l[0] == '\ufeff':
+				l = l[1:]
+			p = l.strip().split(' ', 1)
+
+			if p[0] == '0':
+				# If there's already an object, add it to the lists
+				if ged_obj != None:
+					self.AddGedObj(ged_obj)
+
+				# Start of a new object.
+				ged_obj = GedObject(line_no, l)
+
+			elif ged_obj != None:
+				ged_obj.AddLine(l)
+
+			else:
+				print('Line '+str(line_no)+': "'+l.rstrip()+'" ignored; not part of a record')
+
+		# This is most likely to be the TRLR record
+		if ged_obj != None:
+			self.AddGedObj(ged_obj)
+
+		return
+
+	# Add a single object to one of the lists
+	#
+	#	obj	= the record containing an array of lines and other items
 	#
 	#	The reading process ensures that the first line of the record is at level 0
 	#
-	def ProcessRecord(self, ged_rec):
-		p = ged_rec[0].strip().split(' ', 2)
-		if p[1][0] == '@':
-			tag = p[2]
-		else:
-			tag = p[1]
-#		print('Record type', tag)
+	def AddGedObj(self, obj):
+		tag = obj.tag
 		if tag == 'HEAD':
-			self.ProcessHead(ged_rec)
+			if self.head == None:
+				self.head = obj
+			else:
+				print('Repeat HEAD record in line '+str(obj.first_line)+' ignored')
 		elif tag == 'SUBM':
-			self.ProcessSubm(ged_rec)
-		elif tag == 'INDI':
-			self.ProcessIndi(ged_rec)
-		elif tag == 'FAM':
-			self.ProcessFam(ged_rec)
-		elif tag == 'NOTE':
-			self.ProcessNote(ged_rec)
-		elif tag == 'SOUR':
-			self.ProcessSour(ged_rec)
+			if self.subm == None:
+				self.subm = obj
+			else:
+				print('Repeat SUBM record in line '+str(obj.first_line)+' ignored')
 		elif tag == 'TRLR':
-			self.ProcessTrlr(ged_rec)
+			if self.trlr == None:
+				self.trlr = obj
+			else:
+				print('Repeat TRLR record in line '+str(obj.first_line)+' ignored')
+		elif tag == 'INDI':
+			if obj.xref == None:
+				print('INDI record with no xref in line '+str(obj.first_line)+' ignored')
+			else:
+				self.indi[obj.xref] = obj
+		elif tag == 'FAM':
+			if obj.xref == None:
+				print('FAM record with no xref in line '+str(obj.first_line)+' ignored')
+			else:
+				self.fam[obj.xref] = obj
+		elif tag == 'NOTE':
+			if obj.xref == None:
+				print('NOTE record with no xref in line '+str(obj.first_line)+' ignored')
+			else:
+				self.note[obj.xref] = obj
+		elif tag == 'SOUR':
+			if obj.xref == None:
+				print('SOUR record with no xref in line '+str(obj.first_line)+' ignored')
+			else:
+				self.sour[obj.xref] = obj
 		else:
-			print('ProcessRecord() line '+str(self.rec_start)+': record type "'+tag+'" ignored.')
+			print('Record with unknown tag "'+tag+' in line '+str(obj.first_line)+' ignored')
 #		print()
 		return
 
-	def ProcessHead(self, ged_rec):
-#		print('ProcessHead()')
-		return
-
-	def ProcessSubm(self, ged_rec):
-#		print('ProcessSubm()')
-		return
-
-	def ProcessIndi(self, ged_rec):
-#		print('ProcessIndi()')
-		p = ged_rec[0].strip().split(' ', 2)
-		
-		if p[1][0] == '@' and p[1][-1] == '@':
-			xref = p[1]
-#			print('ProcessIndi(): Xref = "'+xref+'"')
-		else:
-			print('Line '+str(self.rec_start)+': "'+ged_rec[0].rstrip()+'" has no Xref')
-			return
-
+	# Process an INDI record. Add a person to the database and fill with all relevant information
+	#
+	def ProcessIndi(self, obj):
 		# Create the person object and populate the "headlines" array
 		# Space is reserved for the following:
 		#	0	- Name
@@ -186,12 +203,11 @@ class GedcomImporter():
 		person.headlines.append('')		# Blank line
 
 		# Store the gedcom data and add the person to the list
-		person.importer_info = GedcomInfo(ged_rec)
-		person.importer_info.xref = xref
-		self.persons[xref] = person
+		person.importer_info = GedcomInfo(obj)
+		self.persons[obj.xref] = person
 
 		# Calculate a uniq from the xref, if possible
-		person.uniq = self.ExtractUniqFromXref(xref)
+		person.uniq = self.ExtractUniqFromXref(obj.xref)
 		if person.uniq != None:
 								#  123456789012
 			person.headlines[1] = 'Uniq        '+str(person.uniq)
@@ -210,7 +226,7 @@ class GedcomImporter():
 		ev = None	# Event object associated with the level 1 line
 		grno = 0
 
-		for l in ged_rec[1:]:
+		for l in obj.lines[1:]:
 			grno += 1
 			p =l.strip().split(' ', 2)
 			if p[0] == '1':
@@ -224,10 +240,10 @@ class GedcomImporter():
 											#  123456789012
 						person.headlines[0] = 'Name:       '+n
 					else:
-						print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; no name given')
+						print('Line '+str(obj.first_line+grno)+' "'+l.rstrip()+'": ignored; no name given')
 				elif l1 == 'SEX':
 					if len(p) < 3:
-						print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; no sex given')
+						print('Line '+str(obj.first_line+grno)+' "'+l.rstrip()+'": ignored; no sex given')
 					elif p[2] == 'M':
 						person.headlines[2] = 'Male'
 						person.sex = 'm'
@@ -238,7 +254,7 @@ class GedcomImporter():
 						person.headlines[2] = 'Male'
 						person.sex = 'm'
 					else:
-						print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; sex not known')
+						print('Line '+str(obj.first_line+grno)+' "'+l.rstrip()+'": ignored; sex not known')
 				elif l1 == 'EVEN':
 					# This appears to be a remark about the name of the person
 					# See TYPE at L2
@@ -294,12 +310,12 @@ class GedcomImporter():
 					# This information might not be needed because each family record lists parents and children
 					person.importer_info.famc.append(p[2])
 				else:
-					print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; unknown tag')
+					print('Line '+str(obj.first_line+grno)+' "'+l.rstrip()+'": ignored; unknown tag')
 			elif p[0] == '2':
 				l2 = p[1]
 				if l2 == 'DATE':
 					if len(p) < 3:
-						print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; no date given')
+						print('Line '+str(obj.first_line+grno)+' "'+l.rstrip()+'": ignored; no date given')
 					elif ev == None:
 						pass	# No event to add the date to
 					else:
@@ -318,14 +334,14 @@ class GedcomImporter():
 					if p[2] != 'Surname' and p[2] != 'Family Genealogy':
 						print('Warning: previous EVEN line has "TYPE '+p[2]+'". Expected "Surname"')
 				else:
-					print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; unknown tag')
+					print('Line '+str(obj.first_line+grno)+' "'+l.rstrip()+'": ignored; unknown tag')
 			elif p[0] == '3':
 				l3 = p[1]
 				if l2 == 'PLAC' and l3 == 'MAP':
 					if len(p) > 2 and ev != None:
 						ev.AddLine('-Mapref')
 				else:
-					print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; unknown tag')
+					print('Line '+str(obj.first_line+grno)+' "'+l.rstrip()+'": ignored; unknown tag')
 			elif p[0] == '4':
 				l4 = p[1]
 				if l3 == 'MAP' and l4 == 'LATI' or l4 == 'LONG':
@@ -334,7 +350,7 @@ class GedcomImporter():
 					else:
 						ev.lines[-1] = ev.lines[-1] + ' ' + p[2]
 			else:
-				print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; level > 4')
+				print('Line '+str(obj.first_line+grno)+' "'+l.rstrip()+'": ignored; level > 4')
 		return
 
 	def ProcessFam(self, ged_rec):
@@ -638,7 +654,7 @@ class GedcomImporter():
 
 		if uniq == None:
 			print('Warning: "'+xref+'": not in expected form')
-			self.indi_xref_ok = False
+			self.indiref_ok = False
 		return uniq
 
 	# Construct a date out of component parts, some of which might not exist
@@ -731,13 +747,32 @@ class GedcomImporter():
 		else:
 			return (date0, date)
 
+#	A representation of a record from the GEDCOM file.
+#
+class GedObject():
+	def __init__(self, first_line, line0):
+		self.first_line = first_line	# The line number in the file that contains the level 0 record
+		self.lines = [line0]			# An array holding all the lines in the record
+		self.tag = None					# The record type
+		self.xref = None				# The xref to identify the record
+
+		p = line0.strip().split(' ', 2)	# Extract the tag and (optional) identifier from the level 0 line
+		if p[1][0] == '@':
+			self.xref = p[1]
+			self.tag = p[2]
+		else:
+			self.tag = p[1]
+		return
+
+	def AddLine(self, line):
+		self.lines.append(line)
+		return
+
 # A class to hold extra GEDCOM information for a person
 #
 class GedcomInfo():
-
-	def __init__(self, ged_rec):
-		self.ged_rec = ged_rec
-		self.xref = None
+	def __init__(self, obj):
+		self.obj = obj
 		self.name = None
 		self.fams = []
 		self.famc = []
