@@ -97,6 +97,17 @@ class GedcomImporter():
 		for f in self.fam:
 			self.ProcessFam(self.fam[f])
 
+		# Append death event to event list for each person in GEDCOM
+		# ProcessIndi creates a death event if present in GEDCOM, but doesn't add it to the
+		# person's list, in order to ensure that the death comes last.
+		for pref in self.persons:
+			p = self.persons[pref]
+			if p.death == None:		# Special for Dobbs: all individuals assumed dead. If no death record, add one
+				p.death = Event()
+				p.death.AddLine('?           Death')
+				p.death.AddLine('+Source     Assumed, date unknown')
+				p.death.DecodeEventType(p)
+			p.events.append(p.death)
 		return
 
 	# Read the GEDCOM file and split into different record objects
@@ -304,11 +315,13 @@ class GedcomImporter():
 						ev.AddLine('+Note       '+p[2])
 				elif l1 == 'NOTE':
 					# Add a note to the header lines
-					#try:
-					note = self.note[p[2]]
-					person.headlines += self.ProcessNote(note, 'h')
-					#except:
-					#	print('Line '+str(obj.first_line+grno)+' "'+l.rstrip()+'": referenced note not found')
+					try:
+						note = self.note[p[2]]
+					except:
+						print('Line '+str(obj.first_line+grno)+' "'+l.rstrip()+'": referenced note not found')
+						note = None
+					if note != None:
+						person.headlines += self.ProcessNote(note, 'h')
 				elif l1 == 'FAMS':
 					# Record families in which this person is a parent
 					# This information might not be needed because each family record lists parents and children
@@ -338,9 +351,22 @@ class GedcomImporter():
 							ev.AddLine('+Place      '+p[2])
 						else:
 							ev.AddLine('+Place      not given')
-				elif l2 == 'TYPE' and l1 == 'EVEN':
-					if p[2] != 'Surname' and p[2] != 'Family Genealogy':
-						print('Warning: previous EVEN line has "TYPE '+p[2]+'". Expected "Surname"')
+				elif l2 == 'TYPE':
+					if l1 == 'EVEN':
+						if p[2] != 'Surname' and p[2] != 'Family Genealogy':
+							print('Warning: previous EVEN line has "TYPE '+p[2]+'". Expected "Surname"')
+				elif l2 == 'SOUR':
+					try:
+						source = self.sour[p[2]]
+					except:
+						print('Line '+str(obj.first_line+grno)+' "'+l.rstrip()+'": referenced source not found')
+						source = None
+					if source != None:
+						sourcelines = self.ProcessSource(source)
+						if ev == None:
+							print('Line '+str(obj.first_line+grno)+' "'+l.rstrip()+'": no event for referenced source')
+						else:
+							ev.lines += sourcelines
 				else:
 					print('Line '+str(obj.first_line+grno)+' "'+l.rstrip()+'": ignored; unknown tag')
 			elif p[0] == '3':
@@ -352,6 +378,14 @@ class GedcomImporter():
 						ev.AddLine('-Mapref')
 						if len(p) > 2:
 							print('Line '+str(obj.first_line+grno)+' "'+l.rstrip()+'": ignored unexpected data')
+				elif l2 == 'SOUR' and l3 == 'PAGE':
+					if len(p) < 3 or p[2] == '':
+						print('Line '+str(obj.first_line+grno)+' "'+l.rstrip()+'": ignored; PAGE tag with no data')
+					elif ev == None:
+						print('Line '+str(obj.first_line+grno)+' "'+l.rstrip()+'": ignored; PAGE tag with no event')
+					else:
+								#   123456789012
+						ev.AddLine('-Page       ' + p[2])
 				else:
 					print('Line '+str(obj.first_line+grno)+' "'+l.rstrip()+'": ignored; unknown tag')
 			elif p[0] == '4':
@@ -384,7 +418,7 @@ class GedcomImporter():
 
 		for l in note.lines[1:]:
 			grno += 1
-			p =l.strip().split(' ', 2)
+			p = l.strip().split(' ', 2)
 			if p[0] == '1':
 				if p[1] == 'CONT':
 					# Concatenate with newline. See comment at top of file
@@ -441,6 +475,64 @@ class GedcomImporter():
 #		print(note.lines)
 #		print(text)
 		return text
+
+	# Create a DhG Source attribute from a GEDCOM SOUR object.
+	# The resulting attribute is a list of lines of text looking like this:
+	#	123456789012
+	#	+Source     TITL
+	#	-Author     AUTH
+	#	-Edition    PUBL
+	#	-Note
+	#	| NOTE
+	#
+	# The usual -File, -URL -Transcript etc. could be added later if found in other GEDCOM files.
+	# Dobbs has only one SOUR object.
+	def ProcessSource(self, sour):
+		source = ['+Source     ']
+		grno = 0
+
+		for l in sour.lines[1:]:
+			grno += 1
+			p = l.strip().split(' ', 2)
+			if len(p) < 3:
+				txt = ''
+			else:
+				txt = p[2]
+			if p[0] == '1':
+				l1 = p[1]
+				if l1 == 'TITL':
+					# Append to the source line.
+					if source[0] == '+Source     ':
+						source[0] += txt
+					else:
+						source[0] += ' ' + txt
+				elif l1 == 'AUTH':
+								#  123456789012
+					source.append('-Author     ' + txt)
+				elif l1 == 'PUBL':
+								#  123456789012
+					source.append('-Edition    ' + txt)
+				elif l1 == 'NOTE':
+								#  123456789012
+					source.append('-Note       ' + txt)
+				else:
+					print('Line '+str(note.first_line+grno)+' "'+l.rstrip()+'": ignored; unrecognised tag')
+			elif p[0] == '2':
+				l2 = p[1]
+				if l1 == 'NOTE':
+					if l2 == 'CONT' or l2 == 'CONC':
+						if txt == '':
+							source.append('|')
+						else:
+							source.append('| ' + txt)
+					else:
+						print('Line '+str(note.first_line+grno)+' "'+l.rstrip()+'": ignored; unrecognised tag')
+				else:
+					print('Line '+str(note.first_line+grno)+' "'+l.rstrip()+'": ignored; unexpected line at L2')
+			else:
+				print('Line '+str(note.first_line+grno)+' "'+l.rstrip()+'": ignored; level > 2')
+
+		return source
 
 	# If there are any individuals whose xref is not in the standard @In@ form,
 	# this function is called.
