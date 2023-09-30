@@ -437,11 +437,9 @@ class GedcomImporter():
 			else:
 				return []
 
-		# Debug
-		print('ProcessNote(): style', style, 'multiline', multiline)
-		print(note.lines)
-		print(text)
-
+#		print('ProcessNote(): style', style, 'multiline', multiline)
+#		print(note.lines)
+#		print(text)
 		return text
 
 	# If there are any individuals whose xref is not in the standard @In@ form,
