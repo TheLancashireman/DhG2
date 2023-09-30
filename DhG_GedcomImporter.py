@@ -85,7 +85,7 @@ class GedcomImporter():
 		# Read the file and split up into individual records
 		self.ReadFile(ged_name)
 
-		# Now process all the INDI records
+		# Process all the INDI records and add persons to the database
 		for i in self.indi:
 			self.ProcessIndi(self.indi[i])
 
@@ -94,7 +94,8 @@ class GedcomImporter():
 			self.AllocateNonstandardIndividuals()
 
 		# Connect all the persons together using the FAM records
-		self.ConnectFamilies()
+		for f in self.fam:
+			self.ProcessFam(self.fam[f])
 
 		return
 
@@ -301,6 +302,13 @@ class GedcomImporter():
 					# If there's text (other than Y) on the line after DEAT, record it as a note.
 					if len(p) > 2 and p[2] != 'Y':
 						ev.AddLine('+Note       '+p[2])
+				elif l1 == 'NOTE':
+					# Add a note to the header lines
+					#try:
+					note = self.note[p[2]]
+					person.headlines += self.ProcessNote(note, 'h')
+					#except:
+					#	print('Line '+str(obj.first_line+grno)+' "'+l.rstrip()+'": referenced note not found')
 				elif l1 == 'FAMS':
 					# Record families in which this person is a parent
 					# This information might not be needed because each family record lists parents and children
@@ -338,8 +346,12 @@ class GedcomImporter():
 			elif p[0] == '3':
 				l3 = p[1]
 				if l2 == 'PLAC' and l3 == 'MAP':
-					if len(p) > 2 and ev != None:
+					if ev == None:
+						print('Line '+str(obj.first_line+grno)+' "'+l.rstrip()+'": ignored; MAP tag with no event')
+					else:
 						ev.AddLine('-Mapref')
+						if len(p) > 2:
+							print('Line '+str(obj.first_line+grno)+' "'+l.rstrip()+'": ignored unexpected data')
 				else:
 					print('Line '+str(obj.first_line+grno)+' "'+l.rstrip()+'": ignored; unknown tag')
 			elif p[0] == '4':
@@ -349,92 +361,28 @@ class GedcomImporter():
 						ev.lines[-1] = ev.lines[-1] + '     ' + p[2]
 					else:
 						ev.lines[-1] = ev.lines[-1] + ' ' + p[2]
+				else:
+					print('Line '+str(obj.first_line+grno)+' "'+l.rstrip()+'": ignored; unknown tag')
 			else:
 				print('Line '+str(obj.first_line+grno)+' "'+l.rstrip()+'": ignored; level > 4')
 		return
 
-	def ProcessFam(self, ged_rec):
-#		print('ProcessFam()')
-		p = ged_rec[0].strip().split(' ', 2)
-		
-		if p[1][0] == '@' and p[1][-1] == '@':
-			xref = p[1]
-#			print('ProcessFam(): Xref = "'+xref+'"')
-		else:
-			print('Line '+str(self.rec_start)+': "'+ged_rec[0].rstrip()+'" has no Xref')
-			return
-
-		l1 = None	# Tag of level 1 line
-		grno = 0
-
-		# Create a family record
-		family = GedcomFamily(ged_rec)
-		self.families[xref] = family
-
-		for l in ged_rec[1:]:
-			grno += 1
-			p =l.strip().split(' ', 2)
-			if p[0] == '1':
-				l1 = p[1]
-				if l1 == 'HUSB':
-					family.husb = p[2]
-				elif l1 == 'WIFE':
-					family.wife = p[2]
-				elif l1 == 'CHIL':
-					family.chil.append(p[2])
-				elif l1 == 'MARR':
-					family.marr = '?'
-					if len(p) > 2 and p[2] != 'Y':
-						family.mnot = p[2]
-				else:
-					print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; unknown tag')
-			elif p[0] == '2':
-				l2 = p[1]
-				if l2 == '_MREL' or l2 == '_FREL':
-					if p[2] != 'Natural':
-						print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; children assumed natural')
-				elif l2 == 'DATE' and l1 == 'MARR':
-					(family.marr, family.mar1) = self.ConvertGedcomDate(p[2])
-				elif l2 == 'PLAC' and l1 == 'MARR':
-					family.plac = p[2]
-				else:
-					print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored')
-			elif p[0] == '3':
-				l3 = p[1]
-				if l3 == 'MAP':
-					pass
-				else:
-					print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored')
-			elif p[0] == '4':
-				l4 = p[1]
-				if l3 == 'MAP' and l4 == 'LATI' or l4 == 'LONG':
-					if family.mapr == None:
-						family.mapr = p[2]
-					else:
-						family.mapr += ' ' + p[2]
-				else:
-					print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored')
-			else:
-				print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; level > 4')
-		return
-
-	def ProcessNote(self, ged_rec):
-#		print('ProcessNote()')
-		p = ged_rec[0].strip().split(' ', 2)
-		
-		if p[1][0] == '@' and p[1][-1] == '@':
-			xref = p[1]
-#			print('ProcessNote(): Xref = "'+xref+'"')
-		else:
-			print('Line '+str(self.rec_start)+': "'+ged_rec[0].rstrip()+'" has no Xref')
-			return
-
+	# Create a DhG note from a GEDCOM NOTE object.
+	#	The result is an array of lines of text in one of three styles:
+	#		h - for the person's heading lines. Startes with "Note:"
+	#		e - for an event. Starts with "+Note"
+	#		s - subsidiary to an event attribute. Starts with "-Note"
+	#	If the note is a single-line note, the "starts with" is padded to 12 chars and the text added on the same line.
+	#	If the note is a multi-line note, the "starts with" is on a line of its own and eack line of text is added as
+	#	a continuation line starting with "| ".
+	#
+	def ProcessNote(self, note, style):
 		# Text of note.
-		note = ''
+		text = []
 		multiline = False
 		grno = 0
 
-		for l in ged_rec[1:]:
+		for l in note.lines[1:]:
 			grno += 1
 			p =l.strip().split(' ', 2)
 			if p[0] == '1':
@@ -442,39 +390,59 @@ class GedcomImporter():
 					# Concatenate with newline. See comment at top of file
 					# In DhG, multi-line notes usa a continuation indicator "| "
 					if len(p) < 3:
-						note += '\n|'
+						text.append('|')			# Empty continuation line
 					else:
-						note += '\n| ' + p[2]
+						 text.append('| ' + p[2])	# Continuation line with text
 					multiline = True
 				elif p[1] == 'CONC':
 					# Concatenate without newline. See comment at top of file
+					# The text is concatenated onto the last element of the text array,
+					# with a space if the last element was only a continuation character
 					if len(p) < 3:
 						pass		# Nothing to concatenate
+					elif len(text) <= 0:
+						text.append(p[2])
+					elif text[-1] == '|':
+						text[-1] += ' ' + p[2]
 					else:
-						note += p[2]
+						text[-1] += p[2]
 				else:
-					print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; unknown tag')
+					print('Line '+str(note.first_line+grno)+' "'+l.rstrip()+'": ignored; unknown tag')
 			else:
-				print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; level > 1')
+				print('Line '+str(note.first_line+grno)+' "'+l.rstrip()+'": ignored; level > 1')
 
 		if multiline:
-			# Add note with newline and continuation indicator
-			self.notes[xref] = '+Note\n| ' + note + '\n'
+			# Insert the Note specifier in the selected style.
+			if style == 'h':
+				text.insert(0, 'Note:')
+			elif style == 'e':
+				text.insert(0, '+Note')
+			elif style == 's':
+				text.insert(0, '-Note')
+			else:
+				return []
+			# Ensure that the first line of text has a continuation marker
+			if text[1] == '':
+				text[1] = '|'
+			elif text[1][0] != '|':
+				text[1] = '| '+text[1]
 		else:
-			# Add single-line note
-			self.notes[xref] = '+Note       ' + note + '\n'
+			# Insert the Note specifier in the selected style.
+			if style == 'h':
+				text[0] = 'Note:       ' + text[0]
+			elif style == 'e':
+				text[0] = 0, '+Note       ' + text[0]
+			elif style == 's':
+				text[0] = 0, '-Note       ' + text[0]
+			else:
+				return []
 
-		print('ProcessNote(): Xref = "'+xref+'"')
-		print(self.notes[xref])
-		return
+		# Debug
+		print('ProcessNote(): style', style, 'multiline', multiline)
+		print(note.lines)
+		print(text)
 
-	def ProcessSour(self, ged_rec):
-#		print('ProcessSour()')
-		return
-
-	def ProcessTrlr(self, ged_rec):
-#		print('ProcessTrlr()')
-		return
+		return text
 
 	# If there are any individuals whose xref is not in the standard @In@ form,
 	# this function is called.
@@ -508,102 +476,159 @@ class GedcomImporter():
 	# What if an individual is listed as a child in two families? Answer: there were a few; all were errors
 	# in the gedcom.
 	#
-	def ConnectFamilies(self):
-		for fref in self.families:
-			f = self.families[fref]
-			if f.husb == None:
+	def ProcessFam(self, family):
+		husb = None
+		wife = None
+		marr = None		# Marriage date: None ==> no record, '?' ==> no date, else date
+		mar1 = None		# Marriage date: later limit
+		plac = None		# Marriage place
+		mapr = None		# Marriage map reference
+		mnot = None		# Marriage note (extra text on MARR line)
+		chil = []		# List of children
+
+		l1 = None	# Tag of level 1 line
+		grno = 0
+
+		# Read and process all the lines from the family object
+		for l in family.lines[1:]:
+			grno += 1
+			p =l.strip().split(' ', 2)
+			if p[0] == '1':
+				l1 = p[1]
+				if l1 == 'HUSB':
+					husb = p[2]
+				elif l1 == 'WIFE':
+					wife = p[2]
+				elif l1 == 'CHIL':
+					chil.append(p[2])
+				elif l1 == 'MARR':
+					marr = '?'
+					if len(p) > 2 and p[2] != 'Y':
+						mnot = p[2]
+				else:
+					print('Line '+str(self.rec_start+grno)+' "'+l.rstrip()+'": ignored; unknown tag')
+			elif p[0] == '2':
+				l2 = p[1]
+				if l2 == '_MREL' or l2 == '_FREL':
+					if p[2] != 'Natural':
+						print('Line '+str(family.first_line+grno)+' "'+l.rstrip()+'": ignored; children assumed natural')
+				elif l2 == 'DATE' and l1 == 'MARR':
+					(marr, mar1) = self.ConvertGedcomDate(p[2])
+				elif l2 == 'PLAC' and l1 == 'MARR':
+					plac = p[2]
+				else:
+					print('Line '+str(family.first_line+grno)+' "'+l.rstrip()+'": ignored')
+			elif p[0] == '3':
+				l3 = p[1]
+				if l3 == 'MAP':
+					pass
+				else:
+					print('Line '+str(family.first_line+grno)+' "'+l.rstrip()+'": ignored')
+			elif p[0] == '4':
+				l4 = p[1]
+				if l3 == 'MAP' and l4 == 'LATI' or l4 == 'LONG':
+					if mapr == None:
+						mapr = p[2]
+					else:
+						mapr += ' ' + p[2]
+				else:
+					print('Line '+str(family.first_line+grno)+' "'+l.rstrip()+'": ignored')
+			else:
+				print('Line '+str(family.first_line+grno)+' "'+l.rstrip()+'": ignored; level > 4')
+
+		if husb == None:
+			father = None
+		else:
+			try:
+				father = self.persons[husb]
+							 # 123456789012
+			except:
+				print('Warning: HUSB '+husb+' not found in database')
 				father = None
-			else:
-				try:
-					father = self.persons[f.husb]
-								 # 123456789012
-				except:
-					print('Warning: HUSB '+f.husb+' not found in database')
-					father = None
-			if father == None:
-							#  123456789012
-				father_line = 'Father:     not known'
-			else:
-							#  123456789012
-				father_line = 'Father:     '+father.name+' ['+str(father.uniq)+']'
+		if father == None:
+						#  123456789012
+			father_line = 'Father:     not known'
+		else:
+						#  123456789012
+			father_line = 'Father:     '+father.name+' ['+str(father.uniq)+']'
 
-			if f.wife == None:
+		if wife == None:
+			mother = None
+		else:
+			try:
+				mother = self.persons[wife]
+							 # 123456789012
+			except:
+				print('Warning: WIFE '+wife+' not found in database')
 				mother = None
-			else:
-				try:
-					mother = self.persons[f.wife]
-								 # 123456789012
-				except:
-					print('Warning: WIFE '+f.wife+' not found in database')
-					mother = None
-			if mother == None:
+		if mother == None:
+						#  123456789012
+			mother_line = 'Mother:     not known'
+		else:
+						#  123456789012
+			mother_line = 'Mother:     '+mother.name+' ['+str(mother.uniq)+']'
+
+		for c in chil:
+			try:
+				child = self.persons[c]
+			except:
+				print('Warning: CHIL '+c+' not found in database')
+				child = None
+			if child != None:
+				if child.headlines[3] == '' and child.headlines[4] == '':
+					if father != None:
+						child.headlines[3] = father_line
+						child.father_name = father.name
+						child.father_uniq = father.uniq
+					if mother != None:
+						child.headlines[4] = mother_line
+						child.mother_name = mother.name
+						child.mother_uniq = mother.uniq
+				else:
+					print('Warning:', child.name, '['+str(child.uniq)+'] (', c, ') has two sets of parents:')
+					print('   Existing: ', child.headlines[3])
+					print('             ', child.headlines[4])
+					print('   Found:    ', father_line)
+					print('             ', mother_line)
+
+		if marr != None:
+			el0 = marr
+			for i in range(len(marr), 12):
+				el0 += ' '
+			el0 += 'Marriage    '
+			elines = ['']
+			if mar1 != None:
 							#  123456789012
-				mother_line = 'Mother:     not known'
-			else:
+				elines.append('+Before     '+mar1)
+			if mnot != None:
 							#  123456789012
-				mother_line = 'Mother:     '+mother.name+' ['+str(mother.uniq)+']'
-
-			for c in f.chil:
-				try:
-					child = self.persons[c]
-				except:
-					print('Warning: CHIL '+c+' not found in database')
-					child = None
-				if child != None:
-					if child.headlines[3] == '' and child.headlines[4] == '':
-						if father != None:
-							child.headlines[3] = father_line
-							child.father_name = father.name
-							child.father_uniq = father.uniq
-						if mother != None:
-							child.headlines[4] = mother_line
-							child.mother_name = mother.name
-							child.mother_uniq = mother.uniq
-					else:
-						print('Warning:', child.name, '['+str(child.uniq)+'] (', c, ') has two sets of parents:')
-						print('   Existing: ', child.headlines[3])
-						print('             ', child.headlines[4])
-						print('   Found:    ', father_line)
-						print('             ', mother_line)
-
-			if f.marr != None:
-				el0 = f.marr
-				for i in range(len(f.marr), 12):
-					el0 += ' '
-				el0 += 'Marriage    '
-				elines = ['']
-				if f.mar1 != None:
+				elines.append('+Note       '+mnot)
+			if plac != None:
+							#  123456789012
+				elines.append('+Place      '+plac)
+				if mapr != None:
 								#  123456789012
-					elines.append('+Before     '+f.mar1)
-				if f.mnot != None:
-								#  123456789012
-					elines.append('+Note       '+f.mnot)
-				if f.plac != None:
-								#  123456789012
-					elines.append('+Place      '+f.plac)
-					if f.mapr != None:
-									#  123456789012
-						elines.append('-Mapref     '+f.mapr)
+					elines.append('-Mapref     '+mapr)
 
-				if father != None:
-					ev = Event()
-					if mother == None:
-						elines[0] = el0 + 'not known'
-					else:
-						elines[0] = el0 + mother.GetVitalLine(fmt='card')
-					ev.lines += elines
-					ev.DecodeEventType(father)
-					father.events.append(ev)
+			if father != None:
+				ev = Event()
+				if mother == None:
+					elines[0] = el0 + 'not known'
+				else:
+					elines[0] = el0 + mother.GetVitalLine(fmt='card')
+				ev.lines += elines
+				ev.DecodeEventType(father)
+				father.events.append(ev)
 
-				if mother != None:
-					ev = Event()
-					if father == None:
-						elines[0] = el0 + 'not known'
-					else:
-						elines[0] = el0 + father.GetVitalLine(fmt='card')
-					ev.lines += elines
-					ev.DecodeEventType(mother)
-					mother.events.append(ev)
+			if mother != None:
+				ev = Event()
+				if father == None:
+					elines[0] = el0 + 'not known'
+				else:
+					elines[0] = el0 + father.GetVitalLine(fmt='card')
+				ev.lines += elines
+				ev.DecodeEventType(mother)
+				mother.events.append(ev)
 		return
 
 	# Remove the surname indicators and any multiple spaces
@@ -776,19 +801,3 @@ class GedcomInfo():
 		self.name = None
 		self.fams = []
 		self.famc = []
-
-# A class to hold a GEDCOM family
-#
-class GedcomFamily():
-
-	def __init__(self, ged_rec):
-		self.ged_rec = ged_rec
-		self.xref = None
-		self.husb = None
-		self.wife = None
-		self.marr = None	# Marriage date: None ==> no record, '?' ==> no date, else date
-		self.mar1 = None	# Marriage date: later limit
-		self.plac = None	# Marriage place
-		self.mapr = None	# Marriage map reference
-		self.mnot = None	# Marriage note (extra text on MARR line)
-		self.chil = []
