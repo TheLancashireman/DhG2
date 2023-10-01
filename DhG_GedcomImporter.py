@@ -709,6 +709,7 @@ class GedcomImporter():
 				ev.lines += elines
 				ev.DecodeEventType(father)
 				father.events.append(ev)
+				father.partnerships.append(ev)
 
 			if mother != None:
 				ev = Event()
@@ -719,6 +720,7 @@ class GedcomImporter():
 				ev.lines += elines
 				ev.DecodeEventType(mother)
 				mother.events.append(ev)
+				mother.partnerships.append(ev)
 		return
 
 	# Remove the surname indicators and any multiple spaces
