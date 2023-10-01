@@ -681,6 +681,10 @@ class GedcomImporter():
 					print('   Found:    ', father_line)
 					print('             ', mother_line)
 
+		# Special for Dobbs - assume a marriage took place
+		if marr == None:
+			marr = '?'
+
 		if marr != None:
 			el0 = marr
 			for i in range(len(marr), 12):
