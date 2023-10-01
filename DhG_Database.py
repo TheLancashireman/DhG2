@@ -521,6 +521,31 @@ class Database:
 			return 1
 		return 0
 
+	# List all the patriarchs and/or matriarchs (those whose parents are not recorded)
+	# The argument is one of male, female, both. Default is both
+	def ListHeads(self, arg):
+		print('ListHeads(): arg="' + arg + '"')
+		if arg == None or len(arg) == 0:
+			which = None
+		else:
+			argl = arg.lower()
+			l = len(argl)
+			if argl == 'female'[:l]:
+				which = 'f'
+			elif argl == 'male'[:l]:
+				which = 'm'
+			elif argl == 'both'[:l]:
+				which = None
+			else:
+				print('Unrecognised parameter "' + arg + '" for heads command')
+				return
+
+		for p in self.persons:
+			if p != None and p.father_uniq == None and p.mother_uniq == None:
+				if which == None or p.sex == which:
+					print(p.GetVitalLine())
+		return
+
 	# Import a GEDCOM file
 	#
 	def ImportGedcom(self, path):

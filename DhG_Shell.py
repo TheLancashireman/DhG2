@@ -311,6 +311,11 @@ class DhG_Shell(cmd.Cmd):
 		else:
 			self.PrintPersonList(l, arg)
 
+	def do_heads(self, arg):
+		'List all the patriarchs and/or matriarchs (those whose parents are not recorded).\n\
+The argument is one of male, female, both. Default is both'
+		self.db.ListHeads(arg)
+
 	def do_verify(self, arg):
 		'Verify all the person references in the database'
 		if self.db.VerifyRefs() == 0:
