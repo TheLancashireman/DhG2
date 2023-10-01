@@ -524,7 +524,6 @@ class Database:
 	# List all the patriarchs and/or matriarchs (those whose parents are not recorded)
 	# The argument is one of male, female, both. Default is both
 	def ListHeads(self, arg):
-		print('ListHeads(): arg="' + arg + '"')
 		if arg == None or len(arg) == 0:
 			which = None
 		else:
