@@ -852,7 +852,7 @@ class GedcomImporter():
 			elif len(p) == 1:
 				day = '0'+p
 			elif len(p) == 2:
-				day = '0'+p
+				day = p
 			elif len(p) == 4:
 				year = p
 			else:
