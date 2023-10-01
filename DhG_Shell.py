@@ -312,7 +312,7 @@ class DhG_Shell(cmd.Cmd):
 			self.PrintPersonList(l, arg)
 
 	def do_heads(self, arg):
-		'List all the patriarchs and/or matriarchs (those whose parents are not recorded).\n\
+		'List all the patriarchs and/or matriarchs (those whose parents and parents of spouses are not recorded).\n\
 The argument is one of male, female, both. Default is both'
 		self.db.ListHeads(arg)
 

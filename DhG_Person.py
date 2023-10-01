@@ -253,7 +253,13 @@ class Person:
 			p.append(t)
 		p = sorted(p, key=lambda xx: xx[0])
 		return p
-		
+
+	# Returns True if one or both parents is recorded in the database (not just as a name)
+	#
+	def HasParents(self):
+		if  self.father_uniq == None and self.mother_uniq == None:
+			return False
+		return True
 
 	# Return an array containing the complete file contents
 	#

@@ -521,8 +521,22 @@ class Database:
 			return 1
 		return 0
 
-	# List all the patriarchs and/or matriarchs (those whose parents are not recorded)
+	# Return True if a person has no recorded parents AND none of the spouses has recorded parents
+	#
+	def IsHead(self, p):
+		if p.HasParents():
+			return False
+		pp = p.GetPartners()		# Returns None or a list of (date, sp_uniq) tuples
+		if pp == None:
+			return True
+		for (x, sp_uniq) in pp:
+			if sp_uniq != None and self.persons[sp_uniq].HasParents():
+				return False
+		return True
+
+	# List all the patriarchs and/or matriarchs (those whose parents and parents of spouses are not recorded)
 	# The argument is one of male, female, both. Default is both
+	#
 	def ListHeads(self, arg):
 		if arg == None or len(arg) == 0:
 			which = None
@@ -540,9 +554,8 @@ class Database:
 				return
 
 		for p in self.persons:
-			if p != None and p.father_uniq == None and p.mother_uniq == None:
-				if which == None or p.sex == which:
-					print(p.GetVitalLine())
+			if p != None and self.IsHead(p):
+				print(p.GetVitalLine())
 		return
 
 	# Import a GEDCOM file
