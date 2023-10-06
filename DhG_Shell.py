@@ -280,7 +280,7 @@ class DhG_Shell(cmd.Cmd):
 			'father': Config.father,
 			'mother': Config.mother
 			}
-		DoTemplate('person-card.tmpl', tp, cardname)
+		DoTemplate('new-person-card.tmpl', tp, cardname)
 		if self.db.LoadPerson(cardname) == 0:
 			print('Created new person ', name, '['+str(uniq)+']')
 
