@@ -466,6 +466,76 @@ class Database:
 		anc['lines'] = self.GetAtree(p, 1)
 		return anc
 
+	# Return a TPerson object for a person of given unique id, or None if person not found
+	#
+	def GetTPerson(self, uniq, dateformat):
+		try:
+			p = self.persons[uniq]
+			if p == None:
+				return None
+		except:
+			# Out of range
+			return None
+		return p.GetTPerson(dateformat)
+
+	# Return a dictionary containing the information for an individual's HTML page.
+	# See templates/person-card-html.tmpl for structure and contents
+	#
+	def GetPersonCardInfo(self, person, dateformat = 'yearonly'):
+		info = {}
+		info['subj'] = person.GetTPerson(dateformat)
+		info['father'] = self.GetTPerson(person.father_uniq, dateformat)
+		info['mother'] = self.GetTPerson(person.mother_uniq, dateformat)
+
+		info['notes'] = None	# ToDo
+
+		info['siblings'] = []
+		info['others'] = []
+		for sib in self.GetSiblings(person.uniq):	# Non-empty: always contains the person themself
+			tsib = sib.GetTPerson(dateformat)
+			info['siblings'].append(tsib)
+			other = None
+			if tsib.uniq == person.uniq:
+				# For the person thmself, remove the link and replace DoB-DoD with '(self)'
+				tsib.file = None
+				tsib.vital = tsib.name + ' (self)'
+			elif sib.father_uniq != person.father_uniq:
+				# Half-sibling; different father
+				other = sib.father_uniq
+			elif sib.mother_uniq != person.mother_uniq:
+				# Half-sibling; different mother
+				other = sib.mother_uniq
+			else:
+				# Full sibling: nothing to do
+				pass
+			if other != None:
+				o_index = 0
+				for o in info['others']:
+					if o.uniq == other:
+						tsib.other = o_index+1			# Index is 1-based
+						break
+					o_index += 1
+				if tsib.other == None:
+					print('GetPersonCardInfo(): appending ', other, ' to info[\'others\']')
+					tother = self.GetTPerson(other, dateformat)
+					if sib.father_uniq == person.father_uniq:
+						tother.other = 'Mother'
+					else:
+						tother.other = 'Father'
+					info['others'].append(tother)
+					tsib.other = len(info['others'])		# Index is 1-based
+		if len(info['others']) == 0:
+			# No half-siblings. Discard the array
+			print('GetPersonCardInfo(): discarding info[\'others\']')
+			info['others'] = None
+			
+		info['spouses'] = None
+		info['children'] = None
+		info['events'] = None
+		info['transcripts'] = None
+		info['images'] = None
+		return info
+
 	# Verify that all reference links between people exist.
 	# Also check that the names are correct.
 	#
