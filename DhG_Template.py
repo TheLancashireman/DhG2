@@ -34,12 +34,12 @@ class DoTemplate():
 	#	tp		= template parameters
 	#	out		= output file. None ==> stdout
 	#
-	def __init__(self, tmpl, tp, out):
+	def __init__(self, tmpl, tp, out, trim=False):
 		tmpl_name = Config.MakeTemplateName(tmpl)
 		tmpl_file = open(tmpl_name, 'r')
 		tmpl_text = tmpl_file.read()
 		tmpl_file.close()
-		template = Template(tmpl_text)
+		template = Template(tmpl_text, trim_blocks=trim, lstrip_blocks=trim)
 		out_text = template.render(tp = tp)
 		if out == None:
 			print(out_text)
@@ -51,3 +51,20 @@ class DoTemplate():
 			outfile = open(out, 'w')
 			outfile.write(out_text)
 			outfile.close()
+
+# A class to hold basic information about a person
+# Used in templates
+# See person-card-html.tmpl for details
+#
+class T_Person():
+	def __init__(self, name, uniq, dob_dod = None, file = None, other = None):
+		self.name = name			# Person's name
+		self.uniq = uniq			# Person's id
+		self.dob_dod = dob_dod		# "(DoB - DoD)" in specified form
+		self.file = file			# File name (without extension) including surname directory
+		self.other = other			# Index of other parent (for siblings and children)
+									# Relationship to sibling (for other parent of half-siblings)
+		if dob_dod == None:
+			self.vital = name
+		else:
+			self.vital = name + ' ' + dob_dod
