@@ -19,7 +19,9 @@
 
 import os
 import sys
+from DhG_Config import Config
 from DhG_Event import Event
+from DhG_Template import T_Person
 
 evchars = set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '?'])
 
@@ -297,3 +299,15 @@ class Person:
 		if self.mother_name != None:
 			tl.append('Mother = '+self.mother_name+' ['+str(self.mother_uniq)+']')
 		return tl
+
+	# Return a T_Person object the person
+	#
+	def GetTPerson(self, dateformat):
+		fn = Config.MakePersonfileName(self.name, self.uniq,
+						prefix = '',
+						suffix='', surname_dir=True)
+		tp = T_Person(self.name, self.uniq,
+						dob_dod = self.GetDates(dateformat),
+						file = fn)
+		# tp.other left at default; must be added later if needed
+		return tp
