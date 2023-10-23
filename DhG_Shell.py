@@ -312,8 +312,7 @@ class DhG_Shell(cmd.Cmd):
 			self.PrintPersonList(l, arg)
 
 	def do_heads(self, arg):
-		'List all the patriarchs and/or matriarchs (those whose parents and parents of spouses are not recorded).\n\
-The argument is one of male, female, both. Default is both'
+		'List all the patriarchs and/or matriarchs (those whose parents and parents of spouses are not recorded).\nThe argument is one of male, female, both. Default is both'
 		self.db.ListHeads(arg)
 
 	def do_verify(self, arg):
@@ -334,15 +333,30 @@ The argument is one of male, female, both. Default is both'
 		l = self.db.GetMatchingPersons(arg)
 		if len(l) == 1:
 			person = l[0]
-			file = Config.MakeDescTreeName(person.name, person.uniq)
+			file = Config.MakeHtmlDescTreeName(person.name, person.uniq)
 			desc = self.db.GetDescendants(person.uniq, 'yearonly')
-			DoTemplate('descendant-tree-html.tmpl', desc, file)
+			DoTemplate('descendant-tree-html.tmpl', desc, file, trim = True)
 		else:
 			self.PrintPersonList(l, arg)
 
-	def do_hd(self, arg):
-		'Create a descendants tree in HTML for a given person'
+	def do_hd(self, arg):	# Abbreviated command
+		'Create a descendants tree in HTML for a given person. Abbreviation of htmldescendants'
 		self.do_htmldescendants(arg)
+
+	def do_htmlcard(self, arg):
+		'Create a cardfile in HTML for a given person'
+		l = self.db.GetMatchingPersons(arg)
+		if len(l) == 1:
+			person = l[0]
+			file = Config.MakeHtmlPersonCardName(person.name, person.uniq)
+			info = self.db.GetPersonCardInfo(person, 'yearonly')
+			DoTemplate('person-card-html.tmpl', info, file, trim = True)
+		else:
+			self.PrintPersonList(l, arg)
+
+	def do_hc(self, arg):
+		'Create a cardfile in HTML for a given person. Abbreviation of htmlcard'
+		self.do_htmlcard(arg)
 
 	def do_test(self, arg):
 		'For testing code snippets. ToDo: delete'
