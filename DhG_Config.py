@@ -57,6 +57,7 @@ class Config():
 		print('db_dir      =', Config.db_dir)
 		print('branch      =', Config.branch)
 		print('tmpl_dir    =', Config.tmpl_dir)
+		print('html_dir    =', Config.html_dir)
 		print('editor      =', Config.editor)
 		print('dateformat  =', Config.dateformat)
 		print('depth       =', Config.depth)
@@ -148,12 +149,25 @@ class Config():
 			path = path + '/' + Config.branch
 		return Config.MakePersonfileName(name, uniq, path)
 
-	# Construct a file name for a descendants tree
+	# Construct a file name for an HTML descendants tree
 	#
 	@staticmethod
-	def MakeDescTreeName(name, uniq):
-		path = Config.html_dir + '/trees'
+	def MakeHtmlDescTreeName(name, uniq):
+		if Config.html_dir == None or Config.html_dir == '':
+			path = 'trees'
+		else:
+			path = Config.html_dir + '/trees'
 		return Config.MakePersonfileName(name, uniq, path, '-descendants.html', False)
+
+	# Construct a file name for an HTML person card
+	#
+	@staticmethod
+	def MakeHtmlPersonCardName(name, uniq):
+		if Config.html_dir == None or Config.html_dir == '':
+			path = 'cards'
+		else:
+			path = Config.html_dir + '/cards'
+		return Config.MakePersonfileName(name, uniq, path, '.html', True)
 
 	# Construct a file name for a person's file
 	#
