@@ -516,7 +516,6 @@ class Database:
 						break
 					o_index += 1
 				if tsib.other == None:
-					print('GetPersonCardInfo(): appending ', other, ' to info[\'others\']')
 					tother = self.GetTPerson(other, dateformat)
 					if sib.father_uniq == person.father_uniq:
 						tother.other = 'Mother'
@@ -526,7 +525,6 @@ class Database:
 					tsib.other = len(info['others'])		# Index is 1-based
 		if len(info['others']) == 0:
 			# No half-siblings. Discard the array
-			print('GetPersonCardInfo(): discarding info[\'others\']')
 			info['others'] = None
 			
 		info['spouses'] = None
