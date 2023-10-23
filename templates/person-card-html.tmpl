@@ -1,0 +1,309 @@
+{# person-card-html.tmpl - a template for an individual's family and timeline in HTML
+
+    (c) David Haworth
+
+    This file is part of DhG.
+
+    DhG is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    DhG is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with DhG.  If not, see <http://www.gnu.org/licenses/>.
+
+	Input is a dictionary containing the following items:
+		subj		: the subject of the card
+		father		: the subject's father
+		mother		: the subject's mother
+		siblings	: a list of siblings of the subject, ordered by DoB
+		others		: a list of other parents of half-siblings
+		spouses		: a list of all the other parents of the children
+		children	: a list of children of the subject, ordered by DoB, interspersed with spouses
+						The first item in the list is always a spouse
+		notes		: a list of general information about the person
+		events		: a list of events from the person's timeline
+		transcripts	: a list of transcripts referenced from the events
+		images		: a list of image files referenced from the events
+		timestamp	: date and time of generation
+
+	Each person in the above dictionary is a class with the following members:
+		name		: the person's name
+		dob_dod		: (DoB - DoD)
+		vital		: string containing name and dob_dod
+		file		: basename of file, including surname directory
+		other		: in siblings list: index of other parent in others list
+					: in children list: index of other parent in spouses list
+					: in others list: relationship to half-sibling (mother/father)
+-#}
+{%  set CARDBASE = '/family-history/cards' %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="" />
+  <meta name="author" content="TheLancashireman" />
+  <meta name="generator" content="DhG" />
+
+  <link  href="/styles/family-history.css" rel="stylesheet" type="text/css" media="screen" />
+  <script type="text/javascript" src="/styles/family-history.js"> </script>
+
+  <title>The Lancashireman's family history</title>
+</head>
+
+<body>
+  <div>
+    <table class="pagehead">
+      <tr class="pagehead">
+        <td class="pagehead_left">
+          <h1>The Lancashireman's family history</h1>
+        </td>
+        <td class="pagehead_right">
+          <a href="http://www.forl.co.uk/graphics.php">
+            <img style="border:0; width:100px; height:100px"
+                 src="/images/forlrose01.gif"
+                 alt="Red rose of Lancashire" />
+          </a>
+        </td>
+      </tr>
+    </table>
+    <div id="menubar" />
+  </div>
+
+  <hr/>
+
+{%  set subj = tp['subj'] %}
+  <h1>{{ subj.name }}</h1>
+{%  if subj.dob_dod != None %}
+  <h2>{{ subj.dob_dod }}</h2>
+{%  endif %}
+  <hr/>
+
+  <table class="general-info">
+{%  set father = tp['father'] %}
+    <tr class="general-info">
+      <td class="general-info-caption">
+        Father:
+      </td>
+      <td class="general-info-value">
+{%  if father == None %}
+        not known
+{%  else %}
+{%    if father.file == None %}
+        {{ father.vital }}
+{%    else %}
+        <a href="{{ CARDBASE }}/{{ father.file }}.html">{{ father.vital }}</a>
+{%    endif %}
+{%  endif %}
+      </td>
+    </tr>
+{%  set mother = tp['mother'] %}
+    <tr class="general-info">
+      <td class="general-info-caption">
+        Mother:
+      </td>
+      <td class="general-info-value">
+{%  if mother == None %}
+        not known
+{%  else %}
+{%    if mother.file == None %}
+        {{ mother.vital }}
+{%    else %}
+        <a href="{{ CARDBASE }}/{{ mother.file }}.html">{{ mother.vital }}</a>
+{%    endif %}
+{%  endif %}
+      </td>
+    </tr>
+  </table>
+
+  <table class="family">
+    <tr class="family">
+      <td class="siblings">
+        <h4>Siblings:</h4>
+{%  set siblings = tp['siblings'] %}
+{%  if siblings == None %}
+          None
+{%  else %}
+        <ul class="siblings">
+{%    for sib in siblings %}
+          <li class="siblings">
+{%      if sib.file == None %}
+            {{ sib.vital }}
+{%      else %}
+            <a href="{{ CARDBASE }}/{{ sib.file }}.html">{{ sib.vital }}</a>
+{%      endif %}
+{%      if sib.other != None %}
+<sup>{{ sib.other }}</sup>
+{%      endif %}
+          </li>
+{%    endfor %}
+{%  endif %}
+        </ul>
+{%  set other_parents = tp['others'] %}
+{%  if other_parents != None %}
+        Other parents of half-siblings:<br/>
+        <ol class="siblings">
+{%    for op in other_parents %}
+{%      if op.file == None %}
+          <li>{{ op.other }}: {{ op.name }}</li>
+{%      else %}
+          <li>{{ op.other }}: <a href="{{ CARDBASE }}/{{ op.file }}.html">{{ op.name }}</a></li>
+{%      endif %}
+{%    endfor %}
+        </ol>
+{%  endif %}
+      </td>
+      <td class="children">
+        <h4>Children:</h4>
+{%  set spouses = tp['spouses'] %}
+{%  if spouses == None %}
+        None
+{%  else %}
+{%    for sp in spouses %}
+{%      if sp.file == None %}
+        {{ subj.name }} + {{ sp.name }}
+{%      else %}
+        {{ subj.name }} + <a href="/a>"{{ CARDBASE }}/{{ sp.file }}.html">{{ sp.name }}</a>
+{%      endif %}
+        <ul class="children">
+{%      for ch in tp['children'] if ch.other == loop.index0 %}
+          <li class="children">
+{%        if ch.file == None %}
+            {{ ch.vital }}
+{%        else %}
+            <a href="/a>"{{ CARDBASE }}/{{ ch.file }}.html">{{ ch.vital }}</a>
+{%        endif %}
+          </li>
+{%      endfor %}
+        </ul>
+{%    endfor %}
+{%  endif %}
+      </td>
+    </tr>
+  </table>
+  <p>
+  </p>
+{%  set events = tp['events'] %}
+{%  if events != None %}
+
+  <hr/>
+
+  <h3>Timeline</h3>
+  <table class="timeline">
+    <tr class="timeline">
+      <td class="timeline-date-even">
+      </td>
+      <td class="timeline-event-even">
+      </td>
+      <td class="timeline-info-even">
+      </td>
+      <td class="timeline-source-even">
+      </td>
+    </tr>
+    <tr class="timeline">
+      <td class="timeline-date-odd">
+      </td>
+      <td class="timeline-event-odd">
+      </td>
+      <td class="timeline-info-odd">
+      </td>
+      <td class="timeline-source-odd">
+      </td>
+    </tr>
+  </table>
+  <p>
+  </p>
+{%  endif %}
+{%  set transcripts = tp['transcripts'] %}
+{%  if transcripts != None %}
+
+  <hr/>
+
+  <h3>Transcripts of sources</h3>      
+  <table class="transcripts">
+    <tr class="transcripts" id="transcript_1">
+      <td class="transcript-index-even">
+      </td>
+      <td class="transcript-text-even">
+        <pre>
+        </pre>
+      </td>
+    </tr>
+    <tr class="transcripts" id="transcript_2">
+      <td class="transcript-index-odd">
+      </td>
+      <td class="transcript-text-odd">
+        <pre>
+        </pre>
+      </td>
+    </tr>
+  </table>
+  <p>
+  </p>
+{%  endif %}
+{%  set images = tp['images'] %}
+{%  if images != None %}
+
+  <hr/>
+
+  <h3>File sources</h3>      
+  <table class="images">
+    <tr class="images" id="image_1">
+      <td class="image-index-even">
+      </td>
+      <td class="image-text-even">
+      </td>
+    </tr>
+    <tr class="images" id="image_2">
+      <td class="image-index-odd">
+      </td>
+      <td class="image-text-odd">
+      </td>
+    </tr>
+  </table>
+  <p>
+  </p>
+{%  endif %}
+
+  <hr/>
+
+  <table class="pagefoot">
+    <tr class="pagefoot">
+      <td class="pagefoot_left">
+        Last updated {{ tp['timestamp'] }}<br/>
+        &copy; David Haworth<br/>
+        <a href="/about.html">About this site (Impressum)</a>.
+      </td>
+      <td class="pagefoot_centre">
+        <a href="http://www.forl.co.uk/">
+          <img style="border:0; width:384px; height:60px"
+               src="/images/dont_say.gif"
+               alt="Don't say Greater Manchester, Merseyside or Cumbria when you mean Lancashire" />
+        </a>
+      </td>
+      <td class="pagefoot_right">
+        <a href="https://validator.w3.org/check?uri=referer">
+          <img src="/images/w3c-valid-xhtml11.png"
+               alt="Valid XHTML 1.1" height="31" width="88" />
+        </a>
+        <a href="https://jigsaw.w3.org/css-validator/check/referer">
+          <img style="border:0; width:88px; height:31px"
+               src="/images/w3c-vcss-blue.gif"
+               alt="Valid CSS!" />
+        </a>
+      </td>
+    </tr>
+  </table>
+  <hr/>
+
+</body>
+
+</html>
+
