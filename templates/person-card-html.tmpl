@@ -28,10 +28,10 @@
 		notes		: a list of general information about the person
 		events		: a list of events from the person's timeline
 		transcripts	: a list of transcripts referenced from the events
-		images		: a list of image files referenced from the events
+		files		: a list of image/transcript files referenced from the events
 		timestamp	: date and time of generation
 
-	Each person in the above dictionary is a class with the following members:
+	Each person in the above dictionary is an instance of a class with the following members:
 		name		: the person's name
 		dob_dod		: (DoB - DoD)
 		vital		: string containing name and dob_dod
@@ -39,6 +39,22 @@
 		other		: in siblings list: index of other parent in others list
 					: in others list: relationship to half-sibling (mother/father)
 					: in children list: unique id of other parent (partner)
+
+	Each event in the events list is an instance of a class with the following members:
+		date		: the date of the event
+		evtype		: what kind of event: Birth, Marriage etc.
+		person		: person connected with the event (e.g. spouse for marriages) (optional)
+		info		: list of information. Each is a (name, value, URL) tuple (or class?)
+		sources		: list of sources. Each is a name, along with a list of links (web or local)
+
+	Each transcript in the transcripts list is an instance of a class with the following members:
+		id			: Identifier. Used as anchor and in the ref column.
+		text		: text of the transcript
+
+	Each file in the files list is an instance of a class with the following members:
+		id			: Identifier. Used as anchor and in the ref column
+		type		: Image, transcript, document with page no...
+		filename	: Unique name of the file
 -#}
 {%  set CARDBASE = '/family-history/cards' %}
 <!DOCTYPE html>
