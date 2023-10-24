@@ -22,6 +22,7 @@ import sys
 from pathlib import Path
 from DhG_Config import Config
 from DhG_Person import Person
+from DhG_Template import T_Person
 from DhG_GedcomImporter import GedcomImporter
 
 # A class to represent the entire database
@@ -538,6 +539,8 @@ class Database:
 			else:
 				tch.other = ch.father_uniq
 				other = ch.father_name
+			if other == None:
+				other = 'not known'
 			if tch.other == None:
 				tch.other = other					# Use name as id
 				tother = T_Person(other, other)		# Use name as id
@@ -555,7 +558,7 @@ class Database:
 
 		info['events'] = None
 		info['transcripts'] = None
-		info['images'] = None
+		info['files'] = None
 		return info
 
 	# Verify that all reference links between people exist.
