@@ -524,11 +524,35 @@ class Database:
 					info['others'].append(tother)
 					tsib.other = len(info['others'])		# Index is 1-based
 		if len(info['others']) == 0:
-			# No half-siblings. Discard the array
+			# No half-siblings. Discard the empty array
 			info['others'] = None
 			
-		info['spouses'] = None
-		info['children'] = None
+		info['children'] = []
+		info['partners'] = []
+		for ch in self.GetChildren(person.uniq):	# Might be empty
+			tch = ch.GetTPerson(dateformat)
+			info['children'].append(tch)
+			if person.uniq == ch.father_uniq:
+				tch.other = ch.mother_uniq
+				other = ch.mother_name
+			else:
+				tch.other = ch.father_uniq
+				other = ch.father_name
+			if tch.other == None:
+				tch.other = other					# Use name as id
+				tother = T_Person(other, other)		# Use name as id
+			else:
+				tother = self.GetTPerson(tch.other, dateformat)
+			try:
+				if info['partners'][-1].uniq != tch.other:
+					info['partners'].append(tother)
+			except:	# When partners list is empty
+				info['partners'].append(tother)
+		if len(info['children']) == 0:
+			# No children. Discard the empty children and partners arrays
+			info['children'] = None
+			info['partners'] = None
+
 		info['events'] = None
 		info['transcripts'] = None
 		info['images'] = None

@@ -23,9 +23,8 @@
 		mother		: the subject's mother
 		siblings	: a list of siblings of the subject, ordered by DoB
 		others		: a list of other parents of half-siblings
-		spouses		: a list of all the other parents of the children
-		children	: a list of children of the subject, ordered by DoB, interspersed with spouses
-						The first item in the list is always a spouse
+		partners	: a list of all the other parents of the children, in order of the children's DoB
+		children	: a list of children of the subject, ordered by DoB
 		notes		: a list of general information about the person
 		events		: a list of events from the person's timeline
 		transcripts	: a list of transcripts referenced from the events
@@ -38,8 +37,8 @@
 		vital		: string containing name and dob_dod
 		file		: basename of file, including surname directory
 		other		: in siblings list: index of other parent in others list
-					: in children list: index of other parent in spouses list
 					: in others list: relationship to half-sibling (mother/father)
+					: in children list: unique id of other parent (partner)
 -#}
 {%  set CARDBASE = '/family-history/cards' %}
 <!DOCTYPE html>
@@ -162,18 +161,18 @@
       </td>
       <td class="children">
         <h4>Children:</h4>
-{%  set spouses = tp['spouses'] %}
-{%  if spouses == None %}
+{%  set partners = tp['partners'] %}
+{%  if partners == None %}
         None
 {%  else %}
-{%    for sp in spouses %}
+{%    for sp in partners %}
 {%      if sp.file == None %}
         {{ subj.name }} + {{ sp.name }}
 {%      else %}
         {{ subj.name }} + <a href="/a>"{{ CARDBASE }}/{{ sp.file }}.html">{{ sp.name }}</a>
 {%      endif %}
         <ul class="children">
-{%      for ch in tp['children'] if ch.other == loop.index0 %}
+{%      for ch in tp['children'] if ch.other == sp.uniq %}
           <li class="children">
 {%        if ch.file == None %}
             {{ ch.vital }}
