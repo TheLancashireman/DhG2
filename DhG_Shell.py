@@ -48,10 +48,11 @@ class DhG_Shell(cmd.Cmd):
 		'    -v --version                  print the version and exit\n'+\
 		'    -c cfgfile  --config=cfgfile  use cfgfile as the configuration file. Default ~/.DhG/config\n'+\
 		'  If more than one cfgfile is specified, the last one is used.\n'+\
-		'  Each argument is treated as a script file.\n'+\
-		'  The commands in the scripts are executed after loading the database.\n'+\
-		'  After executing the scripts, ' + sys.argv[0] + ' drops into interactive mode.\n'+\
-		'  A quit command in one of the scripts terminates the program immediately.'
+		'  The script-file arguments are currently ignored.'
+#		'  Each argument is treated as a script file.\n'+\
+#		'  The commands in the scripts are executed after loading the database.\n'+\
+#		'  After executing the scripts, ' + sys.argv[0] + ' drops into interactive mode.\n'+\
+#		'  A quit command in one of the scripts terminates the program immediately.'
 
 	# Message that is displayed on startup
 	intro = '\nType help or ? to list commands.'
@@ -92,12 +93,15 @@ class DhG_Shell(cmd.Cmd):
 			exit(0)
 		Config.Init(cfgfile)
 		self.prompt = Config.prompt
+		return
 
 	def Usage(self):
 		print(self.usage)
+		return
 
 	def Version(self):
 		print(self.version)
+		return
 
 	# Before the command loop, create and load the database
 	#
@@ -110,6 +114,7 @@ class DhG_Shell(cmd.Cmd):
 			super().onecmd(str)
 		except Exception:
 			print(traceback.format_exc())
+		return
 
 	# Ignore blank commands
 	#
@@ -160,6 +165,7 @@ class DhG_Shell(cmd.Cmd):
 		else:
 			for p in l:
 				print(p.GetVitalLine())		# ToDo: parameters
+		return
 
 	# Edit a card using the specified editor
 	#
@@ -171,11 +177,13 @@ class DhG_Shell(cmd.Cmd):
 			self.db.ReloadPerson(l[0].uniq)
 		else:
 			self.PrintPersonList(l, arg)
+		return
 
 	# Report the ambiguous command error
 	#
 	def do_ambiguous_command_error(self, arg):
 		print('Ambiguous command. Possible matches are: ', arg)
+		return
 
 	# All the "real" commands:
 	#
@@ -197,34 +205,41 @@ class DhG_Shell(cmd.Cmd):
 			print('Error : invalid syntax')
 		else:
 			print('Error : to do')
+		return
 
 	def do_reload(self, arg):
 		'Reload the database'
 		self.db.Reload()
+		return
 
 	def do_unused(self, arg):
 		'List all the unused IDs in the database'
 		l = self.db.GetUnused()
 		for i in l:
 			print('['+str(i)+']')
+		return
 
 	def do_list(self, arg):
 		'List all the persons in the database'
 		self.do_find('')
+		return
 
 	def do_find(self, arg):
 		'Print a list of persons that match the given terms'
 		l = self.db.GetMatchingPersons(arg)
 		for p in l:
 			print(p.GetVitalLine())		# ToDo: parameters
+		return
 
 	def do_search(self, arg):
 		'Print a list of persons that match the given terms'
 		do_find(arg)
+		return
 
 	def do_tl(self, arg):
 		'Print the timeline for a person'
 		self.do_timeline(arg)
+		return
 
 	def do_timeline(self, arg):
 		'Print the timeline for a person'
@@ -235,18 +250,22 @@ class DhG_Shell(cmd.Cmd):
 				print(txt)
 		else:
 			self.PrintPersonList(l, arg)
+		return
 
 	def do_vi(self, arg):
 		'Edit a person\'s card using vi'
 		self.EditCard('vi', arg)
+		return
 
 	def do_vim(self, arg):
 		'Edit a person\'s card using vim'
 		self.EditCard('vim', arg)
+		return
 
 	def do_edit(self, arg):
 		'Edit a card using config.editor'
 		self.EditCard(Config.editor, arg)
+		return
 
 	def do_new(self, arg):					# ToDo: refactor this function
 		'Create a new person in the database'
@@ -283,6 +302,7 @@ class DhG_Shell(cmd.Cmd):
 		DoTemplate('new-person-card.tmpl', tp, cardname)
 		if self.db.LoadPerson(cardname) == 0:
 			print('Created new person ', name, '['+str(uniq)+']')
+		return
 
 	def do_family(self, arg):
 		'Show a person\'s immediate family'
@@ -292,6 +312,7 @@ class DhG_Shell(cmd.Cmd):
 			DoTemplate('family-text.tmpl', fam, None)
 		else:
 			self.PrintPersonList(l, arg)
+		return
 
 	def do_descendants(self, arg):
 		'Print a descendants tree for a given person'
@@ -301,6 +322,7 @@ class DhG_Shell(cmd.Cmd):
 			DoTemplate('descendant-tree-text.tmpl', desc, None)
 		else:
 			self.PrintPersonList(l, arg)
+		return
 
 	def do_ancestors(self, arg):
 		'Print an ancestors tree for a given person'
@@ -310,23 +332,28 @@ class DhG_Shell(cmd.Cmd):
 			DoTemplate('ancestor-tree-text.tmpl', anc, None)
 		else:
 			self.PrintPersonList(l, arg)
+		return
 
 	def do_heads(self, arg):
 		'List all the patriarchs and/or matriarchs (those whose parents and parents of spouses are not recorded).\nThe argument is one of male, female, both. Default is both'
 		self.db.ListHeads(arg)
+		return
 
 	def do_verify(self, arg):
 		'Verify all the person references in the database'
 		if self.db.VerifyRefs() == 0:
 			print('Verification complete; no errors')
+		return
 
 	def do_gedi(self, arg):
 		'Import a GEDCOM file'
 		self.db.ImportGedcom(arg)
+		return
 
 	def do_shell(self, arg):
 		'Run a command in a shell'
 		os.system(arg)
+		return
 
 	def do_htmldescendants(self, arg):
 		'Create a descendants tree in HTML for a given person'
@@ -338,10 +365,12 @@ class DhG_Shell(cmd.Cmd):
 			DoTemplate('descendant-tree-html.tmpl', desc, file, trim = True)
 		else:
 			self.PrintPersonList(l, arg)
+		return
 
 	def do_hd(self, arg):	# Abbreviated command
 		'Create a descendants tree in HTML for a given person. Abbreviation of htmldescendants'
 		self.do_htmldescendants(arg)
+		return
 
 	def do_htmlcard(self, arg):
 		'Create a cardfile in HTML for a given person'
@@ -353,14 +382,17 @@ class DhG_Shell(cmd.Cmd):
 			DoTemplate('person-card-html.tmpl', info, file, trim = True)
 		else:
 			self.PrintPersonList(l, arg)
+		return
 
 	def do_hc(self, arg):
 		'Create a cardfile in HTML for a given person. Abbreviation of htmlcard'
 		self.do_htmlcard(arg)
+		return
 
 	def do_test(self, arg):
 		'For testing code snippets. ToDo: delete'
 		print('do_test(): ', arg)
+		return
 
 if __name__ == '__main__':
 	print(DhG_Shell.version)
