@@ -34,6 +34,8 @@ class Config():
 	tmpl_dir = 'templates'									# Location of templates
 	html_dir = None											# Where to put the HTML output
 	server_path = None										# Path to htmldir on server (for links)
+	card_path = None										# Path to html cards on server (for links).
+															# Default: server_path+'cards'
 	editor = 'vi'											# Editor to use for 'edit' command
 	dateformat = 'raw'										# Format for dates
 	depth = 999999											# Max depth for trees
@@ -58,6 +60,8 @@ class Config():
 		print('branch      =', Config.branch)
 		print('tmpl_dir    =', Config.tmpl_dir)
 		print('html_dir    =', Config.html_dir)
+		print('server_path =', Config.server_path)
+		print('card_path   =', Config.card_path)
 		print('editor      =', Config.editor)
 		print('dateformat  =', Config.dateformat)
 		print('depth       =', Config.depth)

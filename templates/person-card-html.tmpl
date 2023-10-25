@@ -56,7 +56,7 @@
 		type		: Image, transcript, document with page no...
 		filename	: Unique name of the file
 -#}
-{%  set CARDBASE = '/family-history/cards' %}
+{%  set CARDBASE = tp['cardbase'] %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -185,7 +185,7 @@
 {%      if sp.file == None %}
         {{ subj.name }} + {{ sp.name }}
 {%      else %}
-        {{ subj.name }} + <a href="/a>"{{ CARDBASE }}/{{ sp.file }}.html">{{ sp.name }}</a>
+        {{ subj.name }} + <a href="{{ CARDBASE }}/{{ sp.file }}.html">{{ sp.name }}</a>
 {%      endif %}
         <ul class="children">
 {%      for ch in tp['children'] if ch.other == sp.uniq %}
@@ -193,7 +193,7 @@
 {%        if ch.file == None %}
             {{ ch.vital }}
 {%        else %}
-            <a href="/a>"{{ CARDBASE }}/{{ ch.file }}.html">{{ ch.vital }}</a>
+            <a href="{{ CARDBASE }}/{{ ch.file }}.html">{{ ch.vital }}</a>
 {%        endif %}
           </li>
 {%      endfor %}
@@ -263,8 +263,8 @@
   <p>
   </p>
 {%  endif %}
-{%  set images = tp['images'] %}
-{%  if images != None %}
+{%  set files = tp['files'] %}
+{%  if files != None %}
 
   <hr/>
 

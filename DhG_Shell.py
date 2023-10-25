@@ -357,6 +357,10 @@ class DhG_Shell(cmd.Cmd):
 
 	def do_htmldescendants(self, arg):
 		'Create a descendants tree in HTML for a given person'
+		if len(arg) > 0 and arg[0] == '@':
+			listfile = arg[1:]
+			print('Printing descendant trees of list of persons is not supported yet')
+			return
 		l = self.db.GetMatchingPersons(arg)
 		if len(l) == 1:
 			person = l[0]
@@ -374,6 +378,35 @@ class DhG_Shell(cmd.Cmd):
 
 	def do_htmlcard(self, arg):
 		'Create a cardfile in HTML for a given person'
+		if len(arg) > 0 and arg[0] == '@':
+			listfile = arg[1:]
+			# Special cases of listfile
+			if listfile == 'all' or listfile == 'public':
+				l = self.db.GetMatchingPersons('')
+				erase = '          '
+				lastlen = 0
+				for person in l:
+					if person == None:
+						continue
+					if listfile == 'all' or person.IsPublic():
+						# Erase the previous line
+						if lastlen > 0:
+							while len(erase) < lastlen:
+								erase += '     '
+							print('HTML card for', erase[0:lastlen], end='\r')
+						print('HTML card for', person.GetVitalLine(), end='\r')
+						lastlen = len(person.GetVitalLine())
+						try:
+							file = Config.MakeHtmlPersonCardName(person.name, person.uniq)
+							info = self.db.GetPersonCardInfo(person, 'yearonly')
+							DoTemplate('person-card-html.tmpl', info, file, trim = True)
+						except Exception:
+							print()
+							print(traceback.format_exc())
+				print()
+			else:
+				print('Printing cards of list of persons is not supported yet')
+			return
 		l = self.db.GetMatchingPersons(arg)
 		if len(l) == 1:
 			person = l[0]

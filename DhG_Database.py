@@ -484,6 +484,13 @@ class Database:
 	#
 	def GetPersonCardInfo(self, person, dateformat = 'yearonly'):
 		info = {}
+		if Config.card_path == None:
+			if Config.server_path == None:
+				info['cardbase'] = '/cards'
+			else:
+				info['cardbase'] = Config.server_path + '/cards'
+		else:
+			info['cardbase'] = Config.card_path
 		info['subj'] = person.GetTPerson(dateformat)
 		info['father'] = self.GetTPerson(person.father_uniq, dateformat)
 		info['mother'] = self.GetTPerson(person.mother_uniq, dateformat)
