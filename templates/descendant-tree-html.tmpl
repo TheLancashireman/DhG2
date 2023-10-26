@@ -16,7 +16,27 @@
    
     You should have received a copy of the GNU General Public License
     along with DhG.  If not, see <http://www.gnu.org/licenses/>.
+
+    Input is a dictionary containing the following items:
+		cardbase	: the server's 'cards' directory
+		subj		: the subject of the card
+		items		: a list of the people and (optionally) their partners
+
+	Each item in items is an instance of a class with the following members:
+		level		: the level. Level 1 is the top level
+		left		: the left-hand person of a partnership:
+					: 	at the top level, the subject
+					:	at lower levels, a child of the level above
+		right		: the right-hand person of the partnership
+					:	None if no partners
+					:	person with name "not known" if there are children with an unknown partner
+		items		: a list of the children of the partnership. It's a recursive structure
+	An individual can occur more than once in an items list, when there are multiple partners
+
+	Each person (subj, left, right) is an instance of a class; see person class in person-card-html.tmpl
+	Only vital and file are used.
 #}
+{%  set CARDBASE = tp['cardbase'] %}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" 
    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 
@@ -56,42 +76,37 @@
 
   <hr/>
 
-  <h1>Descendants of {{ tp['name'] }} {{ tp['dates'] }}</h1>
+{%  set subj = tp['subj'] %}
+  <h1>Descendants of {{ subj.vital }}</h1>
+
   <hr/>
 
   <div id="pagetorso" class="familytree">
 
-{% for line in tp['lines'] -%}
-{%   if loop.previtem is defined -%}
-{%     if line['level'] > loop.previtem['level'] -%}
-{%       for j in range(line['level']*2) -%}{{ '  ' }}{% endfor -%}<ul>
-{%       for j in range(line['level']*2+1) -%}{{ '  ' }}{% endfor -%}<li>
-{%     elif line['level'] < loop.previtem['level']  -%}
-{%       set n = loop.previtem['level'] - line['level'] -%}
-{%       for k in range(n) -%}
-{%         for j in range(line['level']*2+2*(n-k)+1) -%}{{ '  ' }}{% endfor -%}</li>
-{%         for j in range(line['level']*2+2*(n-k)) -%}{{ '  ' }}{% endfor -%}</ul>
-{%       endfor -%}
-{%       for j in range(line['level']*2+1) -%}{{ '  ' }}{% endfor -%}</li>
-{%       for j in range(line['level']*2+1) -%}{{ '  ' }}{% endfor -%}<li>
-{%     else -%}
-{%       for j in range(line['level']*2+1) -%}{{ '  ' }}{% endfor -%}</li>
-{%       for j in range(line['level']*2+1) -%}{{ '  ' }}{% endfor -%}<li>
-{%     endif -%}
-{%   else -%}
-{%     for j in range(line['level']*2) -%}{{ '  ' }}{% endfor -%}<ul>
-{%     for j in range(line['level']*2+1) -%}{{ '  ' }}{% endfor -%}<li>
-{%   endif -%}
-{%   for j in range(line['level']*2+2) -%}{{ '  ' }}{% endfor -%}{{ line['level'] }}.&nbsp;&nbsp;{{ line['name'] -}}&nbsp;{{ line['dates'] -}}
-{%   if line['spouse_name'] != '' -%}{{ '&nbsp;===&nbsp;' }}{{ line['spouse_name'] }}&nbsp;{{ line['spouse_dates'] -}}{% endif %}
-{%   if not (loop.nextitem is defined) -%}
-{%     set n = line['level'] -%}
-{%     for k in range(n) -%}
-{%       for j in range(2*(n-k)+1) -%}{{ '  ' }}{% endfor -%}</li>
-{%       for j in range(2*(n-k)) -%}{{ '  ' }}{% endfor -%}</ul>
-{%     endfor -%}
-{%   endif -%}
-{% endfor %}
+{%  set items = tp['items'] %}
+    <ul class="desctree">
+{%  for item in items recursive %}
+      <li style="list-style-type: '{{ item.level }}.'">
+{%    if item.left.file == None %}
+        {{ item.left.vital }}
+{%    else  %}
+        <a href="{{ CARDBASE }}/{{ item.left.file }}">{{ item.left.vital }}</a>
+{%    endif  %}
+{%    if item.right != None %}
+        ===
+{%      if item.right.file == None %}
+        {{ item.right.vital }}
+{%      else  %}
+        <a href="{{ CARDBASE }}/{{ item.right.file }}">{{ item.right.vital }}</a>
+{%      endif  %}
+{%    endif  %}
+{%    if item.items -%}
+          <ul class="desctree">
+{{      loop(item.items) }}
+          </ul>
+{%    endif %}</li>
+{%  endfor %}
+    </ul>
 
   </div>
 
