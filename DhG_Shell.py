@@ -318,7 +318,7 @@ class DhG_Shell(cmd.Cmd):
 		'Print a descendants tree for a given person'
 		l = self.db.GetMatchingPersons(arg)
 		if len(l) == 1:
-			desc = self.db.GetDescendants(l[0].uniq)
+			desc = self.db.GetDescendantsObsolete(l[0].uniq)		# ToDo: update template to use new structure
 			DoTemplate('descendant-tree-text.tmpl', desc, None)
 		else:
 			self.PrintPersonList(l, arg)
@@ -425,6 +425,16 @@ class DhG_Shell(cmd.Cmd):
 	def do_test(self, arg):
 		'For testing code snippets. ToDo: delete'
 		print('do_test(): ', arg)
+		l = self.db.GetMatchingPersons(arg)
+		if len(l) == 1:
+			info = self.db.GetDescendants(l[0].uniq, 'yearonly')
+			print('cardbase =', info['cardbase'])
+			print('subj = ', info['subj'])
+			if info['partners'] == None:
+				print('partners = None')
+			else:
+				for p in info['partners']:
+					p.debug_print()
 		return
 
 if __name__ == '__main__':
