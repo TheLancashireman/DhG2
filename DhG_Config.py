@@ -195,7 +195,7 @@ class Config():
 		elif prefix != '':
 			prefix = prefix + '/'
 		# Remove unwanted characters from name and split on spaces
-		# At the moment, only ' and . are removed (e.g. as in O'Brien)
+		# At the moment, only ' and . are removed (e.g. as in O'Brien, Rev. etc)
 		names = re.sub('[\'\.]', '', name).split()
 		if surname_dir:
 			prefix = prefix + names[-1] + '/'
