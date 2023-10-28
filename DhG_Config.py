@@ -144,6 +144,19 @@ class Config():
 			return 2
 		return 0
 
+	# Return the base directory (on the server) of the card files
+	#
+	@staticmethod
+	def GetCardbase():
+		if Config.card_path == None:
+			if Config.server_path == None:
+				cb = '/cards'
+			else:
+				cb = Config.server_path + '/cards'
+		else:
+			cb = Config.card_path
+		return cb
+
 	# Construct a file name for a card file
 	#
 	@staticmethod
