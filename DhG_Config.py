@@ -195,8 +195,8 @@ class Config():
 		elif prefix != '':
 			prefix = prefix + '/'
 		# Remove unwanted characters from name and split on spaces
-		# At the moment, only ' is removed (e.g. as in O'Brien)
-		names = re.sub('[\']', '', name).split()
+		# At the moment, only ' and . are removed (e.g. as in O'Brien)
+		names = re.sub('[\'\.]', '', name).split()
 		if surname_dir:
 			prefix = prefix + names[-1] + '/'
 		cardname = prefix + ''.join(names) + '-' + str(uniq) + suffix
