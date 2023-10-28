@@ -68,3 +68,26 @@ class T_Person():
 			self.vital = name
 		else:
 			self.vital = name + ' ' + dob_dod
+
+# A class to hold a subtree of a descendants tree
+# Used in templates
+# See descendant-tree-html.tmpl for details
+#
+class T_Descendants():
+	def __init__(self, level, left_person, right_person = None, children = None):
+		self.level = level
+		self.left = left_person
+		self.right = right_person
+		self.children = children
+
+	def debug_print(self):
+		if self.right == None:
+			print(self.level, ':', self.left.vital)
+
+		else:
+			print(self.level, ':', self.left.vital, "===", self.right.vital)
+		if self.children == None:
+			print('No children')
+		else:
+			for x in self.children:
+				x.debug_print()
