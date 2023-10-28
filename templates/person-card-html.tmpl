@@ -62,13 +62,13 @@
 <html lang="en">
 
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="" />
-  <meta name="author" content="TheLancashireman" />
-  <meta name="generator" content="DhG" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="TheLancashireman">
+  <meta name="generator" content="DhG2">
 
-  <link  href="/styles/family-history.css" rel="stylesheet" type="text/css" media="screen" />
+  <link  href="/styles/family-history.css" rel="stylesheet" type="text/css" media="screen">
   <script type="text/javascript" src="/styles/family-history.js"> </script>
 
   <title>The Lancashireman's family history</title>
@@ -85,22 +85,23 @@
           <a href="http://www.forl.co.uk/graphics.php">
             <img style="border:0; width:100px; height:100px"
                  src="/images/forlrose01.gif"
-                 alt="Red rose of Lancashire" />
+                 alt="Red rose of Lancashire">
           </a>
         </td>
       </tr>
     </table>
-    <div id="menubar" />
+    <div id="menubar">
+    </div>
   </div>
 
-  <hr/>
+  <hr>
 
 {%  set subj = tp['subj'] %}
   <h1>{{ subj.name }}</h1>
 {%  if subj.dob_dod != None %}
   <h2>{{ subj.dob_dod }}</h2>
 {%  endif %}
-  <hr/>
+  <hr>
 
   <table class="general-info">
 {%  set father = tp['father'] %}
@@ -164,7 +165,7 @@
         </ul>
 {%  set other_parents = tp['others'] %}
 {%  if other_parents != None %}
-        Other parents of half-siblings:<br/>
+        Other parents of half-siblings:<br>
         <ol class="siblings">
 {%    for op in other_parents %}
 {%      if op.file == None %}
@@ -209,7 +210,7 @@
 {%  set events = tp['events'] %}
 {%  if events != None %}
 
-  <hr/>
+  <hr>
 
   <h3>Timeline</h3>
   <table class="timeline">
@@ -240,7 +241,7 @@
 {%  set transcripts = tp['transcripts'] %}
 {%  if transcripts != None %}
 
-  <hr/>
+  <hr>
 
   <h3>Transcripts of sources</h3>      
   <table class="transcripts">
@@ -267,7 +268,7 @@
 {%  set files = tp['files'] %}
 {%  if files != None %}
 
-  <hr/>
+  <hr>
 
   <h3>File sources</h3>      
   <table class="images">
@@ -288,36 +289,36 @@
   </p>
 {%  endif %}
 
-  <hr/>
+  <hr>
 
   <table class="pagefoot">
     <tr class="pagefoot">
       <td class="pagefoot_left">
-        Last updated {{ tp['timestamp'] }}<br/>
-        &copy; David Haworth<br/>
+        Last updated {{ tp['timestamp'] }}<br>
+        &copy; David Haworth<br>
         <a href="/about.html">About this site (Impressum)</a>.
       </td>
       <td class="pagefoot_centre">
         <a href="http://www.forl.co.uk/">
           <img style="border:0; width:384px; height:60px"
                src="/images/dont_say.gif"
-               alt="Don't say Greater Manchester, Merseyside or Cumbria when you mean Lancashire" />
+               alt="Don't say Greater Manchester, Merseyside or Cumbria when you mean Lancashire">
         </a>
       </td>
       <td class="pagefoot_right">
         <a href="https://validator.w3.org/check?uri=referer">
           <img src="/images/w3c-valid-xhtml11.png"
-               alt="Valid XHTML 1.1" height="31" width="88" />
+               alt="Valid XHTML 1.1" height="31" width="88">
         </a>
         <a href="https://jigsaw.w3.org/css-validator/check/referer">
           <img style="border:0; width:88px; height:31px"
                src="/images/w3c-vcss-blue.gif"
-               alt="Valid CSS!" />
+               alt="Valid CSS!">
         </a>
       </td>
     </tr>
   </table>
-  <hr/>
+  <hr>
 
 </body>
 
