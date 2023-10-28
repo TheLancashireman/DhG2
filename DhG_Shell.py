@@ -358,8 +358,25 @@ class DhG_Shell(cmd.Cmd):
 	def do_htmldescendants(self, arg):
 		'Create a descendants tree in HTML for a given person'
 		if len(arg) > 0 and arg[0] == '@':
-			listfile = arg[1:]
-			print('Printing descendant trees of list of persons is not supported yet')
+			f = open(arg[1:], 'r')
+			erase = '          '
+			lastlen = 0
+			for line in f:
+				line = line.rstrip().lstrip()
+				id = line.split(' ')[0]
+				if id == '' or id[0] == '#':
+					pass			# Ignore comment lines and blank lines
+				else:
+					l = self.db.GetMatchingPersons(id)
+					if len(l) == 1:
+						person = l[0]
+						print('HTML descendants for', person.GetVitalLine())
+						file = Config.MakeHtmlDescTreeName(person.name, person.uniq)
+						desc = self.db.GetDescendants(person.uniq, 'yearonly')
+						DoTemplate('descendant-tree-html.tmpl', desc, file, trim = True)
+					else:
+						print('Invalid or ambiguous line "'+line+'" found in', arg[1:])
+			f.close()
 			return
 		l = self.db.GetMatchingPersons(arg)
 		if len(l) == 1:
