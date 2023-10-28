@@ -20,7 +20,8 @@
     Input is a dictionary containing the following items:
 		cardbase	: the server's 'cards' directory
 		subj		: the subject of the card
-		items		: a list of the people and (optionally) their partners
+		partners	: a list of the subject, partners and children.
+					: At this level, the left partner is always the subject
 
 	Each item in items is an instance of a class with the following members:
 		level		: the level. Level 1 is the top level
@@ -30,7 +31,7 @@
 		right		: the right-hand person of the partnership
 					:	None if no partners
 					:	person with name "not known" if there are children with an unknown partner
-		items		: a list of the children of the partnership. It's a recursive structure
+		children	: a list of the children of the partnership. It's a recursive structure
 	An individual can occur more than once in an items list, when there are multiple partners
 
 	Each person (subj, left, right) is an instance of a class; see person class in person-card-html.tmpl
@@ -83,28 +84,28 @@
 
   <div id="pagetorso" class="familytree">
 
-{%  set items = tp['items'] %}
     <ul class="desctree">
-{%  for item in items recursive %}
-      <li style="list-style-type: '{{ item.level }}.'">
-{%    if item.left.file == None %}
-        {{ item.left.vital }}
+{%  for obj in tp['partners'] recursive %}
+      <li style="list-style-type: '{{ obj.level }}. '">
+{%    if obj.left.file == None %}
+        {{ obj.left.vital }}
 {%    else  %}
-        <a href="{{ CARDBASE }}/{{ item.left.file }}">{{ item.left.vital }}</a>
+        <a href="{{ CARDBASE }}/{{ obj.left.file }}">{{ obj.left.vital }}</a>
 {%    endif  %}
-{%    if item.right != None %}
+{%    if obj.right != None %}
         ===
-{%      if item.right.file == None %}
-        {{ item.right.vital }}
+{%      if obj.right.file == None %}
+        {{ obj.right.vital }}
 {%      else  %}
-        <a href="{{ CARDBASE }}/{{ item.right.file }}">{{ item.right.vital }}</a>
+        <a href="{{ CARDBASE }}/{{ obj.right.file }}">{{ obj.right.vital }}</a>
 {%      endif  %}
 {%    endif  %}
-{%    if item.items -%}
+{%    if obj.children != None %}
           <ul class="desctree">
-{{      loop(item.items) }}
+{{      loop(obj.children) }}
           </ul>
-{%    endif %}</li>
+{%    endif %}
+      </li>
 {%  endfor %}
     </ul>
 
