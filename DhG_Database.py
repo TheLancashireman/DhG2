@@ -439,8 +439,12 @@ class Database:
 		for p in pp:
 			partner = self.GetTPerson(p[1], dateformat)
 			# For each of the children of this partnership, add a list of next-level child/partner objects
+			if partner == None:
+				cc = self.GetChildren(subj.uniq)
+				partner = T_Person('not known', None)
+			else:
+				cc = self.GetChildren(subj.uniq, partner.uniq)
 			cp = []
-			cc = self.GetChildren(subj.uniq, partner.uniq)
 			if cc != None:
 				for c in cc:
 					csubj = c.GetTPerson(dateformat)
