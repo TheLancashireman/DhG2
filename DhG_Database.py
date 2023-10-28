@@ -22,7 +22,7 @@ import sys
 from pathlib import Path
 from DhG_Config import Config
 from DhG_Person import Person
-from DhG_Template import T_Person
+from DhG_Template import T_Person, T_Descendants
 from DhG_GedcomImporter import GedcomImporter
 
 # A class to represent the entire database
@@ -178,8 +178,11 @@ class Database:
 		return sibs
 
 	# Returns a list of children of a person, in order of data-of-birth
+	# The optional 'other' parameter allows both parents to be specified.
 	#
-	def GetChildren(self, uniq):
+	# The return value is a list of (date, id) tuples.
+	#
+	def GetChildren(self, uniq, other = None):
 		try:
 			p = self.persons[uniq]
 			if p == None:
@@ -190,7 +193,8 @@ class Database:
 		children = []
 		for pp in self.persons:
 			if pp != None and (pp.father_uniq == uniq or pp.mother_uniq == uniq):
-				children.append((pp.GetDoB(None), pp))
+				if other == None or pp.father_uniq == other or pp.mother_uniq == other:
+					children.append((pp.GetDoB(None), pp))
 		children_in_order = sorted(children, key=lambda xx: xx[0])
 
 		children = []
@@ -270,7 +274,7 @@ class Database:
 
 	# Return an array containing a descendant tree of a person
 	#
-	# ToDo: insert childless partnerships
+	# OBSOLETE: This method to be removed when text descendants template has been updated
 	#
 	def GetDtree(self, p, level, datefmt):
 		lines = []
@@ -375,8 +379,9 @@ class Database:
 
 	# Return a descendant tree dictionary for a person.
 	# The return value can be passed to a template.
+	# OBSOLETE: This method to be removed when text descendants template has been updated
 	#
-	def GetDescendants(self, uniq, fmt='raw'):
+	def GetDescendantsObsolete(self, uniq, fmt='raw'):
 		try:
 			p = self.persons[uniq]
 			if p == None:
@@ -391,6 +396,75 @@ class Database:
 		desc['dates'] = p.GetDates(fmt)
 		desc['lines'] = self.GetDtree(p, 1, fmt)
 		return desc
+
+	# Return a list of T_Descendant objects for a subject given by the person parameter
+	# The subj parameter is an existing T_Person for the subject, to avoid duplication
+	#
+	def GetTDescendants(self, level, person, subj, dateformat):
+		tdlist = []
+
+		# Get list of partners from marriage records
+		pp = person.GetPartners()
+		if pp == None:
+			pp = []
+
+		# Add assumed partnerships from children
+		cc = self.GetChildren(person.uniq)
+		if cc == None:
+			cc = []
+		for c in cc:
+			to_add = True
+			if person.uniq == c.father_uniq:
+				sp_uniq = c.mother_uniq
+				if sp_uniq == None:
+					sp_uniq = c.mother_name
+			else:
+				sp_uniq = c.father_uniq
+				if sp_uniq == None:
+					sp_uniq = c.father_name
+			for (d, u) in pp:
+				if u == sp_uniq:
+					to_add = False
+					break
+			if to_add:
+				t = (c.GetDoB('raw'), sp_uniq)
+				pp.append(t)
+
+		# Re-sort the combined partnerships list
+		pp = sorted(pp, key=lambda xx: xx[0])
+
+		if pp == []:
+			return [T_Descendants(level, subj)]
+
+		for p in pp:
+			partner = self.GetTPerson(p[1], dateformat)
+			# For each of the children of this partnership, add a list of next-level child/partner objects
+			cp = []
+			cc = self.GetChildren(subj.uniq, partner.uniq)
+			if cc != None:
+				for c in cc:
+					csubj = c.GetTPerson(dateformat)
+					cp += self.GetTDescendants(level+1, c, csubj, dateformat)
+			if cp == []:
+				cp = None
+			td = T_Descendants(level, subj, partner, cp)
+			tdlist.append(td)
+
+		return tdlist
+
+	# Return a descendant tree dictionary for a person.
+	# The return value can be passed to a template.
+	#
+	def GetDescendants(self, uniq, fmt='raw'):
+		subj = self.GetTPerson(uniq, fmt)
+		if subj == None:
+			return None
+
+		info = {}
+		info['cardbase'] = Config.GetCardbase()
+		info['subj'] = subj
+		info['partners'] = self.GetTDescendants(1, self.persons[uniq], subj, fmt)
+		return info
 
 	# Return a partial ancestor tree
 	#
@@ -484,13 +558,7 @@ class Database:
 	#
 	def GetPersonCardInfo(self, person, dateformat = 'yearonly'):
 		info = {}
-		if Config.card_path == None:
-			if Config.server_path == None:
-				info['cardbase'] = '/cards'
-			else:
-				info['cardbase'] = Config.server_path + '/cards'
-		else:
-			info['cardbase'] = Config.card_path
+		info['cardbase'] = Config.GetCardbase()
 		info['subj'] = person.GetTPerson(dateformat)
 		info['father'] = self.GetTPerson(person.father_uniq, dateformat)
 		info['mother'] = self.GetTPerson(person.mother_uniq, dateformat)
