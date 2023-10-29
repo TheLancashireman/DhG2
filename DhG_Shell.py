@@ -92,7 +92,7 @@ class DhG_Shell(cmd.Cmd):
 		if dropout:
 			exit(0)
 		Config.Init(cfgfile)
-		self.prompt = Config.prompt
+		self.prompt = Config.Get('prompt')
 		return
 
 	def Usage(self):
@@ -106,7 +106,7 @@ class DhG_Shell(cmd.Cmd):
 	# Before the command loop, create and load the database
 	#
 	def preloop(self):
-		self.db = Database(Config.db_dir)
+		self.db = Database(Config.Get('db_dir'))
 		self.db.Reload()
 
 	def onecmd(self, str):
@@ -264,7 +264,7 @@ class DhG_Shell(cmd.Cmd):
 
 	def do_edit(self, arg):
 		'Edit a card using config.editor'
-		self.EditCard(Config.editor, arg)
+		self.EditCard(Config.Get('editor'), arg)
 		return
 
 	def do_new(self, arg):					# ToDo: refactor this function
@@ -272,7 +272,7 @@ class DhG_Shell(cmd.Cmd):
 		(name, uniq) = Person.ParseCombinedNameString(arg)
 		#db.CreateNewPerson(name, uniq)
 		if name == '':
-			print('Use "new forname(s) surname" to add a new person')
+			print('Use "new forename(s) surname" to add a new person')
 			return
 		if uniq == None:
 			uniq = len(self.db.persons)
@@ -296,8 +296,8 @@ class DhG_Shell(cmd.Cmd):
 			'name': name,
 			'uniq': uniq,
 			'sex': s,
-			'father': Config.father,
-			'mother': Config.mother
+			'father': Config.Get('father'),
+			'mother': Config.Get('mother')
 			}
 		DoTemplate('new-person-card.tmpl', tp, cardname)
 		if self.db.LoadPerson(cardname) == 0:

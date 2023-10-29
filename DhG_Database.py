@@ -360,7 +360,7 @@ class Database:
 					line['spouse_vital'] = sp_cur
 					sp_vital = sp_cur
 			lines.append(line)
-			if level < Config.depth:
+			if level < Config.Get('depth'):
 				for c in cc:
 					if p.uniq == c.father_uniq:
 						sp_uniq = c.mother_uniq
@@ -475,7 +475,7 @@ class Database:
 	def GetAtree(self, p, level):
 		l = []
 
-		if level > Config.depth:
+		if level > Config.Get('depth'):
 			a = {}
 			a['level'] = level+1
 			a['fm'] = ''

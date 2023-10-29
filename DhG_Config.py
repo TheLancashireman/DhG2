@@ -28,45 +28,55 @@ import re
 
 class Config():
 	cfgfile = os.path.expanduser('~') + '/.DhG/config'		# Set on command line with -c
-	prompt = '(DhG) '										# Command prompt
-	db_dir = None											# Location of database (must be set!)
-	branch = None											# Current family branch
-	tmpl_dir = 'templates'									# Location of templates
-	html_dir = None											# Where to put the HTML output
-	server_path = None										# Path to htmldir on server (for links)
-	card_path = None										# Path to html cards on server (for links).
-															# Default: server_path+'cards'
-	editor = 'vi'											# Editor to use for 'edit' command
-	dateformat = 'raw'										# Format for dates
-	depth = 999999											# Max depth for trees
-	father = None											# Father for 'new' command
-	mother = None											# Mother for 'new' command
+	config = {}
 
 	# Initialize the class
 	@staticmethod
 	def Init(cfgfile):
 		if cfgfile != None:
 			Config.cfgfile = cfgfile
+
+		# Some default values
+		Config.config['prompt'] = '(DhG) '			# Command prompt
+		Config.config['db_dir'] = None				# Location of database (must be set!)
+		Config.config['branch'] = None				# Current family branch
+		Config.config['tmpl_dir'] = 'templates'		# Location of templates
+		Config.config['html_dir'] = None			# Where to put the HTML output
+		Config.config['server_path'] = None			# Path to htmldir on server (for links)
+		Config.config['card_path'] = None			# Path to html cards on server (for links).
+													# Default: server_path+'cards'
+		Config.config['editor'] = 'vi'				# Editor to use for 'edit' command
+		Config.config['dateformat'] = 'raw'			# Format for dates
+		Config.config['depth'] = 999999				# Max depth for trees
+		Config.config['father'] = None				# Father for 'new' command
+		Config.config['mother'] = None				# Mother for 'new' command
+
 		Config.ReadConfig()
+		return
+
+	# Get a config variable.
+	# Returns None if the variable is not present in the config dictionary.
+	#
+	@staticmethod
+	def Get(var):
+		try:
+			val = Config.config[var]
+		except:
+			val = None
+		return val
 
 	# Print the config
 	#
 	@staticmethod
 	def Print():
 		print('Config parameters:')
-		print('cfgfile     =', Config.cfgfile)
-		print('prompt      =', '"'+Config.prompt+'"')
-		print('db_dir      =', Config.db_dir)
-		print('branch      =', Config.branch)
-		print('tmpl_dir    =', Config.tmpl_dir)
-		print('html_dir    =', Config.html_dir)
-		print('server_path =', Config.server_path)
-		print('card_path   =', Config.card_path)
-		print('editor      =', Config.editor)
-		print('dateformat  =', Config.dateformat)
-		print('depth       =', Config.depth)
-		print('father      =', Config.father)
-		print('mother      =', Config.mother)
+		varname = '%20s =' % 'cfgfile'
+		print(varname, Config.cfgfile)
+
+		for key in sorted(Config.config):
+			varname = '%20s =' % key
+			print(varname, Config.config[key])
+		return
 
 	# Read the config file
 	#
@@ -80,16 +90,12 @@ class Config():
 			if l == '' or l[0] == '#':
 				pass			# Ignore comment lines and blank lines
 			else:
-				e = Config.SetParameter(l)
-				if e == 0:
+				if Config.SetParameter(l):
 					pass
-				elif e == 1:
-					print('Error in', Config.cfgfile, 'line', line_no, ': unknown variable')
-				elif e == 2:
-					print('Error in', Config.cfgfile, 'line', line_no, ': invalid syntax')
 				else:
-					print('Error in', Config.cfgfile, 'line', line_no, ': to do')
+					print('Error in', Config.cfgfile, 'line', line_no, ': invalid syntax')
 		f.close()
+		return
 
 	# Parse a parameter assignment and set an inidividual parameter
 	#
@@ -112,78 +118,58 @@ class Config():
 			except:
 				pass
 
-			# Set the variable
-			if var == 'prompt':
-				Config.prompt = value
-			elif var == 'db':
-				Config.db_dir = value
-			elif var == 'branch':
-				Config.branch = value
-			elif var == 'templates':
-				Config.tmpl_dir = value
-			elif var == 'htmldir':
-				Config.html_dir = value
-			elif var == 'serverpath':
-				Config.server_path = value
-			elif var == 'editor':
-				Config.editor = value
-			elif var == 'dateformat':
-				Config.dateformat = value
-			elif var == 'depth':
-				try:
-					Config.depth = int(value)
-				except:
-					print('The value of "depth" must be an integer')
-			elif var == 'father':
-				Config.father = value
-			elif var == 'mother':
-				Config.mother = value
-			else:
-				return 1
+			# Set the variable. Values that can be converted to integers are stored as such
+			try:
+				Config.config[var] = int(value)
+			except:
+				Config.config[var] = value
 		else:
-			return 2
-		return 0
+			return False
+		return True
 
 	# Return the base directory (on the server) of the card files
 	#
 	@staticmethod
 	def GetCardbase():
-		if Config.card_path == None:
-			if Config.server_path == None:
+		if Config.Get('card_path') == None:
+			if Config.Get('server_path') == None:
 				cb = '/cards'
 			else:
-				cb = Config.server_path + '/cards'
+				cb = Config.Get('server_path') + '/cards'
 		else:
-			cb = Config.card_path
+			cb = Config.Get('card_path')
 		return cb
 
 	# Construct a file name for a card file
 	#
 	@staticmethod
 	def MakeCardfileName(name, uniq):
-		path = Config.db_dir
-		if Config.branch != None and Config.branch != '':
-			path = path + '/' + Config.branch
+		path = Config.Get('db_dir')
+		b = Config.Get('branch')
+		if b != None and b != '':
+			path = path + '/' + b
 		return Config.MakePersonfileName(name, uniq, path)
 
 	# Construct a file name for an HTML descendants tree
 	#
 	@staticmethod
 	def MakeHtmlDescTreeName(name, uniq):
-		if Config.html_dir == None or Config.html_dir == '':
+		h = Config.Get('html_dir')
+		if h == None or h == '':
 			path = 'trees'
 		else:
-			path = Config.html_dir + '/trees'
+			path = h + '/trees'
 		return Config.MakePersonfileName(name, uniq, path, '-descendants.html', False)
 
 	# Construct a file name for an HTML person card
 	#
 	@staticmethod
 	def MakeHtmlPersonCardName(name, uniq):
-		if Config.html_dir == None or Config.html_dir == '':
+		h = Config.Get('html_dir')
+		if h == None or h == '':
 			path = 'cards'
 		else:
-			path = Config.html_dir + '/cards'
+			path = h + '/cards'
 		return Config.MakePersonfileName(name, uniq, path, '.html', True)
 
 	# Construct a file name for a person's file
@@ -206,8 +192,9 @@ class Config():
 	#
 	@staticmethod
 	def MakeTemplateName(tmpl):
-		if Config.tmpl_dir != None and Config.tmpl_dir != '':
-			return Config.tmpl_dir + '/' + tmpl
+		t = Config.Get('tmpl_dir')
+		if t != None and t != '':
+			return t + '/' + tmpl
 		return tmpl
 
 	# Returns a "normalised" version of a given date according to the specified format
@@ -225,7 +212,7 @@ class Config():
 				return '?'
 			return dflt
 		if fmt == None:
-			fmt = Config.dateformat
+			fmt = Config.Get('dateformat')
 		if fmt == 'raw':
 			return date
 
