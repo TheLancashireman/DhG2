@@ -20,9 +20,33 @@
 import os
 import sys
 
-from jinja2 import Template
-
+from jinja2 import Environment, BaseLoader
 from DhG_Config import Config
+
+# A class to load a template
+#
+class DhG_Loader(BaseLoader):
+	# Parameter is a colon-separated list of places to look for templates
+	#
+	def __init__(self, path):
+		self.locations = path.split(':')
+		return
+
+	# Look through the locations in order; return the first matching template
+	#
+	def find_first(self, template):
+		for loc in self.locations:
+			t = os.path.join(loc, template)
+			if os.path.exists(t):
+				return t
+		raise TemplateNotFound(template)
+
+	def get_source(self, environment, template):
+		t = self.find_first(template)
+		mtime = os.path.getmtime(t)
+		with open(t) as f:
+			source = f.read()
+		return source, t, lambda: mtime == getmtime(path)
 
 # A class to create a file from a template
 #
@@ -34,12 +58,10 @@ class DoTemplate():
 	#	tp		= template parameters
 	#	out		= output file. None ==> stdout
 	#
-	def __init__(self, tmpl, tp, out, trim=False):
-		tmpl_name = Config.MakeTemplateName(tmpl)
-		tmpl_file = open(tmpl_name, 'r')
-		tmpl_text = tmpl_file.read()
-		tmpl_file.close()
-		template = Template(tmpl_text, trim_blocks=trim, lstrip_blocks=trim)
+	def __init__(self, tmpl_name, tp, out, trim=False):
+		tp['config'] = Config
+		env = Environment(trim_blocks=trim, lstrip_blocks=trim, loader=DhG_Loader(Config.Get('tmpl_path')))
+		template = env.get_template(tmpl_name)
 		out_text = template.render(tp = tp)
 		if out == None:
 			print(out_text)
@@ -50,6 +72,7 @@ class DoTemplate():
 				pass
 			outfile = open(out, 'w')
 			outfile.write(out_text)
+			outfile.write('\n')
 			outfile.close()
 
 # A class to hold basic information about a person

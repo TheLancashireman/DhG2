@@ -36,22 +36,23 @@ class Config():
 		if cfgfile != None:
 			Config.cfgfile = cfgfile
 
+		# These values MUST be set in the config file
+		Config.config['db_dir'] = None				# Location of database (must be set!)
+		Config.config['tmpl_path'] = None			# Location of templates
+
 		# Some default values
 		Config.config['prompt'] = '(DhG) '			# Command prompt
-		Config.config['db_dir'] = None				# Location of database (must be set!)
-		Config.config['branch'] = None				# Current family branch
-		Config.config['tmpl_dir'] = 'templates'		# Location of templates
-		Config.config['html_dir'] = None			# Where to put the HTML output
-		Config.config['server_path'] = None			# Path to htmldir on server (for links)
-		Config.config['card_path'] = None			# Path to html cards on server (for links).
-													# Default: server_path+'cards'
 		Config.config['editor'] = 'vi'				# Editor to use for 'edit' command
 		Config.config['dateformat'] = 'raw'			# Format for dates
 		Config.config['depth'] = 999999				# Max depth for trees
-		Config.config['father'] = None				# Father for 'new' command
-		Config.config['mother'] = None				# Mother for 'new' command
 
 		Config.ReadConfig()
+		if Config.config['db_dir'] == None:
+			print('Error: db_dir is not set in the config file')
+			exit(1)
+		if Config.config['tmpl_path'] == None:
+			print('Error: tmpl_path is not set in the config file')
+			exit(1)
 		return
 
 	# Get a config variable.
@@ -187,15 +188,6 @@ class Config():
 			prefix = prefix + names[-1] + '/'
 		cardname = prefix + ''.join(names) + '-' + str(uniq) + suffix
 		return cardname
-
-	# Construct a file name for a template file
-	#
-	@staticmethod
-	def MakeTemplateName(tmpl):
-		t = Config.Get('tmpl_dir')
-		if t != None and t != '':
-			return t + '/' + tmpl
-		return tmpl
 
 	# Returns a "normalised" version of a given date according to the specified format
 	#
