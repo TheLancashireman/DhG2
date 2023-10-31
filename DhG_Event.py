@@ -112,7 +112,7 @@ class Event:
 				if curinfo == None:
 					print('GetTEvInfo() warning: "'+line+'" nothing to continue. Ignored')
 				else:
-					txt = line[1:].lstrip()
+					txt = line[1:]
 					if txt != '':
 						curinfo.info += ' ' + txt
 			elif line[0] == '-':
@@ -147,9 +147,10 @@ class Event:
 				if tx == None:
 					print('GetTSource warning: "'+line+'" nothing to continue. Ignored')
 				else:
-					txt = line[1:].lstrip()
-					if txt != '':
-						tx.AppendLine(txt)
+					txt = line[1:]
+					if len(txt) > 1 and txt[0] == ' ':
+						txt = txt[1:]
+					tx.AppendLine(txt)
 			elif line[0] == '-':
 				tx = None
 				# Supplementary information
