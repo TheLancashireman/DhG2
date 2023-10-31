@@ -211,22 +211,22 @@
 
   <h3>Transcripts of sources</h3>      
   <table class="transcripts">
+    <tr class="transcripts">
+      <th>Ref.</th>
+      <th>Transcript</th>
+	</tr>
+{%    for tx in transcripts %}
     <tr class="transcripts" id="transcript_1">
-      <td class="transcript-index-even">
+      <td class="transcript-index-{{ loop.cycle('odd', 'even') }}">
+        {{ tx.ref }}
       </td>
-      <td class="transcript-text-even">
+      <td class="transcript-index-{{ loop.cycle('odd', 'even') }}">
         <pre>
+{{ tx.text }}
         </pre>
       </td>
     </tr>
-    <tr class="transcripts" id="transcript_2">
-      <td class="transcript-index-odd">
-      </td>
-      <td class="transcript-text-odd">
-        <pre>
-        </pre>
-      </td>
-    </tr>
+{%    endfor %}
   </table>
   <p>
   </p>
@@ -238,18 +238,24 @@
 
   <h3>File sources</h3>      
   <table class="images">
-    <tr class="images" id="image_1">
-      <td class="image-index-even">
+	<tr class="images">
+      <th>Ref.</th>
+      <th>Type</th>
+      <th>File name</th>
+    </tr>
+{%    for file in files %}
+    <tr class="images" id="#{{ file.ref }}">
+      <td class="image-index-{{ loop.cycle('odd', 'even') }}">
+        {{ file.ref }}
       </td>
-      <td class="image-text-even">
+      <td class="image-index-{{ loop.cycle('odd', 'even') }}">
+        {{ file.ftype }}
+      </td>
+      <td class="image-index-{{ loop.cycle('odd', 'even') }}">
+        {{ file.name }}
       </td>
     </tr>
-    <tr class="images" id="image_2">
-      <td class="image-index-odd">
-      </td>
-      <td class="image-text-odd">
-      </td>
-    </tr>
+{%    endfor %}
   </table>
   <p>
   </p>
