@@ -74,6 +74,7 @@ class DoTemplate():
 			outfile.write(out_text)
 			outfile.write('\n')
 			outfile.close()
+		return
 
 # A class to hold basic information about a person
 # Used in templates
@@ -91,6 +92,7 @@ class T_Person():
 			self.vital = name
 		else:
 			self.vital = name + ' ' + dob_dod
+		return
 
 # A class to hold a subtree of a descendants tree
 # Used in templates
@@ -114,3 +116,77 @@ class T_Descendants():
 		else:
 			for x in self.children:
 				x.debug_print()
+		return
+
+# A class to hold a row of the event timeline
+# Used in templates
+# See descendant-tree-html.tmpl for details
+#
+class T_Event():
+	def __init__(self, date, etype, tperson):
+		self.date = date		# Formatted date of the event
+		self.evtype = etype		# Event type
+		self.tperson = tperson	# T_Person object for partner in marriage etc.
+		self.information = []	# Array of T_EvInfo objects containing information about or extracted from the event
+		self.sources = []		# Array of T_Source objects
+		return
+
+# A class to hold an item of information about an event
+#
+class T_EvInfo():
+	def __init__(self, caption, info):
+		self.caption = caption		# Type of information (Place, Abode etc.)
+		self.info = info			# The information
+		self.url = None				# Link to a supporting page
+		self.moreinfo = None		# List of supplementary information (T_EvInfo objects with no moreinfo)
+		return
+
+	# Add more info to the array. Create the array if None
+	#
+	def AddInfo(self, info):
+		if self.moreinfo == None:
+			self.moreinfo = [info]
+		else:
+			self.moreinfo.append(info)
+		return
+
+# A class to hold a source of information
+#
+class T_Source():
+	def __init__(self, descr):
+		self.descr = descr			# Description of the source
+		self.refs = None			# Array of links. Each is a (text, url) tuple
+									# URL can be local (#Tn, #Fn) or global (http/https/etc.)
+		return
+
+	# Add a reference to the array. Create the array if None
+	#
+	def AddRef(self, ref):
+		if self.refs == None:
+			self.refs = [ref]
+		else:
+			self.refs.append(ref)
+		return
+
+# A class to hold a transcript
+#
+class T_Transcript():
+	def __init__(self, ref, text):
+		self.ref = ref				# Reference (Tn). Used in column 1 and as anchor.
+		self.text = text			# The transcript. Will be shown in <pre> environment.
+		return
+
+	def AppendLine(self, text):
+		if self.text != '':
+			self.text += '\n'
+		self.text += text
+		return
+
+# A class to hold a file
+#
+class T_File():
+	def __init__(self, ref, ftype, name):
+		self.ref = ref			# Reference (Fn). Used in column 1 and as anchor.
+		self.ftype = ftype		# File type (transcript, image etc)
+		self.name = name		# File name
+		return

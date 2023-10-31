@@ -137,6 +137,14 @@ class Person:
 				uniq = None
 		return (Person.NormaliseName(name), uniq)
 
+	# Parse a combined name/id string in the form 'Forename Name Lastname [id]'
+	# Returns normalised name and id as a tuple.
+	#
+	# Implemented as a non-static to avoid a circular import. This is a nasty hack.
+	#
+	def ParseCombinedNameStringX(self, namestr):
+		return Person.ParseCombinedNameString(namestr)
+
 	# Extract the important information from the header lines:
 	# Name, Uniq, Sex, Father, Mother
 	#

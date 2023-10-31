@@ -23,6 +23,7 @@ from pathlib import Path
 from DhG_Config import Config
 from DhG_Person import Person
 from DhG_Template import T_Person, T_Descendants
+from DhG_Event import TEventFactory
 from DhG_GedcomImporter import GedcomImporter
 
 # A class to represent the entire database
@@ -635,9 +636,13 @@ class Database:
 			info['children'] = None
 			info['partners'] = None
 
-		info['events'] = None
-		info['transcripts'] = None
-		info['files'] = None
+		factory = TEventFactory(self)
+		for ev in person.events:
+			factory.AddEvent(ev)
+
+		info['events'] = factory.events
+		info['transcripts'] = factory.transcripts
+		info['files'] = factory.files
 		return info
 
 	# Verify that all reference links between people exist.
