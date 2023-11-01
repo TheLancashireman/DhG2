@@ -181,25 +181,68 @@
   <h3>Timeline</h3>
   <table class="timeline">
     <tr class="timeline">
-      <td class="timeline-date-even">
-      </td>
-      <td class="timeline-event-even">
-      </td>
-      <td class="timeline-info-even">
-      </td>
-      <td class="timeline-source-even">
-      </td>
-    </tr>
+      <th>Date</th>
+      <th>Event</th>
+      <th>Information</th>
+      <th>Sources</th>
+	</tr>
+{%    for ev in events %}
     <tr class="timeline">
-      <td class="timeline-date-odd">
+      <td class="timeline-date-{{ loop.cycle('even', 'odd') }}">
+        {{ ev.date }}
       </td>
-      <td class="timeline-event-odd">
+      <td class="timeline-event-{{ loop.cycle('even', 'odd') }}">
+{%      if ev.tperson == None %}
+        {{ ev.evtype }}
+{%      else %}
+        {{ ev.evtype }}<br>
+{%        if ev.tperson.file == None %}
+        {{ ev.tperson.vital }}
+{%        else %}
+        <a href="{{ CARDBASE }}/{{ ev.tperson.file }}.html">{{ ev.tperson.vital }}</a>
+{%        endif %}
+{%      endif %}
       </td>
-      <td class="timeline-info-odd">
+      <td class="timeline-info-{{ loop.cycle('even', 'odd') }}">
+{%      if ev.information != None %}
+        <ul style="list-style-type: none; padding-left: 0px; margin-left: 0px; margin-top: 0px">
+{%        for inf in ev.information recursive %}
+          <li>
+{%          if inf.url == None %}
+            {{ inf.caption }}: {{ inf.info }}
+{%          else %}
+            {{ inf.caption }}: <a href="{{inf.url }}">{{ inf.info }}</a>
+{%          endif %}
+{%          if inf.moreinfo != None %}
+            <ul style="list-style-type: disc; padding-left: 20px">
+{{            loop(inf.moreinfo) }}
+            </ul>
+{%          endif %}
+          </li>
+{%        endfor %}
+        </ul>
+{%      endif %}
       </td>
-      <td class="timeline-source-odd">
+      <td class="timeline-source-{{ loop.cycle('even', 'odd') }}">
+{%      if ev.sources != None %}
+        <ul style="list-style-type: none; padding-left: 0px; margin-left: 0px; margin-top: 0px">
+{%        for src in ev.sources %}
+          <li>
+{%          if src.refs == None %}
+            {{ src.descr }}
+{%          else %}
+            {{ src.descr }}:
+{%            for r in src.refs %}
+            &nbsp;<a href="{{ r.link }}">{{ r.text }}</a>
+{%            endfor %}
+{%          endif %}
+          </li>
+{%        endfor %}
+        </ul>
+{%      endif %}
       </td>
     </tr>
+{%    endfor %}
   </table>
   <p>
   </p>
@@ -216,11 +259,11 @@
       <th>Transcript</th>
 	</tr>
 {%    for tx in transcripts %}
-    <tr class="transcripts" id="transcript_1">
-      <td class="transcript-index-{{ loop.cycle('odd', 'even') }}">
+    <tr class="transcripts" id="{{ tx.ref }}">
+      <td class="transcript-index-{{ loop.cycle('even', 'odd') }}">
         {{ tx.ref }}
       </td>
-      <td class="transcript-index-{{ loop.cycle('odd', 'even') }}">
+      <td class="transcript-text-{{ loop.cycle('even', 'odd') }}">
         <pre>
 {{ tx.text }}
         </pre>
@@ -244,14 +287,14 @@
       <th>File name</th>
     </tr>
 {%    for file in files %}
-    <tr class="images" id="#{{ file.ref }}">
-      <td class="image-index-{{ loop.cycle('odd', 'even') }}">
+    <tr class="images" id="{{ file.ref }}">
+      <td class="image-index-{{ loop.cycle('even', 'odd') }}">
         {{ file.ref }}
       </td>
-      <td class="image-index-{{ loop.cycle('odd', 'even') }}">
+      <td class="image-text-{{ loop.cycle('even', 'odd') }}">
         {{ file.ftype }}
       </td>
-      <td class="image-index-{{ loop.cycle('odd', 'even') }}">
+      <td class="image-text-{{ loop.cycle('even', 'odd') }}">
         {{ file.name }}
       </td>
     </tr>

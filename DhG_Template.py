@@ -150,18 +150,27 @@ class T_EvInfo():
 			self.moreinfo.append(info)
 		return
 
+# A class to hold a source reference
+#
+class T_Ref():
+	def __init__(self, text, link):
+		self.text = text
+		self.link = link
+		return
+
 # A class to hold a source of information
 #
 class T_Source():
 	def __init__(self, descr):
 		self.descr = descr			# Description of the source
-		self.refs = None			# Array of links. Each is a (text, url) tuple
+		self.refs = None			# Array of links. Each is a T_Ref object
 									# URL can be local (#Tn, #Fn) or global (http/https/etc.)
 		return
 
 	# Add a reference to the array. Create the array if None
 	#
-	def AddRef(self, ref):
+	def AddRef(self, text, link):
+		ref = T_Ref(text, link)
 		if self.refs == None:
 			self.refs = [ref]
 		else:

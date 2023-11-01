@@ -546,7 +546,7 @@ class Database:
 		anc['lines'] = self.GetAtree(p, 1)
 		return anc
 
-	# Return a TPerson object for a person of given unique id, or None if person not found
+	# Return a T_Person object for a person of given unique id, or None if person not found
 	#
 	def GetTPerson(self, uniq, dateformat):
 		try:

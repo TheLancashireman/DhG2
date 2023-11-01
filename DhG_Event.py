@@ -18,7 +18,7 @@
 # along with DhG.  If not, see <http://www.gnu.org/licenses/>.
 
 from DhG_Config import Config
-from DhG_Template import T_Event, T_EvInfo, T_Source, T_Transcript, T_File
+from DhG_Template import T_Person, T_Event, T_EvInfo, T_Source, T_Transcript, T_File
 
 # Event class - represents an event on a person's timeline
 #
@@ -68,7 +68,7 @@ class Event:
 			if idx != None:
 				tp = factory.db.GetTPerson(idx, 'yearonly')
 			if tp == None:
-				tp = TPerson(name, None)
+				tp = T_Person(name, None)
 
 		e = T_Event(self.GetDate('cooked'), self.etype, tp)
 
@@ -159,7 +159,7 @@ class Event:
 					if len(parts) != 2:
 						print('GetTSource() warning: "'+line+'" not recognised. Ignored')
 						continue
-					src.AddRef(('Link', parts[1]))
+					src.AddRef('Link', parts[1])
 				elif parts[0].lower() == '-file':
 					if len(parts) != 2:
 						print('GetTSource() warning: "'+line+'" not recognised. Ignored')
@@ -169,14 +169,14 @@ class Event:
 						print('GetTSource() warning: "'+line+'" not recognised. Ignored')
 						continue
 					ref = factory.AddFile(fparts[0], fparts[1])
-					src.AddRef((ref, '#'+ref))
+					src.AddRef(ref, '#'+ref)
 				elif parts[0].lower() == '-transcript':
 					if len(parts) >= 2:
 						txt = parts[1]
 					else:
 						txt = ''
 					(ref, tx) = factory.AddTranscript(txt)
-					src.AddRef((ref, '#'+ref))
+					src.AddRef(ref, '#'+ref)
 				else:
 					print('GetTSource() warning: "'+line+'" not recognised. Ignored')
 			else:
@@ -232,6 +232,6 @@ class TEventFactory():
 					print('AddFile() warning: "'+fname+'" referenced with different types')
 				return fx.ref
 
-		ref = 'F'+str(len(self.transcripts)+1)
+		ref = 'F'+str(len(self.files)+1)
 		self.files.append(T_File(ref, ftype, fname))
 		return ref
