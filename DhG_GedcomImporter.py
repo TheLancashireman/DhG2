@@ -107,7 +107,7 @@ class GedcomImporter():
 				p.death.AddLine('?           Death')
 				p.death.AddLine('+Source     Assumed, date unknown')
 				p.death.DecodeEventType(p)
-			p.events.append(p.death)
+			p.events.append(p.death)	# Death record is always last
 		return
 
 	# Read the GEDCOM file and split into different record objects
@@ -194,6 +194,17 @@ class GedcomImporter():
 #		print()
 		return
 
+	# Insert an event into the event list in sorted order
+	# Birth is assumed to be event[0], death is appended afterwards, so is always last.
+	# '?' is greater than all digits, so events with unknown dates come after those with known dates
+	#
+	def InsertEvent(self, list, event):
+		for i in range(1, len(list)):
+			if list[i].date > event.date:
+				list.insert(i, event)
+				return
+		list.append(event)
+
 	# Process an INDI record. Add a person to the database and fill with all relevant information
 	#
 	def ProcessIndi(self, obj):
@@ -231,6 +242,7 @@ class GedcomImporter():
 		# Assume that every person was born and add a Birth event.
 		ev = Event()
 		ev.AddLine('?           Birth')
+		ev.DecodeEventType(person)
 		person.birth = ev
 		person.events.append(ev)
 
@@ -282,29 +294,32 @@ class GedcomImporter():
 					# Add a Travel event.
 					# Special for Dobbs
 					ev = Event()
-					person.events.append(ev)
+					self.InsertEvent(person.events, ev)
 					ev.AddLine('?           Emigration')
 					# If there's text on the line after EMIG, record it as the destination.
 					if len(p) > 2 and p[2] != 'Y':
 						ev.AddLine('+Where      '+p[2])
+					ev.DecodeEventType(person)
 				elif l1 == 'PROP':
 					# Add a miscellaneous event for property acquisition.
 					# Special for Dobbs
 					ev = Event()
-					person.events.append(ev)
+					self.InsertEvent(person.events, ev)
 					ev.AddLine('?           Misc        Property acquisition')
 					# If there's text on the line after PROP, record it as a note.
 					if len(p) > 2 and p[2] != 'Y':
 						ev.AddLine('+Note       '+p[2])
+					ev.DecodeEventType(person)
 				elif l1 == 'OCCU':
 					# Add a miscellaneous event for occupation
 					# Special for Dobbs
 					ev = Event()
-					person.events.append(ev)
+					self.InsertEvent(person.events, ev)
 					ev.AddLine('?           Misc        Occupation')
 					# If there's text on the line after PROP, record it as a note.
 					if len(p) > 2 and p[2] != 'Y':
 						ev.AddLine('+Note       '+p[2])
+					ev.DecodeEventType(person)
 				elif l1 == 'DEAT':
 					# Add a Death event, but don't append to the list yet.
 					ev = Event()
@@ -313,6 +328,7 @@ class GedcomImporter():
 					# If there's text (other than Y) on the line after DEAT, record it as a note.
 					if len(p) > 2 and p[2] != 'Y':
 						ev.AddLine('+Note       '+p[2])
+					ev.DecodeEventType(person)
 				elif l1 == 'NOTE':
 					# Add a note to the header lines
 					try:
@@ -712,7 +728,7 @@ class GedcomImporter():
 					elines[0] = el0 + mother.GetVitalLine(fmt='card')
 				ev.lines += elines
 				ev.DecodeEventType(father)
-				father.events.append(ev)
+				self.InsertEvent(father.events, ev)
 				father.partnerships.append(ev)
 
 			if mother != None:
@@ -723,7 +739,7 @@ class GedcomImporter():
 					elines[0] = el0 + father.GetVitalLine(fmt='card')
 				ev.lines += elines
 				ev.DecodeEventType(mother)
-				mother.events.append(ev)
+				self.InsertEvent(mother.events, ev)
 				mother.partnerships.append(ev)
 		return
 
