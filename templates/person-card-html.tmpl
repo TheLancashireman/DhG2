@@ -236,6 +236,19 @@
             &nbsp;<a href="{{ r.link }}">{{ r.text }}</a>
 {%            endfor %}
 {%          endif %}
+{%          if src.moreinfo != None %}
+            <ul style="list-style-type: disc; padding-left: 20px">
+{%            for inf in src.moreinfo %}
+              <li>
+{%              if inf.url == None %}
+                {{ inf.caption }}: {{ inf.info }}
+{%              else %}
+                {{ inf.caption }}: <a href="{{inf.url }}">{{ inf.info }}</a>
+{%              endif %}
+              </li>
+{%            endfor %}
+            </ul>
+{%          endif %}
           </li>
 {%        endfor %}
         </ul>

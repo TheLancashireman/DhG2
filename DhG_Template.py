@@ -136,9 +136,17 @@ class T_Event():
 class T_EvInfo():
 	def __init__(self, caption, info):
 		self.caption = caption		# Type of information (Place, Abode etc.)
-		self.info = info			# The information
+		self.info = info			# The information (text)
 		self.url = None				# Link to a supporting page
 		self.moreinfo = None		# List of supplementary information (T_EvInfo objects with no moreinfo)
+		return
+
+	# Add more text to the info
+	#
+	def AppendLine(self, text):
+		if self.info != '':
+			self.info += '\n'
+		self.info += text
 		return
 
 	# Add more info to the array. Create the array if None
@@ -165,6 +173,7 @@ class T_Source():
 		self.descr = descr			# Description of the source
 		self.refs = None			# Array of links. Each is a T_Ref object
 									# URL can be local (#Tn, #Fn) or global (http/https/etc.)
+		self.moreinfo = None		# List of supplementary information (T_EvInfo objects with no moreinfo)
 		return
 
 	# Add a reference to the array. Create the array if None
@@ -175,6 +184,15 @@ class T_Source():
 			self.refs = [ref]
 		else:
 			self.refs.append(ref)
+		return
+
+	# Add more info to the array. Create the array if None
+	#
+	def AddInfo(self, info):
+		if self.moreinfo == None:
+			self.moreinfo = [info]
+		else:
+			self.moreinfo.append(info)
 		return
 
 # A class to hold a transcript

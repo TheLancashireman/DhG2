@@ -133,7 +133,7 @@ class Event:
 	#
 	def GetTSource(self, factory, parts, i):
 		src = T_Source(parts[1])
-		tx = None
+		curobj = None				# The object to add continuation lines to.
 		while i < self.nlines:
 			line = self.lines[i]
 			i += 1
@@ -144,15 +144,15 @@ class Event:
 				return (i-1, src)
 			if line[0] == '|':
 				# Continuation character
-				if tx == None:
+				if curobj == None:
 					print('GetTSource warning: "'+line+'" nothing to continue. Ignored')
 				else:
 					txt = line[1:]
 					if len(txt) > 1 and txt[0] == ' ':
 						txt = txt[1:]
-					tx.AppendLine(txt)
+					curobj.AppendLine(txt)
 			elif line[0] == '-':
-				tx = None
+				curobj = None
 				# Supplementary information
 				parts = line.split(maxsplit=1)
 				if parts[0].lower() == '-url':
@@ -175,10 +175,15 @@ class Event:
 						txt = parts[1]
 					else:
 						txt = ''
-					(ref, tx) = factory.AddTranscript(txt)
+					(ref, curobj) = factory.AddTranscript(txt)
 					src.AddRef(ref, '#'+ref)
 				else:
-					print('GetTSource() warning: "'+line+'" not recognised. Ignored')
+					if len(parts) >= 2:
+						txt = parts[1]
+					else:
+						txt = ''
+					curobj = T_EvInfo(parts[0][1:], txt)
+					src.AddInfo(curobj)
 			else:
 				print('GetTSource() warning: "'+line+'" not recognised. Ignored')
 		return (i, src)
