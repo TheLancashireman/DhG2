@@ -17,6 +17,21 @@
 # You should have received a copy of the GNU General Public License
 # along with DhG.  If not, see <http://www.gnu.org/licenses/>.
 
+# Lines in the header:
+#
+# Mandatory
+#	Name:
+#	Uniq:
+#	Male/Female
+#
+# Optional
+#	Private
+#	Nickname:
+#	Source:
+#	Note:
+#	Photo:		(to do)
+#	
+
 import os
 import sys
 from DhG_Config import Config
@@ -31,6 +46,12 @@ evchars = set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '?'])
 class Person:
 	def __init__(self):
 		self.filename = None
+		self.Clear()
+		return
+
+	# Clear all the fields
+	#
+	def Clear(self):
 		self.headlines = []
 		self.events = []
 		self.footlines = []
@@ -39,34 +60,25 @@ class Person:
 		self.sex = None
 		self.birth = None
 		self.death = None
+		self.private = False
 		self.partnerships = []
 		self.father_name = None
 		self.father_uniq = None
 		self.mother_name = None
 		self.mother_uniq = None
 		self.importer_info = None			# Used for storing extra information used by importers etc.
+		return
 
 	# Read and store all the data from a person's card file
 	#
 	def ReadFile(self, filename):
 		self.filename = filename
 		self.Read()
+		return
 
 	def Read(self):
 		# Clear out any old stuff
-		self.headlines = []
-		self.events = []
-		self.footlines = []
-		self.name = None
-		self.uniq = None
-		self.sex = None
-		self.birth = None
-		self.death = None
-		self.partnerships = []
-		self.father_name = None
-		self.father_uniq = None
-		self.mother_name = None
-		self.mother_uniq = None
+		self.Clear()
 		mode = 0	# 0 = head, 1 = timeline, 2 = tail
 		cur_event = None
 		f = open(self.filename, 'r')
@@ -99,6 +111,7 @@ class Person:
 			self.events.append(cur_event)
 
 		f.close()
+		return
 
 	# Normalise a name string: remove leading and trailing whitespace, replace multiple whitespace with a single space
 	# Returns the normalised name
@@ -149,25 +162,65 @@ class Person:
 	# Name, Uniq, Sex, Father, Mother
 	#
 	def AnalyseHeader(self):
+		cont_allowed = False
 		for line in self.headlines:
 			line = line.lstrip()	# Remove leading spaces
-			if line[0:5].lower() == 'name:':
-				name = Person.NormaliseName(line[5:])
-				self.name = name
-			elif line[0:5].lower() == 'uniq:':
-				try:
-					uniq = int(line[5:].rstrip().lstrip())
-				except:
-					uniq = None
-				self.uniq = uniq
-			elif line.lower() == 'male':
-				self.sex = 'm'
-			elif line.lower() == 'female':
-				self.sex = 'f'
-			elif line[0:7].lower() == 'mother:':
-				(self.mother_name, self.mother_uniq) = Person.ParseCombinedNameString(line[7:])
-			elif line[0:7].lower() == 'father:':
-				(self.father_name, self.father_uniq) = Person.ParseCombinedNameString(line[7:])
+			if line == '' or line[0] == '#':
+				cont_allowed = False
+				pass	# Ignore blanks and comments
+			elif line[0] == '|':
+				if cont_allowed:
+					pass
+				else:
+					print('Unexpected continuation line "'+line+'" ignored in name:', self.name, 'uniq:', self.uniq)
+			else:
+				cont_allowed = False
+				if line[0:5].lower() == 'name:':
+					name = Person.NormaliseName(line[5:])
+					self.name = name
+				elif line[0:5].lower() == 'uniq:':
+					try:
+						uniq = int(line[5:].rstrip().lstrip())
+					except:
+						uniq = None
+					self.uniq = uniq
+				elif line.lower() == 'male':
+					self.sex = 'm'
+				elif line.lower() == 'female':
+					self.sex = 'f'
+				elif line.lower() == 'unk':
+					self.sex = 'u'
+				elif line.lower() == 'private':
+					self.private = True
+				elif line[0:7].lower() == 'mother:':
+					(self.mother_name, self.mother_uniq) = Person.ParseCombinedNameString(line[7:])
+				elif line[0:7].lower() == 'father:':
+					(self.father_name, self.father_uniq) = Person.ParseCombinedNameString(line[7:])
+				elif line[0:8].lower() == 'version:':
+					pass	# Version: line ignored
+				elif line[0:5].lower() == 'todo:':
+					cont_allowed = True
+					pass	# ToDo: line ignored; continuation lines allowed
+				elif line[0:9].lower() == 'nickname:':
+					pass	# ToDo: process nickname
+				elif line[0:6].lower() == 'alias:':
+					pass	# ToDo: process alias
+				elif line[0:6].lower() == 'photo:':
+					pass	# ToDo: process nickname
+				elif line[0:11].lower() == 'occupation:':
+					cont_allowed = True
+					pass	# Todo: process occupation
+				elif line[0:7].lower() == 'source:':
+					cont_allowed = True
+					pass	# Todo: process notes
+				elif line[0:5].lower() == 'note:':
+					cont_allowed = True
+					pass	# Todo: process notes
+				elif line[0:6].lower() == 'notes:':
+					cont_allowed = True
+					pass	# Todo: process notes
+				else:
+					print('Unrecognised header line: "'+line+'" ignored in name:', self.name, 'uniq:', self.uniq)
 
 	# Return True if person matches arguments
 	# arg is a list of terms. Result is true iff all terms match
