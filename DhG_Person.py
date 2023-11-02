@@ -388,3 +388,28 @@ class Person:
 						file = fn)
 		# tp.other left at default; must be added later if needed
 		return tp
+
+	# Returns an array of strings, each of which is the text of a Note tag in the header
+	#
+	def GetNotes(self):
+		notes = []
+		txt = None
+		for l in self.headlines:
+			if l == '':
+				pass
+			elif l[0:5] == 'Note:':
+				txt = l[5:].lstrip().rstrip()
+			elif l[0:6] == 'Notes:':
+				txt = l[6:].lstrip().rstrip()
+			elif l[0] == '|':
+				if txt != None:
+					txt += ' '+l[1:]
+			else:
+				if txt != None:
+					notes.append(txt)
+					txt = None
+		if txt != None:
+			notes.append(txt)
+		return notes
+
+				

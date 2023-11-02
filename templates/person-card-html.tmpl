@@ -105,7 +105,17 @@
       </td>
     </tr>
   </table>
-
+{%  if tp['notes'] != None %}
+  <table class="general-info">
+{%    for n in tp['notes'] %}
+    <tr class="general-info">
+      <td class="general-info-value">
+{{ n }}
+      </td>
+    </tr>
+{%    endfor %}
+  </table>
+{%  endif %}
   <table class="family">
     <tr class="family">
       <td class="siblings">

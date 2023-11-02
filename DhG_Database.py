@@ -568,7 +568,7 @@ class Database:
 		info['father'] = self.GetTPerson(person.father_uniq, dateformat)
 		info['mother'] = self.GetTPerson(person.mother_uniq, dateformat)
 
-		info['notes'] = None	# ToDo
+		info['notes'] = person.GetNotes()
 
 		info['siblings'] = []
 		info['others'] = []
