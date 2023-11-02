@@ -24,7 +24,7 @@ from DhG_Template import T_Person, T_Event, T_EvInfo, T_Source, T_Transcript, T_
 #
 class Event:
 	def __init__(self):
-		self.lines = []
+		self.lines = None
 		self.owner = None
 		self.date = None
 		self.etype = None
@@ -34,7 +34,16 @@ class Event:
 	# The first line is the date and the event type
 	#
 	def AddLine(self, line):
+		if self.lines == None:
+			self.lines = [line]
+			return
 		self.lines.append(line)
+		if line == '':
+			return
+		if line[0] == '#' or line[0] == '+' or line[0] == '-' or line[0] == '|':
+			return
+		print('Invalid form for event line: "'+line+'"')
+		return
 
 	# Decode the first line of the event
 	#
