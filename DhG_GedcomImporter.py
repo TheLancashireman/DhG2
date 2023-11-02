@@ -233,7 +233,7 @@ class GedcomImporter():
 		person.uniq = self.ExtractUniqFromXref(obj.xref)
 		if person.uniq != None:
 								#  123456789012
-			person.headlines[1] = 'Uniq        '+str(person.uniq)
+			person.headlines[1] = 'Uniq:       '+str(person.uniq)
 #			print(person.headlines[1])
 			self.db.AddPerson(person.uniq, person)
 			if person.uniq > self.max_uniq:
@@ -281,7 +281,7 @@ class GedcomImporter():
 						print('Line '+str(obj.first_line+grno)+' "'+l.rstrip()+'": ignored; sex not known')
 				elif l1 == 'EVEN':
 					# This appears to be a remark about the name of the person
-					# See TYPE at L2
+					# See TYPE at L2         123456789012
 					person.headlines.append('Note:       '+p[2])
 				elif l1 == 'BIRT':
 					# Recall the default birth record
