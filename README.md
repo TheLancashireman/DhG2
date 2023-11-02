@@ -30,6 +30,7 @@ There is always lots to do. :-)
 * Consider refactoring the timeline command to use the same data ad HTML card, but a different template.
 * OR: keep the text output as it is and implement a new command.
 * Add a privacy filter.
-* Add a translation table for captions in event info. See DhG for existing list, add Mapref.
+* Add a translation table for captions in event info. Does DhG have a list? Add Mapref -> Map reference.
 * Read transcripts from transcript file (some types)
 * Check how Misc events are presented
+* Process notes and other information at the file level. Nickname, Private, Note etc. Photo?
