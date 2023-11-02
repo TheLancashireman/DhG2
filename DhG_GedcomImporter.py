@@ -97,11 +97,14 @@ class GedcomImporter():
 		for f in self.fam:
 			self.ProcessFam(self.fam[f])
 
+		# Reprocess the header for each person. This will overwrite some of the previously
+		# calculated stuff, but it should be the same.
 		# Append death event to event list for each person in GEDCOM
 		# ProcessIndi creates a death event if present in GEDCOM, but doesn't add it to the
 		# person's list, in order to ensure that the death comes last.
 		for pref in self.persons:
 			p = self.persons[pref]
+			p.AnalyseHeader()
 			if p.death == None:		# Special for Dobbs: all individuals assumed dead. If no death record, add one
 				p.death = Event()
 				p.death.AddLine('?           Death')
@@ -726,7 +729,10 @@ class GedcomImporter():
 					elines[0] = el0 + 'not known'
 				else:
 					elines[0] = el0 + mother.GetVitalLine(fmt='card')
-				ev.lines += elines
+				if ev.lines == None:
+					ev.lines = elines
+				else:
+					ev.lines += elines
 				ev.DecodeEventType(father)
 				self.InsertEvent(father.events, ev)
 				father.partnerships.append(ev)
@@ -737,7 +743,10 @@ class GedcomImporter():
 					elines[0] = el0 + 'not known'
 				else:
 					elines[0] = el0 + father.GetVitalLine(fmt='card')
-				ev.lines += elines
+				if ev.lines == None:
+					ev.lines = elines
+				else:
+					ev.lines += elines
 				ev.DecodeEventType(mother)
 				self.InsertEvent(mother.events, ev)
 				mother.partnerships.append(ev)

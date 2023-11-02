@@ -196,15 +196,8 @@ class DhG_Shell(cmd.Cmd):
 		if arg == '':
 			Config.Print()
 			return
-		e = Config.SetParameter(arg)
-		if e == 0:
-			pass
-		elif e == 1:
-			print('Error : unknown variable')
-		elif e == 2:
-			print('Error : invalid syntax')
-		else:
-			print('Error : to do')
+		if not Config.SetParameter(arg):
+			print('Error : invalid syntax for set')
 		return
 
 	def do_reload(self, arg):

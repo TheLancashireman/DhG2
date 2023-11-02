@@ -158,6 +158,14 @@ class Person:
 	def ParseCombinedNameStringX(self, namestr):
 		return Person.ParseCombinedNameString(namestr)
 
+	# Print a header line tag an unique ID where found
+	# Useful for testing - to find out persons to look at for a given tag.
+	#
+	def PrintHeaderTag(self, tag):
+		if Config.Get('ListHeaderTags') == 'y':
+			print(tag, 'tag found in', self.uniq)
+		return
+
 	# Extract the important information from the header lines:
 	# Name, Uniq, Sex, Father, Mother
 	#
@@ -202,25 +210,33 @@ class Person:
 					cont_allowed = True
 					pass	# ToDo: line ignored; continuation lines allowed
 				elif line[0:9].lower() == 'nickname:':
+					self.PrintHeaderTag('Nickname')
 					pass	# ToDo: process nickname
 				elif line[0:6].lower() == 'alias:':
+					self.PrintHeaderTag('Alias')
 					pass	# ToDo: process alias
 				elif line[0:6].lower() == 'photo:':
+					self.PrintHeaderTag('Photo')
 					pass	# ToDo: process nickname
 				elif line[0:11].lower() == 'occupation:':
+					self.PrintHeaderTag('Occupation')
 					cont_allowed = True
 					pass	# Todo: process occupation
 				elif line[0:7].lower() == 'source:':
+					self.PrintHeaderTag('Source')
 					cont_allowed = True
 					pass	# Todo: process notes
 				elif line[0:5].lower() == 'note:':
+					self.PrintHeaderTag('Note')
 					cont_allowed = True
 					pass	# Todo: process notes
 				elif line[0:6].lower() == 'notes:':
+					self.PrintHeaderTag('Notes')
 					cont_allowed = True
 					pass	# Todo: process notes
 				else:
 					print('Unrecognised header line: "'+line+'" ignored in name:', self.name, 'uniq:', self.uniq)
+		return
 
 	# Return True if person matches arguments
 	# arg is a list of terms. Result is true iff all terms match

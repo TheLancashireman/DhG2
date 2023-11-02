@@ -61,7 +61,7 @@ class Config():
 	@staticmethod
 	def Get(var):
 		try:
-			val = Config.config[var]
+			val = Config.config[var.lower()]
 		except:
 			val = None
 		return val
