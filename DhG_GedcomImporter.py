@@ -319,9 +319,10 @@ class GedcomImporter():
 					ev = Event()
 					self.InsertEvent(person.events, ev)
 					ev.AddLine('?           Misc        Occupation')
-					# If there's text on the line after PROP, record it as a note.
+					# If there's text on the line after OCCU, record it as occupation AND ass a header line
 					if len(p) > 2 and p[2] != 'Y':
-						ev.AddLine('+Note       '+p[2])
+						ev.AddLine('+Occupation '+p[2])
+						person.headlines.append('Occupation: '+p[2])
 					ev.DecodeEventType(person)
 				elif l1 == 'DEAT':
 					# Add a Death event, but don't append to the list yet.

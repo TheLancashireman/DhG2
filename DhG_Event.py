@@ -106,7 +106,10 @@ class Event:
 	# Return a T_EvInfo object and the index of the line after the info
 	#
 	def GetTEvInfo(self, parts, i):
-		evinfo = T_EvInfo(parts[0][1:], parts[1])
+		if len(parts) < 2:
+			evinfo = T_EvInfo(parts[0][1:], '')
+		else:
+			evinfo = T_EvInfo(parts[0][1:], parts[1])
 		curinfo = evinfo
 		while i < self.nlines:
 			line = self.lines[i]
@@ -128,9 +131,16 @@ class Event:
 				# Supplementary information
 				parts = line.split(maxsplit=1)
 				if parts[0].lower() == '-url':
-					evinfo.url = parts[1]
+					if len(parts) < 2:
+						print('GetTEvInfo() warning: "'+line+'" no url provided. Ignored')
+					else:
+						evinfo.url = parts[1]
 					curinfo = None			# No more continuation lines until next item
 				else:
+					if len(parts) < 2:
+						evinfo = T_EvInfo(parts[0][1:], '')
+					else:
+						evinfo = T_EvInfo(parts[0][1:], parts[1])
 					curinfo = T_EvInfo(parts[0][1:], parts[1])
 					evinfo.AddInfo(curinfo)
 			else:

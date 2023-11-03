@@ -568,7 +568,11 @@ class Database:
 		info['father'] = self.GetTPerson(person.father_uniq, dateformat)
 		info['mother'] = self.GetTPerson(person.mother_uniq, dateformat)
 
-		info['notes'] = person.GetNotes()
+		info['nicknames'] = person.GetHeaders('nickname:')
+		info['aliases'] = person.GetHeaders('alias:')
+		info['occupations'] = person.GetHeaders('occupation:')
+		info['notes'] = person.GetHeaders('note:', 'notes:')
+		info['sources'] = person.GetHeaders('source:', 'sources:')
 
 		info['siblings'] = []
 		info['others'] = []

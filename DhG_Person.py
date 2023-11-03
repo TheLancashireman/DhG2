@@ -204,6 +204,8 @@ class Person:
 					(self.mother_name, self.mother_uniq) = Person.ParseCombinedNameString(line[7:])
 				elif line[0:7].lower() == 'father:':
 					(self.father_name, self.father_uniq) = Person.ParseCombinedNameString(line[7:])
+				# The remaining branches are just for error checking. They are read out of the header
+				# when needed -- see GetHeaders()
 				elif line[0:8].lower() == 'version:':
 					pass	# Version: line ignored
 				elif line[0:5].lower() == 'todo:':
@@ -211,29 +213,29 @@ class Person:
 					pass	# ToDo: line ignored; continuation lines allowed
 				elif line[0:9].lower() == 'nickname:':
 					self.PrintHeaderTag('Nickname')
-					pass	# ToDo: process nickname
+					pass
 				elif line[0:6].lower() == 'alias:':
 					self.PrintHeaderTag('Alias')
-					pass	# ToDo: process alias
+					pass
 				elif line[0:6].lower() == 'photo:':
 					self.PrintHeaderTag('Photo')
-					pass	# ToDo: process nickname
+					pass
 				elif line[0:11].lower() == 'occupation:':
 					self.PrintHeaderTag('Occupation')
 					cont_allowed = True
-					pass	# Todo: process occupation
+					pass
 				elif line[0:7].lower() == 'source:':
 					self.PrintHeaderTag('Source')
 					cont_allowed = True
-					pass	# Todo: process notes
+					pass
 				elif line[0:5].lower() == 'note:':
 					self.PrintHeaderTag('Note')
 					cont_allowed = True
-					pass	# Todo: process notes
+					pass
 				elif line[0:6].lower() == 'notes:':
 					self.PrintHeaderTag('Notes')
 					cont_allowed = True
-					pass	# Todo: process notes
+					pass
 				else:
 					print('Unrecognised header line: "'+line+'" ignored in name:', self.name, 'uniq:', self.uniq)
 		return
@@ -389,27 +391,35 @@ class Person:
 		# tp.other left at default; must be added later if needed
 		return tp
 
-	# Returns an array of strings, each of which is the text of a Note tag in the header
+	# Returns an array of strings, each of which is the text of a given tag in the header lines
 	#
-	def GetNotes(self):
-		notes = []
+	def GetHeaders(self, caption, alt = None):
+		s1 = caption.lower()
+		l1 = len(caption)
+		if alt == None:
+			s2 = None
+			l2 = 0
+		else:
+			s2 = alt.lower()
+			l2 = len(alt)
+		items = []
 		txt = None
 		for l in self.headlines:
 			if l == '':
 				pass
-			elif l[0:5] == 'Note:':
-				txt = l[5:].lstrip().rstrip()
-			elif l[0:6] == 'Notes:':
-				txt = l[6:].lstrip().rstrip()
+			elif l[0:l1].lower() == s1:
+				txt = l[l1:].lstrip().rstrip()
+			elif l[0:l2].lower() == s2:
+				txt = l[l2:].lstrip().rstrip()
 			elif l[0] == '|':
 				if txt != None:
 					txt += ' '+l[1:]
 			else:
 				if txt != None:
-					notes.append(txt)
+					items.append(txt)
 					txt = None
 		if txt != None:
-			notes.append(txt)
-		return notes
-
-				
+			items.append(txt)
+		if items == []:
+			return None
+		return items

@@ -22,12 +22,16 @@
 		subj		: the subject of the card
 		father		: the subject's father
 		mother		: the subject's mother
+		nicknames	: a list of the subject's nicknames
+		aliases		: a list of the subject's aliases
+		occupations	: a list of the subject's occupations
 		siblings	: a list of siblings of the subject, ordered by DoB
 		others		: a list of other parents of half-siblings
 		partners	: a list of all the other parents of the children, in order of the children's DoB
 		children	: a list of children of the subject, ordered by DoB
-		notes		: a list of general information about the person
-		events		: a list of events from the person's timeline
+		notes		: a list of general information about the subject
+		sources		: a list of general sources of information about the subject
+		events		: a list of events from the subject's timeline
 		transcripts	: a list of transcripts referenced from the events
 		files		: a list of image/transcript files referenced from the events
 		timestamp	: date and time of generation
@@ -67,7 +71,71 @@
 {%  if subj.dob_dod != None %}
   <h2>{{ subj.dob_dod }}</h2>
 {%  endif %}
+
+{%  set list = tp['nicknames'] %}
+{%  if list != None %}
+  <div>
+{%    for n in list %}
+{%      if loop.first and loop.last %}
+    <p><b>Nickname:</b> {{ n }}</p>
+{%      elif loop.first %}
+    <p><b>Nicknames:</b> {{ n }},
+{%      elif loop.last %}
+      {{ n }}</p>
+{%      else %}
+      {{ n }},
+{%      endif %}
+{%    endfor %}
+  </div>
+{%  endif %}
+
+{%  set list = tp['aliases'] %}
+{%  if list != None %}
+  <div>
+{%    for n in list %}
+{%      if loop.first and loop.last %}
+    <p><b>Alias:</b> {{ n }}</p>
+{%      elif loop.first %}
+    <p><b>Aliases:</b> {{ n }},
+{%      elif loop.last %}
+      {{ n }}</p>
+{%      else %}
+      {{ n }},
+{%      endif %}
+{%    endfor %}
+  </div>
+{%  endif %}
+
+{%  set list = tp['occupations'] %}
+{%  if list != None %}
+  <div>
+{%    for n in list %}
+    <p><b>Occupation:</b> {{ n }}</p>
+{%    endfor %}
+  </div>
+{%  endif %}
+
   <hr>
+{%  if tp['notes'] != None %}
+  <div>
+{%    for n in tp['notes'] %}
+    <p>
+{{ n }}
+    </p>
+{%    endfor %}
+  </div>
+{%  endif %}
+
+{%  if tp['sources'] != None %}
+  <div>
+    <h4>Sources</h4>
+{%    for n in tp['sources'] %}
+    <p>
+{{ n }}
+    </p>
+{%    endfor %}
+  </div>
+{%  endif %}
 
   <table class="general-info">
 {%  set father = tp['father'] %}
@@ -105,17 +173,6 @@
       </td>
     </tr>
   </table>
-{%  if tp['notes'] != None %}
-  <table class="general-info">
-{%    for n in tp['notes'] %}
-    <tr class="general-info">
-      <td class="general-info-value">
-{{ n }}
-      </td>
-    </tr>
-{%    endfor %}
-  </table>
-{%  endif %}
   <table class="family">
     <tr class="family">
       <td class="siblings">
