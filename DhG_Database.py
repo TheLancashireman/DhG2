@@ -273,6 +273,55 @@ class Database:
 
 		return family
 
+	# Determine whether a person is private by looking at
+	#	* the person
+	#	* the person's partners
+	#	* the person's siblings and their partners
+	#
+	def IsPrivate(self, p_uniq, recurse=0):
+		if p_uniq == None or self.persons[p_uniq] == None:
+#			print('Database.IsPrivate(): Not a person')
+			return False
+		p = self.persons[p_uniq]
+		if p.IsPrivate():
+#			print('Database.IsPrivate():', p.name, 'alive or marked private')
+			return True
+		if recurse > 1:
+#			print('Database.IsPrivate(): recurse =', recurse)
+			return False
+		pp = p.GetPartners()			# List of tuples
+		if pp != None:
+			for partner in pp:
+				if self.IsPrivate(partner[1], recurse+1):
+					return True
+		cc = self.GetChildren(p_uniq)	# List of Person() objects
+		if cc != None:
+			for child in cc:
+				if self.IsPrivate(child.father_uniq, recurse+1):
+					return True
+				if self.IsPrivate(child.mother_uniq, recurse+1):
+					return True
+		ss = self.GetSiblings(p_uniq)	# List of Person() objects. Never None
+		for sib in ss:
+			if sib.uniq == p_uniq:
+				continue
+			if self.IsPrivate(sib.uniq, recurse+1):
+				return True
+			pp = sib.GetPartners()				# List of tuples
+			if pp != None:
+				for partner in pp:
+					if self.IsPrivate(partner[1], recurse+1):
+						return True
+			cc = self.GetChildren(sib.uniq)		# List of Person() objects
+			if cc != None:
+				for child in cc:
+					if self.IsPrivate(child.father_uniq, recurse+1):
+						return True
+					if self.IsPrivate(child.mother_uniq, recurse+1):
+						return True
+#		print('Database.IsPrivate():', p.name, 'is public')
+		return False
+
 	# Return an array containing a descendant tree of a person
 	#
 	# OBSOLETE: This method to be removed when text descendants template has been updated

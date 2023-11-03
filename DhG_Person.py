@@ -252,7 +252,6 @@ class Person:
 			return True
 		return False
 
-
 	# Returns DoB as a string
 	#
 	def GetDoB(self, fmt):
@@ -306,6 +305,15 @@ class Person:
 			parts[idx_dates] = '('+dob+' - '+dod+')'
 
 		return ' '.join(parts)
+
+	# Return True if person is defined as private or has no death event
+	#
+	def IsPrivate(self):
+		if self.private:
+			return True
+		if self.death == None:
+			return True
+		return False
 
 	# Analyse all the events for this person
 	#
