@@ -45,6 +45,7 @@ class Config():
 		Config.config['editor'] = 'vi'				# Editor to use for 'edit' command
 		Config.config['dateformat'] = 'raw'			# Format for dates
 		Config.config['depth'] = 999999				# Max depth for trees
+		Config.config['generate'] = 'public'		# Content in generated files: 'public; or 'all'
 
 		Config.ReadConfig()
 		if Config.config['db_dir'] == None:

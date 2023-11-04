@@ -673,7 +673,7 @@ class Database:
 			# No children
 			info['children'] = None
 			info['partners'] = None
-		elif self.IsPrivate(children[0].uniq):
+		elif Config.Get('generate') == 'public' and self.IsPrivate(children[0].uniq):
 			# At least one child is private.
 			# Testing the first is sufficient because that tests all siblings
 			info['children'] = 'private'
