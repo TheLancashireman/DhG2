@@ -463,8 +463,10 @@ class Database:
 		if pp == None:
 			pp = []
 
-		# Add assumed partnerships from children
+		# Get list of children
 		cc = self.GetChildren(person.uniq)
+
+		# Add assumed partnerships from children
 		if cc == None:
 			cc = []
 		for c in cc:
@@ -502,8 +504,12 @@ class Database:
 			cp = []
 			if cc != None:
 				for c in cc:
-					csubj = c.GetTPerson(dateformat)
-					cp += self.GetTDescendants(level+1, c, csubj, dateformat)
+					if Config.Get('generate') == 'public' and self.IsPrivate(c.uniq):
+						cp = 'private'
+						break
+					else:
+						csubj = c.GetTPerson(dateformat)
+						cp += self.GetTDescendants(level+1, c, csubj, dateformat)
 			if cp == []:
 				cp = None
 			td = T_Descendants(level, subj, partner, cp)

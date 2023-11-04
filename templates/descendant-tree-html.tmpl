@@ -67,7 +67,11 @@
 {%    endif  %}
 {%    if obj.children != None %}
           <ul class="desctree">
-{{      loop(obj.children) }}
+{%      if obj.children == 'private' %}
+          <li style="list-style-type: '{{ obj.level+1 }}. '"><a href="/family-history/private.html">Private</a></li>
+{%      else %}
+{{        loop(obj.children) }}
+{%      endif %}
           </ul>
 {%    endif %}
       </li>
