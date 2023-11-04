@@ -66,13 +66,13 @@
 {%      endif  %}
 {%    endif  %}
 {%    if obj.children != None %}
-          <ul class="desctree">
+        <ul class="desctree">
 {%      if obj.children == 'private' %}
           <li style="list-style-type: '{{ obj.level+1 }}. '"><a href="/family-history/private.html">Private</a></li>
 {%      else %}
-{{        loop(obj.children) }}
+{{        loop(obj.children) | indent(first=True) }}
 {%      endif %}
-          </ul>
+        </ul>
 {%    endif %}
       </li>
 {%  endfor %}
