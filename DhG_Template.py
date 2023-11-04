@@ -214,6 +214,7 @@ class T_Transcript():
 class T_File():
 	def __init__(self, ref, ftype, name):
 		self.ref = ref			# Reference (Fn). Used in column 1 and as anchor.
+		self.tref = None		# Reference (Tm) to content of this file in a T_Transcript object
 		self.ftype = ftype		# File type (transcript, image etc)
 		self.name = name		# File name
 		return

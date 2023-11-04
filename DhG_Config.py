@@ -38,7 +38,7 @@ class Config():
 
 		# These values MUST be set in the config file
 		Config.config['db_dir'] = None				# Location of database (must be set!)
-		Config.config['tmpl_path'] = None			# Location of templates
+		Config.config['tmpl_path'] = None			# Location(s) of templates. Colon-separated
 
 		# Some default values
 		Config.config['prompt'] = '(DhG) '			# Command prompt
@@ -46,6 +46,8 @@ class Config():
 		Config.config['dateformat'] = 'raw'			# Format for dates
 		Config.config['depth'] = 999999				# Max depth for trees
 		Config.config['generate'] = 'public'		# Content in generated files: 'public; or 'all'
+		Config.config['text-suffix'] = 'text'		# Colon-separated list of text file suffixes. No dots
+		Config.config['text_path'] = None			# Locations of text transcript files. Colon-separated
 
 		Config.ReadConfig()
 		if Config.config['db_dir'] == None:
@@ -251,3 +253,20 @@ class Config():
 
 		# Nothing else specified. Return "raw" date but with standardised modifier as prefix
 		return mod+odate
+
+	# Find a file called fname in a list of locations given by cfgvar.
+	# If cfgvar is not given or has no value, dflt is used instead.
+	# The lists are colon-separated
+	#
+	@staticmethod
+	def FindFile(fname, cfgvar, dflt):
+		locs = Config.Get(cfgvar)
+		if locs == None:
+			locs = dflt
+		if locs == None:
+			return None
+		for loc in locs.split(':'):
+			for root, dirs, files in os.walk(loc):
+				if fname in files:
+					return os.path.join(root, fname)
+		return None

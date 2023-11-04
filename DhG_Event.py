@@ -19,6 +19,8 @@
 
 from DhG_Config import Config
 from DhG_Template import T_Person, T_Event, T_EvInfo, T_Source, T_Transcript, T_File
+import os
+import traceback
 
 # Event class - represents an event on a person's timeline
 #
@@ -186,8 +188,10 @@ class Event:
 					if len(fparts) != 2:
 						print('GetTSource() warning: "'+line+'" not recognised. Ignored')
 						continue
-					ref = factory.AddFile(fparts[0], fparts[1])
+					(ref, tref) = factory.AddFile(fparts[0], fparts[1])
 					src.AddRef(ref, '#'+ref)
+					if tref != None:
+						src.AddRef(tref, '#'+tref)
 				elif parts[0].lower() == '-transcript':
 					if len(parts) >= 2:
 						txt = parts[1]
@@ -228,7 +232,7 @@ class TEventFactory():
 		return
 
 	# Add a transcript to the list
-	# Return a reference and the reference
+	# Return a reference and the  T_Transcript() object. The latter allows adding text.
 	#
 	def AddTranscript(self, text):
 		if self.transcripts == None:
@@ -240,21 +244,52 @@ class TEventFactory():
 		self.transcripts.append(tx)
 		return (ref, tx)
 
+	# Add a transcript from a file to the list
+	# Return a reference
+	#
+	def AddTranscriptFromFile(self, fname):
+		(base, ext) = os.path.splitext(fname)
+		if ext == '' or ext[0] != '.':
+			return None
+		if ext[1:] not in Config.Get('text-suffix').split(':'):
+			return None
+
+		fpath = Config.FindFile(fname, 'text_path', None)
+		if fpath == None:
+			print('File not found:', fname)
+			return None
+
+		try:
+			f = open(fpath, 'r')
+			content = f.readlines()
+			text = ''.join(content)
+			f.close
+		except:
+			print(traceback.format_exc())
+			return None
+
+		(ref, tx) = self.AddTranscript(text)
+		return ref
+
 	# Add a file to the list, if not already present
-	# Return a reference to the file
+	# Return references to the file and its content (if file is a transcript file that can be handled)
 	#
 	def AddFile(self, ftype, fname):
 		if self.files == None:
-			self.files = [T_File('F1', ftype, fname)]
-			return 'F1'
-
-		for fx in self.files:
-			if fx.name == fname:
-				# File is already in the list. Return its reference.
-				if fx.ftype != ftype:
-					print('AddFile() warning: "'+fname+'" referenced with different types')
-				return fx.ref
+			self.files = []
+		else:
+			for fx in self.files:
+				if fx.name == fname:
+					# File is already in the list. Return its reference.
+					if fx.ftype != ftype:
+						print('AddFile() warning: "'+fname+'" referenced with different types')
+					return fx.ref
 
 		ref = 'F'+str(len(self.files)+1)
 		self.files.append(T_File(ref, ftype, fname))
-		return ref
+
+		if ftype.lower() == 'transcript':
+			tref = self.AddTranscriptFromFile(fname)
+		else:
+			tref = None
+		return (ref, tref)

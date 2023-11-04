@@ -37,7 +37,6 @@ There is always lots to do. :-)
 * Consider refactoring the timeline command to use the same data ad HTML card, but a different template.
 * OR: keep the text output as it is and implement a new command.
 * Add a translation table for captions in event info. Does DhG have a list? Add Mapref -> Map reference.
-* Read transcripts from transcript file (some types)
 * Check how Misc events are presented
 * Photo statements at the file level - include photo in html?
 * Syntax check of events when reading file. Currently happens on HTML card generation.
