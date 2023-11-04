@@ -311,8 +311,8 @@ class DhG_Shell(cmd.Cmd):
 		'Print a descendants tree for a given person'
 		l = self.db.GetMatchingPersons(arg)
 		if len(l) == 1:
-			desc = self.db.GetDescendantsObsolete(l[0].uniq)		# ToDo: update template to use new structure
-			DoTemplate('descendant-tree-text.tmpl', desc, None)
+			desc = self.db.GetDescendants(l[0].uniq, 'yearonly')
+			DoTemplate('descendant-tree-text.tmpl', desc, None, trim = True)
 		else:
 			self.PrintPersonList(l, arg)
 		return

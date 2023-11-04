@@ -37,47 +37,16 @@
 	Each person (subj, left, right) is an instance of a class; see person class in person-card-html.tmpl
 	Only vital and file are used.
 #}
-{%  set CARDBASE = tp['cardbase'] %}
-{%  set HEAD = 'html-head.tmpl' %}
-{%  set FOOT = 'html-foot.tmpl' %}
-{%  include HEAD +%}
-
 {%  set subj = tp['subj'] %}
-  <h1>Descendants of {{ subj.vital }}</h1>
+  Descendants of {{ subj.vital }}
 
-  <hr>
-
-  <div id="pagetorso" class="familytree">
-
-    <ul class="desctree">
 {%  for obj in tp['partners'] recursive %}
-      <li style="list-style-type: '{{ obj.level }}. '">
-{%    if obj.left.file == None %}
-        {{ obj.left.vital }}
-{%    else  %}
-        <a href="{{ CARDBASE }}/{{ obj.left.file }}">{{ obj.left.vital }}</a>
-{%    endif  %}
-{%    if obj.right != None %}
-        ===
-{%      if obj.right.file == None %}
-        {{ obj.right.vital }}
-{%      else  %}
-        <a href="{{ CARDBASE }}/{{ obj.right.file }}">{{ obj.right.vital }}</a>
-{%      endif  %}
-{%    endif  %}
+  {{ obj.level }}. [{{  obj.left.uniq  }}] {{ obj.left.vital }}{% if  obj.right != None %} === [{{  obj.right.uniq  }}] {{ obj.right.vital }}{% endif +%}
 {%    if obj.children != None %}
-        <ul class="desctree">
 {%      if obj.children == 'private' %}
-          <li style="list-style-type: '{{ obj.level+1 }}. '"><a href="/family-history/private.html">Private</a></li>
+      {{ obj.level+1 }}. Private
 {%      else %}
-{{        loop(obj.children) | indent(first=True) }}
-{%      endif %}
-        </ul>
-{%    endif %}
-      </li>
-{%  endfor %}
-    </ul>
-
-  </div>
-
-{%  include FOOT +%}
+{{        loop(obj.children) | indent(width=2, first=True) -}}
+{%      endif -%}
+{%    endif -%}
+{%  endfor -%}
