@@ -392,20 +392,20 @@ class DhG_Shell(cmd.Cmd):
 			listfile = arg[1:]
 			# Special cases of listfile
 			if listfile == 'all' or listfile == 'public':
-				l = self.db.GetMatchingPersons('')
 				erase = '          '
 				lastlen = 0
-				for person in l:
+				for person in self.db.persons:
 					if person == None:
 						continue
-					if listfile == 'all' or person.IsPublic():
+					if listfile == 'all' or self.db.IsPublic(person.uniq):
 						# Erase the previous line
-						if lastlen > 0:
-							while len(erase) < lastlen:
-								erase += '     '
-							print('HTML card for', erase[0:lastlen], end='\r')
-						print('HTML card for', person.GetVitalLine(), end='\r')
-						lastlen = len(person.GetVitalLine())
+#						if lastlen > 0:
+#							while len(erase) < lastlen:
+#								erase += '     '
+#							print('HTML card for', erase[0:lastlen], end='\r')
+#						print('HTML card for', person.GetVitalLine(), end='\r')
+#						lastlen = len(person.GetVitalLine())
+						print('HTML card for', person.GetVitalLine())
 						try:
 							file = Config.MakeHtmlPersonCardName(person.name, person.uniq)
 							info = self.db.GetPersonCardInfo(person, 'yearonly')

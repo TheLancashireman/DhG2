@@ -273,6 +273,11 @@ class Database:
 
 		return family
 
+	# Return True if a person is allowed to be visible on the public website
+	#
+	def IsPublic(self, p_uniq):
+		return not self.IsPrivate(p_uniq)
+
 	# Determine whether a person is private by looking at
 	#	* the person
 	#	* the person's partners
@@ -663,31 +668,38 @@ class Database:
 			
 		info['children'] = []
 		info['partners'] = []
-		for ch in self.GetChildren(person.uniq):	# Might be empty
-			tch = ch.GetTPerson(dateformat)
-			info['children'].append(tch)
-			if person.uniq == ch.father_uniq:
-				tch.other = ch.mother_uniq
-				other = ch.mother_name
-			else:
-				tch.other = ch.father_uniq
-				other = ch.father_name
-			if other == None:
-				other = 'not known'
-			if tch.other == None:
-				tch.other = other					# Use name as id
-				tother = T_Person(other, other)		# Use name as id
-			else:
-				tother = self.GetTPerson(tch.other, dateformat)
-			try:
-				if info['partners'][-1].uniq != tch.other:
-					info['partners'].append(tother)
-			except:	# When partners list is empty
-				info['partners'].append(tother)
-		if len(info['children']) == 0:
-			# No children. Discard the empty children and partners arrays
+		children = self.GetChildren(person.uniq)
+		if len(children) == 0:
+			# No children
 			info['children'] = None
 			info['partners'] = None
+		elif self.IsPrivate(children[0].uniq):
+			# At least one child is private.
+			# Testing the first is sufficient because that tests all siblings
+			info['children'] = 'private'
+			info['partners'] = 'private'
+		else:
+			for ch in children:
+				tch = ch.GetTPerson(dateformat)
+				info['children'].append(tch)
+				if person.uniq == ch.father_uniq:
+					tch.other = ch.mother_uniq
+					other = ch.mother_name
+				else:
+					tch.other = ch.father_uniq
+					other = ch.father_name
+				if other == None:
+					other = 'not known'
+				if tch.other == None:
+					tch.other = other					# Use name as id
+					tother = T_Person(other, other)		# Use name as id
+				else:
+					tother = self.GetTPerson(tch.other, dateformat)
+				try:
+					if info['partners'][-1].uniq != tch.other:
+						info['partners'].append(tother)
+				except:	# When partners list is empty
+					info['partners'].append(tother)
 
 		factory = TEventFactory(self)
 		for ev in person.events:

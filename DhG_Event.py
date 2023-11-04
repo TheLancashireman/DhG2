@@ -138,10 +138,9 @@ class Event:
 					curinfo = None			# No more continuation lines until next item
 				else:
 					if len(parts) < 2:
-						evinfo = T_EvInfo(parts[0][1:], '')
+						curinfo = T_EvInfo(parts[0][1:], '')
 					else:
-						evinfo = T_EvInfo(parts[0][1:], parts[1])
-					curinfo = T_EvInfo(parts[0][1:], parts[1])
+						curinfo = T_EvInfo(parts[0][1:], parts[1])
 					evinfo.AddInfo(curinfo)
 			else:
 				print('GetTEvInfo() warning: "'+line+'" not recognised. Ignored')

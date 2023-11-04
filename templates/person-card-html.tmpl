@@ -27,8 +27,9 @@
 		occupations	: a list of the subject's occupations
 		siblings	: a list of siblings of the subject, ordered by DoB
 		others		: a list of other parents of half-siblings
-		partners	: a list of all the other parents of the children, in order of the children's DoB
-		children	: a list of children of the subject, ordered by DoB
+		partners	: a list of all the other parents of the children, in order of the children's DoB.
+					  Can be None or 'private'
+		children	: a list of children of the subject, ordered by DoB.
 		notes		: a list of general information about the subject
 		sources		: a list of general sources of information about the subject
 		events		: a list of events from the subject's timeline
@@ -215,6 +216,8 @@
 {%  set partners = tp['partners'] %}
 {%  if partners == None %}
         None
+{%  elif partners == 'private' %}
+        <a href="/family-history/private.html">Private</a>
 {%  else %}
 {%    for sp in partners %}
 {%      if sp.file == None %}
