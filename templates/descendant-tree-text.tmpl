@@ -1,26 +1,83 @@
-{# descendant-tree-text.tmpl - a template for a descendant tree in plain text
+{# descendant-tree-html.tmpl - a template for a descendant tree in HTML
 
-    (c) David Haworth
-   
-    This file is part of DhG.
-   
-    DhG is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-   
-    DhG is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-   
-    You should have received a copy of the GNU General Public License
-    along with DhG.  If not, see <http://www.gnu.org/licenses/>.
+	(c) David Haworth
+
+	This file is part of DhG.
+
+	DhG is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	DhG is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with DhG.  If not, see <http://www.gnu.org/licenses/>.
+
+	Input is a dictionary containing the following items:
+		cardbase	: the server's 'cards' directory
+		subj		: the subject of the card
+		partners	: a list of the subject, partners and children.
+					: At this level, the left partner is always the subject
+
+	Each item in items is an instance of a class with the following members:
+		level		: the level. Level 1 is the top level
+		left		: the left-hand person of a partnership:
+					: 	at the top level, the subject
+					:	at lower levels, a child of the level above
+		right		: the right-hand person of the partnership
+					:	None if no partners
+					:	person with name "not known" if there are children with an unknown partner
+		children	: a list of the children of the partnership. It's a recursive structure
+	An individual can occur more than once in an items list, when there are multiple partners
+
+	Each person (subj, left, right) is an instance of a class; see person class in person-card-html.tmpl
+	Only vital and file are used.
 #}
+{%  set CARDBASE = tp['cardbase'] %}
+{%  set HEAD = 'html-head.tmpl' %}
+{%  set FOOT = 'html-foot.tmpl' %}
+{%  include HEAD +%}
 
-{{ '  ' }}Descendants of {{ tp['title'] }}
+{%  set subj = tp['subj'] %}
+  <h1>Descendants of {{ subj.vital }}</h1>
 
-{% for line in tp['lines'] -%}
-{%   for j in range(line['level']) %}{{ '  ' }}{% endfor %}{{ line['level'] }}.  {{ line['vital'] -}}
-{%   if line['spouse_vital'] != '' -%}{{ ' === ' }}{{ line['spouse_vital'] }}{% endif %}
-{% endfor %}
+  <hr>
+
+  <div id="pagetorso" class="familytree">
+
+    <ul class="desctree">
+{%  for obj in tp['partners'] recursive %}
+      <li style="list-style-type: '{{ obj.level }}. '">
+{%    if obj.left.file == None %}
+        {{ obj.left.vital }}
+{%    else  %}
+        <a href="{{ CARDBASE }}/{{ obj.left.file }}">{{ obj.left.vital }}</a>
+{%    endif  %}
+{%    if obj.right != None %}
+        ===
+{%      if obj.right.file == None %}
+        {{ obj.right.vital }}
+{%      else  %}
+        <a href="{{ CARDBASE }}/{{ obj.right.file }}">{{ obj.right.vital }}</a>
+{%      endif  %}
+{%    endif  %}
+{%    if obj.children != None %}
+        <ul class="desctree">
+{%      if obj.children == 'private' %}
+          <li style="list-style-type: '{{ obj.level+1 }}. '"><a href="/family-history/private.html">Private</a></li>
+{%      else %}
+{{        loop(obj.children) | indent(first=True) }}
+{%      endif %}
+        </ul>
+{%    endif %}
+      </li>
+{%  endfor %}
+    </ul>
+
+  </div>
+
+{%  include FOOT +%}
