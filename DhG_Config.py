@@ -200,14 +200,20 @@ class Config():
 	@staticmethod
 	def FormatDate(date, dflt, fmt):
 		if date == None:
+			# No date given. Return the default if there is one, otherwise '?'
 			if dflt == None:
 				return '?'
 			return dflt
+
 		if fmt == None:
+			# No format specified. Use the default.
 			fmt = Config.Get('dateformat')
+
 		if fmt == 'raw':
+			# Raw format - return the date unmodified.
 			return date
 
+		# Convert and remove the modifier suffix
 		odate = date
 		mod = odate[-1]
 		if mod == '~':
@@ -221,6 +227,7 @@ class Config():
 		if mod != '':
 			odate = odate[0:-1]
 
+		# Split into YYYY, MM and DD maybe not all present.
 		parts = odate.split('-')
 		if len(parts) <= 1:
 			# Only the year is available. Modifier applies to year
@@ -228,8 +235,8 @@ class Config():
 
 		yy = parts[0]
 		if fmt == 'yearonly':
-			# More than the year is available, but only the year is required.
-			return mod+yy
+			# More than the year is available, but only the year is required. Modifier not applied.
+			return yy
 
 		mm = parts[1]
 		if mm[0].upper() == 'Q':
@@ -241,5 +248,5 @@ class Config():
 				pass
 			return 'abt.'+yy+'-'+mm
 
-		# Nothing else specified. Return "raw" date but with standardise modifier as prefix
+		# Nothing else specified. Return "raw" date but with standardised modifier as prefix
 		return mod+odate
