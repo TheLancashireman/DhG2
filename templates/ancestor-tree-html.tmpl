@@ -1,0 +1,80 @@
+{# ancestor-tree-html.tmpl - a template for an ancestor tree (Ahnentafel) in HTML
+
+	(c) David Haworth
+
+	This file is part of DhG.
+
+	DhG is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	DhG is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with DhG.  If not, see <http://www.gnu.org/licenses/>.
+
+	Input is a dictionary containing the following items:
+		cardbase	: the server's 'cards' directory
+		nlevels		: number of levels in the tree
+		root		: an array of one element containing a T_AncestorNode object for the subject of the tree
+
+	Each T_AncestorNode is an object with the following members
+		level		: the level. Level 1 is the top level
+		subj		: a T_Person object representing the person at this level
+		parents		: an array of two T_AncestorNode objects for the parents. None if no parents.
+					: If only one parent is known, the other can be None
+#}
+{%  set CARDBASE = tp['cardbase'] %}
+{%  set HEAD = 'html-head.tmpl' %}
+{%  set FOOT = 'html-foot.tmpl' %}
+{%  include HEAD +%}
+
+{%  set nlevels = tp['nlevels'] %}
+{%  set root = tp['root'] %}
+{%  set subj = root[0].subj %}
+  <h1>Ancestors of {{ subj.vital }}</h1>
+
+  <hr>
+
+  <div id="pagetorso" class="familytree">
+    <table class="anctree" border="1" border-collapse="collapse">
+      <tr>
+{%  for obj in root recursive %}
+{%    if loop.index == 2 %}
+      <tr>
+{%    endif %}
+{%    if obj == None %}
+{%      for xx in range(loop.depth, nlevels) recursive %}
+      </tr>
+<!-- xx1 -->
+      <tr>
+{{        loop(range(xx+1, nlevels)) -}}
+{%      endfor %}
+<!-- xx2 -->
+      </tr>
+{%    else %}
+        <td class="anctree" rowspan="{{ 2**(nlevels-loop.depth) }}">
+          {{ obj.subj.name }}
+        </td>
+{%      if obj.parents == None %}
+{%        for xx in range(obj.level, nlevels) recursive%}
+      </tr>
+<!-- xx3 -->
+      <tr>
+{{          loop(range(xx+1, nlevels)) -}}
+{%        endfor %}
+<!-- xx4 -->
+      </tr>
+{%      else %}
+{{        loop(obj.parents) -}}
+{%      endif %}
+{%    endif %}
+{%  endfor %}
+    </table>
+  </div>
+
+{%  include FOOT +%}

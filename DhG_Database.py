@@ -22,7 +22,7 @@ import sys
 from pathlib import Path
 from DhG_Config import Config
 from DhG_Person import Person
-from DhG_Template import T_Person, T_Descendants
+from DhG_Template import T_Person, T_Descendants, T_AncestorNode
 from DhG_Event import TEventFactory
 from DhG_GedcomImporter import GedcomImporter
 
@@ -406,6 +406,7 @@ class Database:
 		return info
 
 	# Return a partial ancestor tree
+	# OBSOLETE: this method can be removed when the text ancestor command has been refactored.
 	#
 	def GetAtree(self, p, level):
 		l = []
@@ -463,11 +464,11 @@ class Database:
 			l.extend(self.GetAtree(self.persons[p.mother_uniq], level+1))
 		return l
 			
-
 	# Return an ancestor tree dictionary for a person.
 	# The return value can be passed to a template.
+	# OBSOLETE: this method can be removed when the text ancestor command has been refactored.
 	#
-	def GetAncestors(self, uniq):
+	def GetAncestorsObsolete(self, uniq):
 		try:
 			p = self.persons[uniq]
 			if p == None:
@@ -478,6 +479,45 @@ class Database:
 		anc = {}
 		anc['title'] = p.GetVitalLine()
 		anc['lines'] = self.GetAtree(p, 1)
+		return anc
+
+	# Return a T_AncestorNode() object for a given person
+	#
+	def GetTAncestorNode(self, person, level, dateformat):
+		if self.maxlevel < level:
+			self.maxlevel = level
+		node = T_AncestorNode(level, person.GetTPerson(dateformat))
+
+		# Fill in the parents who exist in the database
+		for index, id in enumerate( (person.father_uniq, person.mother_uniq) ):
+			if id != None and self.persons[id] != None:
+				pnode = self.GetTAncestorNode(self.persons[id], level+1, dateformat)
+				node.AddParent(index, pnode)
+
+		# Fill in parents whose names are given but who don't exist in the database
+		for index, name in enumerate( (person.father_name, person.mother_name) ):
+			if name != None and node.GetParent(index) == None:
+				if self.maxlevel < level+1:
+					self.maxlevel = level+1
+				pnode = T_AncestorNode(level+1, T_Person(name, None))
+				node.AddParent(index, pnode)
+		return node
+
+	# Return an ancestor tree dictionary for a person.
+	# The return value can be passed to a template.
+	#
+	def GetAncestors(self, uniq, dateformat):
+		try:
+			p = self.persons[uniq]
+			if p == None:
+				return None
+		except:
+			return None
+
+		anc = {}
+		self.maxlevel = 0
+		anc['root'] = [ self.GetTAncestorNode(p, 1, dateformat) ]
+		anc['nlevels'] = self.maxlevel
 		return anc
 
 	# Return a T_Person object for a person of given unique id, or None if person not found

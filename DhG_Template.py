@@ -218,3 +218,28 @@ class T_File():
 		self.ftype = ftype		# File type (transcript, image etc)
 		self.name = name		# File name
 		return
+
+# A class to hold a node in the ancestor tree
+#
+class T_AncestorNode():
+	def __init__(self, level, subj):
+		self.level = level		# The level. Level 1 is the top level
+		self.subj = subj		# A T_Person object representing the person at this level
+		self.parents = None		# An array of two elements that can be None or a T_AncestorNode() object
+
+	# Get a parent from the parents array.
+	# The index must be 0 or 1
+	#
+	def GetParent(self, index):
+		if self.parents == None:
+			return None
+		return self.parents[index]
+
+	# Add a parent to the parents array. Create the array if necessary
+	# The index must be 0 or 1
+	#
+	def AddParent(self, index, anode):
+		if self.parents == None:
+			self.parents = [None, None]
+		self.parents[index] = anode
+		return

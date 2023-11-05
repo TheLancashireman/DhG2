@@ -321,7 +321,7 @@ class DhG_Shell(cmd.Cmd):
 		'Print an ancestors tree for a given person'
 		l = self.db.GetMatchingPersons(arg)
 		if len(l) == 1:
-			anc = self.db.GetAncestors(l[0].uniq)
+			anc = self.db.GetAncestorsObsolete(l[0].uniq)
 			DoTemplate('ancestor-tree-text.tmpl', anc, None)
 		else:
 			self.PrintPersonList(l, arg)
@@ -384,6 +384,44 @@ class DhG_Shell(cmd.Cmd):
 	def do_hd(self, arg):	# Abbreviated command
 		'Create a descendants tree in HTML for a given person. Abbreviation of htmldescendants'
 		self.do_htmldescendants(arg)
+		return
+
+	def do_htmlancestors(self, arg):
+		'Create an ancestor tree (Ahnentafel) in HTML for a given person'
+		if len(arg) > 0 and arg[0] == '@':
+			f = open(arg[1:], 'r')
+			erase = '          '
+			lastlen = 0
+			for line in f:
+				line = line.rstrip().lstrip()
+				id = line.split(' ')[0]
+				if id == '' or id[0] == '#':
+					pass			# Ignore comment lines and blank lines
+				else:
+					l = self.db.GetMatchingPersons(id)
+					if len(l) == 1:
+						person = l[0]
+						print('HTML ancestors for', person.GetVitalLine())
+						file = Config.MakeHtmlAncTreeName(person.name, person.uniq)
+						anc = self.db.GetAncestors(person.uniq, 'yearonly')
+						DoTemplate('ancestor-tree-html.tmpl', anc, file, trim = True)
+					else:
+						print('Invalid or ambiguous line "'+line+'" found in', arg[1:])
+			f.close()
+			return
+		l = self.db.GetMatchingPersons(arg)
+		if len(l) == 1:
+			person = l[0]
+			file = Config.MakeHtmlAncTreeName(person.name, person.uniq)
+			anc = self.db.GetAncestors(person.uniq, 'yearonly')
+			DoTemplate('ancestor-tree-html.tmpl', anc, file, trim = True)
+		else:
+			self.PrintPersonList(l, arg)
+		return
+
+	def do_ha(self, arg):	# Abbreviated command
+		'Create an ancestor tree (Ahnentafel) in HTML for a given person. Abbreviation of htmlancestors'
+		self.do_htmlancestors(arg)
 		return
 
 	def do_htmlcard(self, arg):

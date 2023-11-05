@@ -165,6 +165,17 @@ class Config():
 			path = h + '/trees'
 		return Config.MakePersonfileName(name, uniq, path, '-descendants.html', False)
 
+	# Construct a file name for an HTML ancestor tree
+	#
+	@staticmethod
+	def MakeHtmlAncTreeName(name, uniq):
+		h = Config.Get('html_dir')
+		if h == None or h == '':
+			path = 'trees'
+		else:
+			path = h + '/trees'
+		return Config.MakePersonfileName(name, uniq, path, '-ancestors.html', False)
+
 	# Construct a file name for an HTML person card
 	#
 	@staticmethod
