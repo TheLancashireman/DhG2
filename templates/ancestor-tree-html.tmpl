@@ -57,7 +57,7 @@
 {%        set vital = s.name %}
 {%      else %}
 {%        set dob_dod = s.dob_dod | replace(' ', '&nbsp;') %}
-{%        set vital = s.name + ' ' + dob_dod %}
+{%        set vital = s.name + '<br>' + dob_dod %}
 {%      endif %}
 {%      if s.file == None %}
           {{ vital }}
