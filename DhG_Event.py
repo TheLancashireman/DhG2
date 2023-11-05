@@ -283,13 +283,15 @@ class TEventFactory():
 					# File is already in the list. Return its reference.
 					if fx.ftype != ftype:
 						print('AddFile() warning: "'+fname+'" referenced with different types')
-					return fx.ref
+					return (fx.ref, fx.tref)
 
 		ref = 'F'+str(len(self.files)+1)
-		self.files.append(T_File(ref, ftype, fname))
+		fx = T_File(ref, ftype, fname)
+		self.files.append(fx)
 
 		if ftype.lower() == 'transcript':
 			tref = self.AddTranscriptFromFile(fname)
+			fx.tref = tref
 		else:
 			tref = None
 		return (ref, tref)
