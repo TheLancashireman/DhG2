@@ -55,14 +55,14 @@
 {%    if obj.left.file == None %}
         {{ obj.left.vital }}
 {%    else  %}
-        <a href="{{ CARDBASE }}/{{ obj.left.file }}">{{ obj.left.vital }}</a>
+        <a href="{{ CARDBASE }}/{{ obj.left.file }}.html">{{ obj.left.vital }}</a>
 {%    endif  %}
 {%    if obj.right != None %}
         ===
 {%      if obj.right.file == None %}
         {{ obj.right.vital }}
 {%      else  %}
-        <a href="{{ CARDBASE }}/{{ obj.right.file }}">{{ obj.right.vital }}</a>
+        <a href="{{ CARDBASE }}/{{ obj.right.file }}.html">{{ obj.right.vital }}</a>
 {%      endif  %}
 {%    endif  %}
 {%    if obj.children != None %}
