@@ -48,6 +48,7 @@ class Database:
 			self.persons[uniq] = person
 		else:
 			print('Error: id', uniq, 'is not unique')
+		return
 
 	# Reload the entire database
 	#
@@ -58,6 +59,7 @@ class Database:
 			self.LoadPerson(path)
 		self.VerifyRefs()
 		self.MFGuess()
+		return
 
 	# Load a new person
 	#
@@ -91,6 +93,7 @@ class Database:
 			print(os.path.basename(filename), ': unique ID has changed. You should rename the file and reload')
 			self.AddPerson(p.uniq, p)
 			p.AnalyseEvents()
+		return
 
 	# Guess the sex based on existing persons
 	#
@@ -109,6 +112,7 @@ class Database:
 						print(firstname, 'can be male or female')
 				except:
 					self.mf[firstname] = p.sex
+		return
 
 	# Return a list of all the unused entries in the database
 	#
@@ -488,19 +492,30 @@ class Database:
 			self.maxlevel = level
 		node = T_AncestorNode(level, person.GetTPerson(dateformat))
 
+		# Count the number of rows occupied by parent nodes
+		rowspan = 0
+
 		# Fill in the parents who exist in the database
 		for index, id in enumerate( (person.father_uniq, person.mother_uniq) ):
 			if id != None and self.persons[id] != None:
 				pnode = self.GetTAncestorNode(self.persons[id], level+1, dateformat)
+				rowspan += pnode.rowspan
 				node.AddParent(index, pnode)
 
 		# Fill in parents whose names are given but who don't exist in the database
 		for index, name in enumerate( (person.father_name, person.mother_name) ):
-			if name != None and node.GetParent(index) == None:
-				if self.maxlevel < level+1:
-					self.maxlevel = level+1
-				pnode = T_AncestorNode(level+1, T_Person(name, None))
-				node.AddParent(index, pnode)
+			if node.GetParent(index) == None:
+				rowspan += 1
+				if name != None:
+					if self.maxlevel < level+1:
+						self.maxlevel = level+1
+					pnode = T_AncestorNode(level+1, T_Person(name, None))
+					node.AddParent(index, pnode)
+
+		# If there's one or more parent nodes, use the calculated value instead of the default of 1
+		if node.parents != None:
+			node.rowspan = rowspan
+		
 		return node
 
 	# Return an ancestor tree dictionary for a person.
@@ -516,6 +531,7 @@ class Database:
 
 		anc = {}
 		self.maxlevel = 0
+		anc['cardbase'] = Config.GetCardbase()
 		anc['root'] = [ self.GetTAncestorNode(p, 1, dateformat) ]
 		anc['nlevels'] = self.maxlevel
 		return anc

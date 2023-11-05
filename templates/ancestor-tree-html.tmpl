@@ -25,6 +25,7 @@
 	Each T_AncestorNode is an object with the following members
 		level		: the level. Level 1 is the top level
 		subj		: a T_Person object representing the person at this level
+		rowspan		: how many table rows to occupy
 		parents		: an array of two T_AncestorNode objects for the parents. None if no parents.
 					: If only one parent is known, the other can be None
 #}
@@ -48,26 +49,23 @@
       <tr>
 {%    endif %}
 {%    if obj == None %}
-{%      for xx in range(loop.depth, nlevels) recursive %}
-      </tr>
-<!-- xx1 -->
-      <tr>
-{{        loop(range(xx+1, nlevels)) -}}
-{%      endfor %}
-<!-- xx2 -->
       </tr>
 {%    else %}
-        <td class="anctree" rowspan="{{ 2**(nlevels-loop.depth) }}">
-          {{ obj.subj.name }}
+        <td class="anctree" rowspan="{{ obj.rowspan }}">
+{%      set s = obj.subj %}
+{%      if s.dob_dod == None %}
+{%        set vital = s.name %}
+{%      else %}
+{%        set dob_dod = s.dob_dod | replace(' ', '&nbsp;') %}
+{%        set vital = s.name + ' ' + dob_dod %}
+{%      endif %}
+{%      if s.file == None %}
+          {{ vital }}
+{%      else %}
+          <a href="{{ CARDBASE }}/{{ s.file }}">{{ vital }}</a>
+{%      endif  %}
         </td>
 {%      if obj.parents == None %}
-{%        for xx in range(obj.level, nlevels) recursive%}
-      </tr>
-<!-- xx3 -->
-      <tr>
-{{          loop(range(xx+1, nlevels)) -}}
-{%        endfor %}
-<!-- xx4 -->
       </tr>
 {%      else %}
 {{        loop(obj.parents) -}}

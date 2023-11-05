@@ -225,6 +225,7 @@ class T_AncestorNode():
 	def __init__(self, level, subj):
 		self.level = level		# The level. Level 1 is the top level
 		self.subj = subj		# A T_Person object representing the person at this level
+		self.rowspan = 1		# How many rows of HTML table to occupy
 		self.parents = None		# An array of two elements that can be None or a T_AncestorNode() object
 
 	# Get a parent from the parents array.
