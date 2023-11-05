@@ -27,8 +27,9 @@ DhG2 is in a usable state with most major features implemented.
 
 HTML generation is partially implemented:
 * Descendant trees can be generated, individually or from a list.
+* Ancestor trees can be generated, individually or from a list.
 * Card files can be generated, individually or all/public.
-* Ancestor trees, name index etc. still to do.
+* Name index etc. still to do.
 
 ### To do
 
