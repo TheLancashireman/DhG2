@@ -41,17 +41,17 @@
 
   <hr>
 
-  <div id="pagetorso" class="familytree">
-    <table class="anctree" border="1" border-collapse="collapse">
-      <tr>
+  <div id="pagetorso" class="anctree">
+    <table class="anctree">
+      <tr class="anctree">
 {%  for obj in root recursive %}
 {%    if loop.index == 2 %}
-      <tr>
+      <tr class="anctree">
 {%    endif %}
 {%    if obj == None %}
       </tr>
 {%    else %}
-        <td class="anctree" rowspan="{{ obj.rowspan }}">
+        <td class="anctree-{{ loop.cycle('f', 'm') }}" rowspan="{{ obj.rowspan }}">
 {%      set s = obj.subj %}
 {%      if s.dob_dod == None %}
 {%        set vital = s.name %}
