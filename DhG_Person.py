@@ -413,12 +413,8 @@ class Person:
 		items = []
 		txt = None
 		for l in self.headlines:
-			if l == '':
+			if l == '' or l == '#':
 				pass
-			elif l[0:l1].lower() == s1:
-				txt = l[l1:].lstrip().rstrip()
-			elif l[0:l2].lower() == s2:
-				txt = l[l2:].lstrip().rstrip()
 			elif l[0] == '|':
 				if txt != None:
 					txt += ' '+l[1:]
@@ -426,6 +422,12 @@ class Person:
 				if txt != None:
 					items.append(txt)
 					txt = None
+				if l[0:l1].lower() == s1:
+					txt = l[l1:].lstrip().rstrip()
+				elif l[0:l2].lower() == s2:
+					txt = l[l2:].lstrip().rstrip()
+				else:
+					pass
 		if txt != None:
 			items.append(txt)
 		if items == []:
