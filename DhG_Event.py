@@ -89,8 +89,8 @@ class Event:
 		while i < self.nlines:
 			line = self.lines[i].lstrip().rstrip()
 			i += 1
-			if line == '' or line[0] == '#':
-				continue		# Ignore blanks and comments
+			if line == '' or line[0] == '#' or line[0:5].lower() == '+todo':
+				continue		# Ignore blanks, comments and todo
 			if line[0] == '+':
 				parts = line.split(maxsplit=1)
 				if parts[0].lower() == '+source':
@@ -171,6 +171,8 @@ class Event:
 					if len(txt) > 1 and txt[0] == ' ':
 						txt = txt[1:]
 					curobj.AppendLine(txt)
+			elif line[0:5].lower() == '-todo':
+				pass	# Ignore ToDos
 			elif line[0] == '-':
 				curobj = None
 				# Supplementary information
