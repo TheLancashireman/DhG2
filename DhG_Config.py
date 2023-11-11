@@ -69,6 +69,12 @@ class Config():
 			val = None
 		return val
 
+	# Set a config variable.
+	#
+	@staticmethod
+	def Set(var, val):
+		Config.config[var.lower()] = val
+
 	# Print the config
 	#
 	@staticmethod
@@ -124,9 +130,9 @@ class Config():
 
 			# Set the variable. Values that can be converted to integers are stored as such
 			try:
-				Config.config[var] = int(value)
+				Config.Set(var, int(value))
 			except:
-				Config.config[var] = value
+				Config.Set(var, value)
 		else:
 			return False
 		return True

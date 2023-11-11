@@ -311,8 +311,14 @@ class DhG_Shell(cmd.Cmd):
 		'Print a descendants tree for a given person'
 		l = self.db.GetMatchingPersons(arg)
 		if len(l) == 1:
-			desc = self.db.GetDescendants(l[0].uniq, 'yearonly')
-			DoTemplate('descendant-tree-text.tmpl', desc, None, trim = True)
+			save = Config.Get('generate')
+			Config.Set('generate', 'all')
+			try:
+				desc = self.db.GetDescendants(l[0].uniq, 'yearonly')
+				DoTemplate('descendant-tree-text.tmpl', desc, None, trim = True)
+			except Exception:
+				print(traceback.format_exc())
+			Config.Set('generate', save)
 		else:
 			self.PrintPersonList(l, arg)
 		return
