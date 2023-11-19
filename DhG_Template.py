@@ -21,6 +21,7 @@ import os
 import sys
 
 from jinja2 import Environment, BaseLoader
+from time import strftime, gmtime
 from DhG_Config import Config
 
 # A class to load a template
@@ -60,6 +61,7 @@ class DoTemplate():
 	#
 	def __init__(self, tmpl_name, tp, out, trim=False):
 		tp['config'] = Config
+		tp['timestamp'] = strftime('%Y-%m-%d %H:%M UTC', gmtime())
 		env = Environment(trim_blocks=trim, lstrip_blocks=trim, loader=DhG_Loader(Config.Get('tmpl_path')))
 		template = env.get_template(tmpl_name)
 		out_text = template.render(tp = tp)
