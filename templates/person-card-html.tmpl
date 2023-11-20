@@ -221,9 +221,9 @@
 {%  else %}
 {%    for sp in partners %}
 {%      if sp.file == None %}
-        {{ subj.name }} + {{ sp.name }}
+        With {{ sp.name }}
 {%      else %}
-        {{ subj.name }} + <a href="{{ CARDBASE }}/{{ sp.file }}.html">{{ sp.name }}</a>
+        With <a href="{{ CARDBASE }}/{{ sp.file }}.html">{{ sp.name }}</a>
 {%      endif %}
         <ul class="children">
 {%      for ch in tp['children'] if ch.other == sp.uniq %}
