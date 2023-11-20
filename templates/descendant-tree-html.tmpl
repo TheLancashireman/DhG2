@@ -68,7 +68,9 @@
 {%    if obj.children != None %}
         <ul class="desctree">
 {%      if obj.children == 'private' %}
-          <li style="list-style-type: '{{ obj.level+1 }}. '"><a href="/family-history/private.html">Private</a></li>
+          <li style="list-style-type: '{{ obj.level+1 }}. '">
+            <span class="private"><a href="/family-history/private.html"><span class="private_mark"></span></a></span>
+          </li>
 {%      else %}
 {{        loop(obj.children) | indent(first=True) }}
 {%      endif %}

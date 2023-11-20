@@ -217,7 +217,7 @@
 {%  if partners == None %}
         None
 {%  elif partners == 'private' %}
-        <a href="/family-history/private.html">Private</a>
+        <span class="private"><a href="/family-history/private.html"><span class="private_mark"></span></a></span>
 {%  else %}
 {%    for sp in partners %}
 {%      if sp.file == None %}
