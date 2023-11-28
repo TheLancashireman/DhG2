@@ -138,6 +138,11 @@ class Event:
 					else:
 						evinfo.url = parts[1]
 					curinfo = None			# No more continuation lines until next item
+				elif parts[0].lower() == '-Uniq':
+					# ToDo: the event info mentions a person in the database. This is the ID
+					# The easy way will be to add a TPerson to the TEventInfo somehow
+					# Just ignore for now.
+					curinfo = None			# No more continuation lines until next item
 				else:
 					if len(parts) < 2:
 						curinfo = T_EvInfo(parts[0][1:], '')
@@ -201,6 +206,10 @@ class Event:
 						txt = ''
 					(ref, curobj) = factory.AddTranscript(txt)
 					src.AddRef(ref, '#'+ref)
+				elif src.descr.lower() == 'personal knowledge' and (
+							parts[0].lower() == '-of' or parts[0].lower() == '-from'):
+					# Ignore "Personal knowledge" of/from - might be private
+					pass
 				else:
 					if len(parts) >= 2:
 						txt = parts[1]
