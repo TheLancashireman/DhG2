@@ -72,7 +72,8 @@ class Event:
 	def GetTEvent(self, factory):
 		# Create the basic T_Event structure
 		tp = None
-		lctype = self.etype.lower()
+		etype = self.etype
+		lctype = etype.lower()
 		if lctype == 'marriage' or lctype == 'partnership':
 			# Rest of event line is the partner
 			(name, idx) = self.owner.ParseCombinedNameStringX(self.rest)
@@ -80,8 +81,13 @@ class Event:
 				tp = factory.db.GetTPerson(idx, 'yearonly')
 			if tp == None:
 				tp = T_Person(name, None)
+		elif self.rest != None:
+			if lctype == 'misc':
+				etype = self.rest
+			else:
+				etype += ' ' + self.rest
 
-		e = T_Event(self.GetDate('cooked'), self.etype, tp)
+		e = T_Event(self.GetDate('cooked'), etype, tp)
 
 		# Now parse the rest of the lines
 		i = 1
