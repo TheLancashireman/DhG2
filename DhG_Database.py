@@ -556,7 +556,11 @@ class Database:
 		info['cardbase'] = Config.GetCardbase()
 		info['subj'] = person.GetTPerson(dateformat)
 		info['father'] = self.GetTPerson(person.father_uniq, dateformat)
+		if info['father'] == None and person.father_name != None:
+			info['father'] = T_Person(person.father_name, None)
 		info['mother'] = self.GetTPerson(person.mother_uniq, dateformat)
+		if info['mother'] == None and person.mother_name != None:
+			info['mother'] = T_Person(person.mother_name, None)
 
 		info['nicknames'] = person.GetHeaders('nickname:')
 		info['aliases'] = person.GetHeaders('alias:')
