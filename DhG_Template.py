@@ -72,7 +72,7 @@ class DoTemplate():
 				os.makedirs(os.path.dirname(out))
 			except FileExistsError:
 				pass
-			outfile = open(out, 'w')
+			outfile = open(out, 'w', newline='\n')
 			outfile.write(out_text)
 			outfile.write('\n')
 			outfile.close()
