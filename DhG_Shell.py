@@ -226,7 +226,7 @@ class DhG_Shell(cmd.Cmd):
 
 	def do_search(self, arg):
 		'Print a list of persons that match the given terms'
-		do_find(arg)
+		self.do_find(arg)
 		return
 
 	def do_tl(self, arg):
