@@ -95,6 +95,16 @@ class Database:
 			p.AnalyseEvents()
 		return
 
+	# Clear the calculated privacy of every person in the database
+	#
+	def ClearPrivacy(self):
+		for p in self.persons:
+			if p == None:
+				pass
+			else:
+				p.calc_privacy = None
+		return
+
 	# Guess the sex based on existing persons
 	#
 	def MFGuess(self):
@@ -294,40 +304,51 @@ class Database:
 		p = self.persons[p_uniq]
 		if p.IsPrivate():
 #			print('Database.IsPrivate():', p.name, 'alive or marked private')
+			p.calc_privacy = True
 			return True
-		if recurse > 1:
+		if p.calc_privacy != None:
+			return p.calc_privacy
+		if recurse > 2:
 #			print('Database.IsPrivate(): recurse =', recurse)
 			return False
 		pp = p.GetPartners()			# List of tuples
 		if pp != None:
 			for partner in pp:
 				if self.IsPrivate(partner[1], recurse+1):
+					p.calc_privacy = True
 					return True
 		cc = self.GetChildren(p_uniq)	# List of Person() objects
 		if cc != None:
 			for child in cc:
 				if self.IsPrivate(child.father_uniq, recurse+1):
+					p.calc_privacy = True
 					return True
 				if self.IsPrivate(child.mother_uniq, recurse+1):
+					p.calc_privacy = True
 					return True
 		ss = self.GetSiblings(p_uniq)	# List of Person() objects. Never None
 		for sib in ss:
 			if sib.uniq == p_uniq:
 				continue
 			if self.IsPrivate(sib.uniq, recurse+1):
+				p.calc_privacy = True
 				return True
 			pp = sib.GetPartners()				# List of tuples
 			if pp != None:
 				for partner in pp:
 					if self.IsPrivate(partner[1], recurse+1):
+						p.calc_privacy = True
 						return True
 			cc = self.GetChildren(sib.uniq)		# List of Person() objects
 			if cc != None:
 				for child in cc:
 					if self.IsPrivate(child.father_uniq, recurse+1):
+						p.calc_privacy = True
 						return True
 					if self.IsPrivate(child.mother_uniq, recurse+1):
+						p.calc_privacy = True
 						return True
+		p.calc_privacy = False
 		return False
 
 	# Return a list of T_Descendant objects for a subject given by the person parameter

@@ -476,13 +476,28 @@ class DhG_Shell(cmd.Cmd):
 		self.do_htmlcard(arg)
 		return
 
-	def do_test(self, arg):
-		'For testing code snippets. ToDo: delete'
-		print('do_test(): ', arg)
+	def do_clearprivacy(self, arg):
+		'Clear the calculated privacy of all persons in the database.'
+		self.db.ClearPrivacy()
+		return
+
+	def do_showprivacy(self, arg):
+		'Show the privacy status of a person.'
 		l = self.db.GetMatchingPersons(arg)
 		if len(l) == 1:
 			person = l[0]
-			print('Result is', self.db.IsPrivate(person.uniq))
+			if self.db.IsPrivate(person.uniq):
+				str = 'private'
+			else:
+				str = 'public'
+			print(person.GetVitalLine(), 'is', str)
+		else:
+			self.PrintPersonList(l, arg)
+		return
+
+	def do_test(self, arg):
+		'For testing code snippets. ToDo: delete'
+		print('do_test(): ', arg)
 		return
 
 if __name__ == '__main__':

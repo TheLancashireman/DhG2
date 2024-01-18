@@ -60,7 +60,8 @@ class Person:
 		self.sex = None
 		self.birth = None
 		self.death = None
-		self.private = False
+		self.private = False				# Explicitly set to private in card file
+		self.calc_privacy = None			# Calculated privacy
 		self.partnerships = []
 		self.father_name = None
 		self.father_uniq = None
