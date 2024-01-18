@@ -98,30 +98,24 @@ class Database:
 	# Clear the calculated privacy of every person in the database
 	#
 	def ClearPrivacy(self):
-		for p in self.persons:
-			if p == None:
-				pass
-			else:
-				p.calc_privacy = None
+		for p in filter(lambda x: x != None, self.persons):
+			p.calc_privacy = None
 		return
 
 	# Guess the sex based on existing persons
 	#
 	def MFGuess(self):
 		self.mf = {}
-		for p in self.persons:
-			if p == None:
-				pass
-			else:
-				firstname = p.name.split()[0]
-				try:
-					if self.mf[firstname] == p.sex or self.mf[firstname] == '?':
-						pass
-					else:
-						self.mf[firstname] = '?'
-						print(firstname, 'can be male or female')
-				except:
-					self.mf[firstname] = p.sex
+		for p in filter(lambda x: x != None, self.persons):
+			firstname = p.name.split()[0]
+			try:
+				if self.mf[firstname] == p.sex or self.mf[firstname] == '?':
+					pass
+				else:
+					self.mf[firstname] = '?'
+					print(firstname, 'can be male or female')
+			except:
+				self.mf[firstname] = p.sex
 		return
 
 	# Return a list of all the unused entries in the database
@@ -154,10 +148,9 @@ class Database:
 					return l
 		if name == None:
 			return l
-		for p in self.persons:
-			if p != None:
-				if p.IsMatch(name):
-					l.append(p)
+		for p in filter(lambda x: x != None, self.persons):
+			if p.IsMatch(name):
+				l.append(p)
 		return l
 
 	# Returns a list of siblings of a person, in order of data-of-birth
@@ -182,8 +175,8 @@ class Database:
 			m_uniq = -1			# No match with person whose mother is unknown or name only
 
 		sibs = []
-		for pp in self.persons:
-			if pp != None and (pp.father_uniq == f_uniq or pp.mother_uniq == m_uniq):
+		for pp in filter(lambda x: x != None, self.persons):
+			if pp.father_uniq == f_uniq or pp.mother_uniq == m_uniq:
 				sibs.append((pp.GetDoB(None), pp))
 		sibs_in_order = sorted(sibs, key=lambda xx: xx[0])
 
@@ -206,8 +199,8 @@ class Database:
 			return None
 
 		children = []
-		for pp in self.persons:
-			if pp != None and (pp.father_uniq == uniq or pp.mother_uniq == uniq):
+		for pp in filter(lambda x: x != None, self.persons):
+			if pp.father_uniq == uniq or pp.mother_uniq == uniq:
 				if other == None or pp.father_uniq == other or pp.mother_uniq == other:
 					children.append((pp.GetDoB(None), pp))
 		children_in_order = sorted(children, key=lambda xx: xx[0])
@@ -676,9 +669,7 @@ class Database:
 	#
 	def VerifyRefs(self):
 		n_errs = 0
-		for p in self.persons:
-			if p == None:
-				continue
+		for p in filter(lambda x: x != None, self.persons):
 			if p.father_uniq != None:
 				n_errs += self.VerifyPerson(p.father_uniq, p.father_name, p, 'father')
 			if p.mother_uniq != None:
@@ -758,8 +749,8 @@ class Database:
 				print('Unrecognised parameter "' + arg + '" for heads command')
 				return
 
-		for p in self.persons:
-			if p != None and self.IsHead(p):
+		for p in filter(lambda x: x != None, self.persons):
+			if self.IsHead(p):
 				print(p.GetVitalLine())
 		return
 

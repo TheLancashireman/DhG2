@@ -438,9 +438,7 @@ class DhG_Shell(cmd.Cmd):
 			if listfile == 'all' or listfile == 'public':
 				erase = '          '
 				lastlen = 0
-				for person in self.db.persons:
-					if person == None:
-						continue
+				for person in filter(lambda x: x != None, self.db.persons):
 					if listfile == 'all' or self.db.IsPublic(person.uniq):
 						# Erase the previous line
 #						if lastlen > 0:
