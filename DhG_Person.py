@@ -307,6 +307,12 @@ class Person:
 
 		return ' '.join(parts)
 
+	# Return the person's surname
+	# For the time being, the surname is assumed to be the last word of the name.
+	#
+	def GetSurname(self):
+		return self.name.split()[-1]
+
 	# Return True if person is defined as private or has no death event
 	#
 	def IsPrivate(self):

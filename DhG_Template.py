@@ -246,3 +246,22 @@ class T_AncestorNode():
 			self.parents = [None, None]
 		self.parents[index] = anode
 		return
+
+# A class to hold an index list
+#
+class T_IndexList():
+	def __init__(self):
+		self.key = None				# The index key (letter or name or None)
+		self.objects = {}			# Set of objects with this key. Each object has a key.
+
+	# Return object with given key, or None
+	def GetObject(self, key):
+		try:
+			return self.objects[key]
+		except:
+			return None
+		return None
+
+	def AddObject(self, key, object):
+		self.objects[key] = object
+		return

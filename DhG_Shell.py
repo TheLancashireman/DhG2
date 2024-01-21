@@ -474,6 +474,27 @@ class DhG_Shell(cmd.Cmd):
 		self.do_htmlcard(arg)
 		return
 
+	def do_htmlindex(self, arg):
+		'Create a surname index in HTML'
+		private = False
+		if len(arg) > 0:
+			if arg == '@all':
+				private = True
+			elif arg == '@public':
+				private = False
+			else:
+				print('Argument must be either @public or @all')
+				return
+		file = Config.MakeHtmlSurnameIndexName()
+		info = self.db.GetSurnameIndexInfo(private, 'yearonly')
+		DoTemplate('surname-index-html.tmpl', info, file, trim = True)
+		return
+
+	def do_hi(self, arg):
+		'Create a name index in HTML. Abbreviation of htmlindex'
+		self.do_htmlindex(arg)
+		return
+
 	def do_clearprivacy(self, arg):
 		'Clear the calculated privacy of all persons in the database.'
 		self.db.ClearPrivacy()
@@ -496,6 +517,10 @@ class DhG_Shell(cmd.Cmd):
 	def do_test(self, arg):
 		'For testing code snippets. ToDo: delete'
 		print('do_test(): ', arg)
+		if arg == 'foo':
+			print('foo')
+		else:
+			print('not foo:', arg, type(arg))
 		return
 
 if __name__ == '__main__':

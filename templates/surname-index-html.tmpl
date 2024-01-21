@@ -1,120 +1,82 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" 
-   "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+{# surname-index-html.tmpl - a template for the surname index in HTML
 
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	(c) David Haworth
 
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="" />
-  <meta name="author" content="TheLancashireman" />
-  <meta name="generator" content="DhG" />
+	This file is part of DhG.
 
-  <link  href="/styles/family-history.css" rel="stylesheet" type="text/css" media="screen" />
-  <script type="text/javascript" src="/styles/family-history.js"> </script>
-  <script type="text/javascript" src="/styles/collapsible.js"> </script>
+	DhG is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-  <title>The Lancashireman's family history</title>
-</head>
+	DhG is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-<body>
-  <div>
-    <table class="pagehead">
-      <tr class="pagehead">
-        <td class="pagehead_left">
-          <h1>The Lancashireman's family history</h1>
-        </td>
-        <td class="pagehead_right">
-          <a href="http://www.forl.co.uk/graphics.php">
-            <img style="border:0; width:100px; height:100px"
-                 src="/images/forlrose01.gif"
-                 alt="Red rose of Lancashire" />
-          </a>
-        </td>
-      </tr>
-    </table>
-    <div id="menubar" />
-  </div>
+	You should have received a copy of the GNU General Public License
+	along with DhG.  If not, see <http://www.gnu.org/licenses/>.
 
-  <hr/>
+	Input is a dictionary containing the following items:
+		cardbase	: the server's 'cards' directory
+		initials	: a list of initial-letter objects
+
+	Each element of initials is an object containing:
+		letter		: the initial letter
+		surnames	: a list of surname objects
+
+	Each element of surnames is an object containing:
+		surname		: the surname
+		names		: a list of names of persons with that surname
+
+	Each element of names is an object containing:
+		name		: the surname
+		persons		: a list of persons with that surname
+
+	Each person in persons is an instance of a class; see person class in person-card-html.tmpl
+	Only vital and file are used.
+
+	All the lists are sorted alphabetically.
+#}
+{%  set CARDBASE = tp['cardbase'] %}
+{%  set HEAD = 'html-head.tmpl' %}
+{%  set FOOT = 'html-foot.tmpl' %}
+{%  include HEAD +%}
 
   <h1>Index of surnames</h1>
-  <p>Click on the initial letters and the surnames to open and close the lists.</p>
-  <hr/>
+  <p>Click on the initial letters and the surnames to open and close the lists.
+  </p>
+  <hr>
 
   <div id="pagetorso" class="index_letters">
     <ul class="index_list">
-[% l = 0 -%]
-[% s = 0 -%]
-[% p = 0 -%]
-[% WHILE l < n_letters -%]
-[%   letter = index_letter.$l -%]
-[%   ns = n_surnames.$l -%]
-[%   l = l + 1 -%]
-[%   j = 0 -%]
-      <li id="start_[% letter %]" class="index_firstletter">
-        <span class="collapsible">[% letter %]</span>
+{%  set initials = tp['initials'] %}
+{%  for letter in initials  | sort(case_sensitive = True) %}
+      <li id="start_{{ letter }}" class="index_firstletter">
+        <span class="collapsible">{{ letter }}</span>
         <ul class="index_list">
-[%   WHILE j < ns -%]
-[%     sname = surnames.$s -%]
-[%     np = n_people.$s -%]
-[%     j = j + 1 -%]
-[%     s = s + 1 -%]
-[%     k = 0 -%]
-          <li id="[% sname %]" class="index_surname">
-            <span class="collapsible">[% sname %]</span>
+{%    set surnames = initials[letter].objects %}
+{%    for surname in surnames | sort(case_sensitive = True) %}
+          <li id="{{ surname }}" class="index_surname">
+            <span class="collapsible">{{ surname }}</span>
             <ul class="index_list">
-[%     WHILE k < np -%]
-[%       pname = person_name.$p -%]
-[%       fname = person_fname.$p -%]
-[%       fnamewithdir = person_fnamewithdir.$p -%]
-[%       k = k + 1 -%]
-[%       p = p + 1 -%]
-              <li id="[% fname %]" class="index_person">
-                <a href="cards/[% fnamewithdir %].html">[% pname %]</a>
+{%      set names = surnames[surname].objects %}
+{%      for name in names | sort(case_sensitive = True)  %}
+{%        set persons = names[name].objects %}
+{%        for uniq in persons | sort() %}
+{%          set person = persons[uniq] %}
+              <li class="index_person">
+                <a href="{{ CARDBASE }}/{{ person.file }}.html">{{ person.vital }}</a>
               </li>
-[%     END -%]
+{%        endfor %}
+{%      endfor %}
             </ul>
           </li>
-[%   END -%]
+{%    endfor %}
         </ul>
       </li>
-[% END -%]
+{%  endfor %}
     </ul>
   </div>
 
-
-  <hr/>
-  <table class="pagefoot">
-    <tr class="pagefoot">
-      <td class="pagefoot_left">
-        Last updated 2015-03-29 10:39 GMT<br/>
-        &copy; David Haworth<br/>
-        <a href="/about.html">About this site (Impressum)</a>.
-      </td>
-      <td class="pagefoot_centre">
-        <a href="http://www.forl.co.uk/">
-          <img style="border:0; width:384px; height:60px"
-               src="/images/dont_say.gif"
-               alt="Don't say Greater Manchester, Merseyside or Cumbria when you mean Lancashire" />
-        </a>
-      </td>
-      <td class="pagefoot_right">
-        <a href="https://validator.w3.org/check?uri=referer">
-          <img src="/images/w3c-valid-xhtml11.png"
-               alt="Valid XHTML 1.1" height="31" width="88" />
-        </a>
-        <a href="https://jigsaw.w3.org/css-validator/check/referer">
-          <img style="border:0; width:88px; height:31px"
-               src="/images/w3c-vcss-blue.gif"
-               alt="Valid CSS!" />
-        </a>
-      </td>
-    </tr>
-  </table>
-  <hr/>
-
-</body>
-
-</html>
-
+{%  include FOOT +%}

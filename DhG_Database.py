@@ -22,7 +22,7 @@ import sys
 from pathlib import Path
 from DhG_Config import Config
 from DhG_Person import Person
-from DhG_Template import T_Person, T_Descendants, T_AncestorNode
+from DhG_Template import T_Person, T_Descendants, T_AncestorNode, T_IndexList
 from DhG_Event import TEventFactory
 from DhG_GedcomImporter import GedcomImporter
 
@@ -285,22 +285,26 @@ class Database:
 	def IsPublic(self, p_uniq):
 		return not self.IsPrivate(p_uniq)
 
-	# Determine whether a person is private by looking at
-	#	* the person
-	#	* the person's partners
-	#	* the person's siblings and their partners
+	# Return True if a person is only to be visible on the private website
 	#
 	def IsPrivate(self, p_uniq, recurse=0):
 		if p_uniq == None or self.persons[p_uniq] == None:
 #			print('Database.IsPrivate(): Not a person')
 			return False
-		p = self.persons[p_uniq]
+		return self.IsPrivatePerson(self.persons[p_uniq], recurse)
+
+	# Determine whether a person is private by looking at
+	#	* the person
+	#	* the person's partners
+	#	* the person's siblings and their partners
+	#
+	def IsPrivatePerson(self, p, recurse=0):
+		if p.calc_privacy != None:
+			return p.calc_privacy		# Privacy already calculated; return it
 		if p.IsPrivate():
 #			print('Database.IsPrivate():', p.name, 'alive or marked private')
 			p.calc_privacy = True
 			return True
-		if p.calc_privacy != None:
-			return p.calc_privacy
 		if recurse > 2:
 #			print('Database.IsPrivate(): recurse =', recurse)
 			return False
@@ -310,7 +314,7 @@ class Database:
 				if self.IsPrivate(partner[1], recurse+1):
 					p.calc_privacy = True
 					return True
-		cc = self.GetChildren(p_uniq)	# List of Person() objects
+		cc = self.GetChildren(p.uniq)	# List of Person() objects
 		if cc != None:
 			for child in cc:
 				if self.IsPrivate(child.father_uniq, recurse+1):
@@ -319,9 +323,9 @@ class Database:
 				if self.IsPrivate(child.mother_uniq, recurse+1):
 					p.calc_privacy = True
 					return True
-		ss = self.GetSiblings(p_uniq)	# List of Person() objects. Never None
+		ss = self.GetSiblings(p.uniq)	# List of Person() objects. Never None
 		for sib in ss:
-			if sib.uniq == p_uniq:
+			if sib.uniq == p.uniq:
 				continue
 			if self.IsPrivate(sib.uniq, recurse+1):
 				p.calc_privacy = True
@@ -662,6 +666,41 @@ class Database:
 		info['events'] = factory.events
 		info['transcripts'] = factory.transcripts
 		info['files'] = factory.files
+		return info
+
+	# Return a dictionary containing the information for an HTML surname index page.
+	# See templates/surname-index-html.tmpl for structure and contents
+	#
+	def GetSurnameIndexInfo(self, private, dateformat = 'yearonly'):
+		info = {}
+		info['cardbase'] = Config.GetCardbase()
+
+		root = T_IndexList()
+
+		# At the end of this loop, the root node contains a list of nodes for all the initial letters.
+		# Each letter has a list of nodes for all the surnames beginning with that letter.
+		# Each surname has a list of nodes for all the full names with that surname.
+		# Each name has a list of nodes for all the persons with that name. This list is keyed by unique id
+		for p in filter(lambda x: x != None and (private or not self.IsPrivatePerson(x)), self.persons):
+			tp = self.GetTPerson(p.uniq, dateformat)
+			surname = p.GetSurname()
+			initial = surname[0]
+			initial_obj = root.GetObject(initial)
+			if initial_obj == None:
+				initial_obj = T_IndexList()
+				root.AddObject(initial, initial_obj)
+			surname_obj = initial_obj.GetObject(surname)
+			if surname_obj == None:
+				surname_obj = T_IndexList()
+				initial_obj.AddObject(surname, surname_obj)
+			name_obj = surname_obj.GetObject(p.name)
+			if name_obj == None:
+				name_obj = T_IndexList()
+				surname_obj.AddObject(tp.name, name_obj)
+			name_obj.AddObject(p.uniq, tp)
+
+		info['initials'] = root.objects
+			
 		return info
 
 	# Verify that all reference links between people exist.

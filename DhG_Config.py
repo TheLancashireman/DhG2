@@ -209,6 +209,17 @@ class Config():
 		cardname = prefix + ''.join(names) + '-' + str(uniq) + suffix
 		return cardname
 
+	# Construct file name for an HTML surname index
+	#
+	@staticmethod
+	def MakeHtmlSurnameIndexName():
+		h = Config.Get('html_dir')
+		if h == None or h == '':
+			path = 'surname-index.html'
+		else:
+			path = h + '/surname-index.html'
+		return path
+
 	# Returns a "normalised" version of a given date according to the specified format
 	#
 	# Date formats are:
