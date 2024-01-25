@@ -352,6 +352,9 @@ class Database:
 	# The subj parameter is an existing T_Person for the subject, to avoid duplication
 	#
 	def GetTDescendants(self, level, person, subj, dateformat):
+		if level > Config.Get('depth'):
+			return []
+
 		tdlist = []
 
 		# Get list of partners from marriage records
