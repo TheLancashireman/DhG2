@@ -186,11 +186,14 @@ class Database:
 		return sibs
 
 	# Returns a list of children of a person, in order of data-of-birth
-	# The optional 'other' parameter allows both parents to be specified.
+	# The optional 'other' parameter allows both parents to be specified:
+	#	ID of other person:  only return children with that person
+	#   False:               only return children with unknown partner
+	#	True:                return all children
 	#
 	# The return value is a list of (date, id) tuples.
 	#
-	def GetChildren(self, uniq, other = None):
+	def GetChildren(self, uniq, other = True):
 		try:
 			p = self.persons[uniq]
 			if p == None:
@@ -201,7 +204,12 @@ class Database:
 		children = []
 		for pp in filter(lambda x: x != None, self.persons):
 			if pp.father_uniq == uniq or pp.mother_uniq == uniq:
-				if other == None or pp.father_uniq == other or pp.mother_uniq == other:
+				if other == True:
+					children.append((pp.GetDoB(None), pp))
+				elif other == False:
+					if pp.father_uniq == None or pp.mother_uniq == None:
+						children.append((pp.GetDoB(None), pp))
+				elif pp.father_uniq == other or pp.mother_uniq == other:
 					children.append((pp.GetDoB(None), pp))
 		children_in_order = sorted(children, key=lambda xx: xx[0])
 
@@ -396,7 +404,7 @@ class Database:
 			partner = self.GetTPerson(p[1], dateformat)
 			# For each of the children of this partnership, add a list of next-level child/partner objects
 			if partner == None:
-				cc = self.GetChildren(subj.uniq)
+				cc = self.GetChildren(subj.uniq, False)
 				partner = T_Person('not known', None)
 			else:
 				cc = self.GetChildren(subj.uniq, partner.uniq)
