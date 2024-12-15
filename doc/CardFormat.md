@@ -119,7 +119,6 @@ family trees. If only a name is provided, the name is used in some HTML pages bu
 
 * Mother: - This line is not strictly mandatory, but if you omit it, DhG2 cannot construct family trees. It
 is therefore mandatory wherever it is known.
-
 The value is either "Name [Unique number]" or just "Name". The unique number is used by DhG2 to construct
 family trees. If only a name is provided, the name is used in some HTML pages but no lineage is inferred.
 
