@@ -80,7 +80,9 @@ Version:    2
 | 1052  John Butson  Birtley  Sept'r 22nd  61 years  John Dodd Sub Curate
 ```
 
-## Header information
+Details about the sections and their content follows.
+
+## The header section
 
 The header information ends at the first line that has either a numerical digit or a '?'
 as the first character. After that, all lines are considered as part of an event until
@@ -111,9 +113,9 @@ forename.
 This mandatory line is the unique identifier for the person. Its value is a strictly positive
 integer number.
 
-### Gender
+### Male, Female, Unk
 
-This mandatory line is either "Male", "Female" or "Unk" (unknown). There is no value part.
+This mandatory line specifies the sex of the person.
 
 ### Father
 
@@ -175,10 +177,10 @@ Continuation lines are processed.
 
 Additional free-format information. Continuation lines are processed.
 
-## Events
+## The event section
 
 A person's lifetime is described as a sequence of events, from birth to death and beyond in the case of
-burials and probate records.
+burial and probate records.
 
 While it is possible to construct a family tree using only the header information, it is useful to
 provide at least the birth and death events. If there is no birth event, DhG2 cannot determine
