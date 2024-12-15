@@ -1,10 +1,10 @@
-# Format and structure of the card file
+# Structure of the card file
 
 In DhG2, each person in the database is represented by a text file called a "card file". Think
 of it as a card in a card index (rolodex or whatever) but with the advantage of having much more
-space to store information.
+space to store information. DhG2 accepts UTF-8 in the card files.
 
-The way you write the information on the card is important because DhG2 uses the structured information
+The way you write the information in the card file is important. DhG2 uses the keywords
 to construct family trees and to produce the HTML files for a website.
 
 Apart from the ".card" suffix, the name of a card file is unimportant. DhG2 scans the entire
@@ -12,7 +12,8 @@ database directory for files with suffix ".card". However, if you use the "new" 
 DhG2 creates a file with a name constructed from the full name and unique number of the person and
 places it in a subdirectory of the person's surname.
 
-DhG2 ignores blank lines and lines that start with a '#' character. 
+DhG2 ignores blank lines and lines that start with a '#' character. You can therefore use the
+'#' character to add comment lines wherever you like.
 
 In general, lines that start with a '|' character are considered to be continuation lines.
 However, continuation lines are only processed for specific types of information.
@@ -23,6 +24,10 @@ Each card file is divided into three sections:
 * Header information that identifies the person and provides general information.
 * A list of events for the person, including birth and death events.
 * Additional free-format information that DhG2 does not parse. This section is optional.
+
+The header information starts at the beginning of the file and ends at the first line that has
+either a numerical digit or a '?' as the first character. After that, all lines are considered
+as part of an event until a line equalling "EOF" is found. The lines after EOF are not parsed.
 
 The structure of a card file is best described by giving an example. The following file
 describes a man called John Butson who lived from 1780 until 1833.
@@ -84,10 +89,6 @@ Details about the sections and their content follows.
 
 ## The header section
 
-The header information ends at the first line that has either a numerical digit or a '?'
-as the first character. After that, all lines are considered as part of an event until
-a line equalling "EOF" is found. The lines after EOF are not parsed.
-
 The file header contains mandatory information about the person (name, unique number) along
 with some optional information. Each line holds one piece of information. Most lines of the header
 are of the form "Keyword:  Value", but there are some with no "value" part that are entered without the colon.
@@ -148,7 +149,7 @@ Continuation lines are processed.
 
 ## The event section
 
-A person's lifetime is described as a sequence of events, from birth to death and beyond in the case of
+A person's lifetime is described in a sequence of events, from birth to death and beyond in the case of
 burial and probate records.
 
 While it is possible to construct a family tree using only the header information, it is useful to
@@ -166,7 +167,7 @@ DATE is given in YYY-MM-DD format if the exact date is known. YYYY-MM and YYYY a
 These three forms can be suffixed with one of '~', '<', '>', meaning "about", "before" and "after",
 respectively.
 For events like entries in the UK birth, marriage and death indexes, where only the year and quarter is
-known, YYYY-Qn is also accepted.
+known, YYYY-Qn is also accepted. "?" is also accepted as a date; it means the date is not known.
 
 In the example, John Butson was baptised on 24th December 1780. Based on that information, his
 date of birth is estimated as 1st December of the same year.
@@ -177,18 +178,18 @@ With three exceptions, EVENT can be any text that describes the event. The excep
 
 * Marriage - the rest of the line is the name and unique number of the spouse.
 * Partnership - the rest of the line is the name and unique number of the partner.
-* Misc - the rest of the line is any text that describes the event.
+* Misc - the rest of the line is treated as text that describes the event.
 
 The Misc event is deprecated; it is retained for backward compatibility.
 
 The event types Birth, Death, Marriage and Partnership are used by DhG2 to construct family trees. All other
-event types are considered extra information about the person and are placed in the timeline when creating
-a website.
+event types are considered extra information about the person. They are placed in the timeline when creating
+a website, but otherwise play no role.
 
 In the example, John Butson was baptised at St Mary and St Cuthbert, Chester-le-Street. At the time
 he was living in Fatfield.
 
-His marriage also took place at the same church on 1st May 1797. The witnesses were George Wheatley,
+His marriage took place at the same church on 1st May 1797. The witnesses were George Wheatley,
 William Pybus and Isabella Peacock.
 
 He was buried on 22nd September 1833, again at St Mary and St Cuthbert. His date of death is estimated
@@ -208,7 +209,7 @@ With a few exceptions, the keywords have no special meaning in DhG2. The excepti
 
 * "-URL" gives a URL related to the preceding "+" information. It causes a link to be generated in the website page.
 * "-Uniq" gives the unique number of a person whose name is given in the preceding '+' information. This might be
-a witness to a wedding, for example.
+a witness to a wedding, for example, when the witness is a family member.
 * "+Source" indicates a source of the information in the event. This is described in detail below.
 
 ### Source information
