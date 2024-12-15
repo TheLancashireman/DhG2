@@ -87,14 +87,12 @@ as the first character. After that, all lines are considered as part of an event
 a line equalling "EOF" is found. The lines after EOF are not parsed.
 
 The file header contains mandatory information about the person (name, unique number) along
-with some optional information. Each line holds one piece of information in the form
+with some optional information. Each line holds one piece of information. Most lines of the header
+are of the form "Keyword:  Value", but there are some with no "value" part that are entered without the colon.
 
-Most lines of the header are of the form "Keyword:  Value", but there are some with no
-"value" part that are entered without the colon.
-
-In the example, the person's name is John Butson, male and his unique numbver in the database is 3463.
+In the example, the person's name is John Butson. He is male and his unique numbver in the database is 3463.
 His father was Peter Butson (uniqe number 595) and his mother was Mary Bateman (3459). This is the
-mother's maiden name. The presence of unique numbers for fathe and mother imply that they both have
+mother's maiden name. The presence of unique numbers for father and mother imply that they both have
 card files in the database.
 
 The full set of header lines is described in the following sections. Lines with unrecognised keywords are
