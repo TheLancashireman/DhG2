@@ -19,7 +19,7 @@ However, continuation lines are only processed for specific types of information
 
 ## An example card file
 
-Each card file is devided into three sections:
+Each card file is divided into three sections:
 * Header information that identifies the person and provides general information.
 * A list of events for the person, including birth and death events.
 * Additional free-format information that DhG2 does not parse. This section is optional.
@@ -100,82 +100,51 @@ card files in the database.
 The full set of header lines is described in the following sections. Lines with unrecognised keywords are
 ignored with a warning message.
 
-### Name
-
-This mandatory line is the name of the person as normally written. DhG splits this name into parts based
+* Name: - This mandatory line is the name of the person as normally written. DhG splits this name into parts based
 on space characters; the last part is considered to be the surname. In the example above,
 Bloggs is the surname. If you have someone called Cordelia Ponsomby-Smyth, the surname is
 Ponsomby-Smyth. However, in the case of Ludwig van Beethoven, "van" is considered to be a
 forename.
 
-### Uniq
-
-This mandatory line is the unique identifier for the person. Its value is a strictly positive
+* Uniq: - This mandatory line is the unique identifier for the person. Its value is a strictly positive
 integer number.
 
-### Male, Female, Unk
+* Male, Female, Unk - This mandatory line specifies the sex of the person.
 
-This mandatory line specifies the sex of the person.
+*  Father: - This line is not strictly mandatory, but if you omit it, DhG2 cannot construct family trees. It
+is therefore mandatory wherever it is known.
+The value is either "Name [Unique number]" or just "Name". The unique number is used by DhG2 to construct
+family trees. If only a name is provided, the name is used in some HTML pages but no lineage is inferred.
 
-### Father
-
-This line is not strictly mandatory, but if you omit it, DhG2 cannot construct family trees. It
+* Mother: - This line is not strictly mandatory, but if you omit it, DhG2 cannot construct family trees. It
 is therefore mandatory wherever it is known.
 
 The value is either "Name [Unique number]" or just "Name". The unique number is used by DhG2 to construct
 family trees. If only a name is provided, the name is used in some HTML pages but no lineage is inferred.
 
-### Mother
-
-This line is not strictly mandatory, but if you omit it, DhG2 cannot construct family trees. It
-is therefore mandatory wherever it is known.
-
-The value is either "Name [Unique number]" or just "Name". The unique number is used by DhG2 to construct
-family trees. If only a name is provided, the name is used in some HTML pages but no lineage is inferred.
-
-### Private
-
-This line has no value part; it is either present or absent. If present, it restricts the content of
+* Private - This line has no value part; it is either present or absent. If present, it restricts the content of
 public web pages.
 
-### Version
+* Version: - In principle, this line defines the structure version of the card file. DhG2 only supports version 2;
+version 1 was the first attempt and is now obsolete. The Version line is retained for compatibility and might be
+re-introduced in the future if the structure changes again.
 
-In principle, this line defines the structure version of the card file. DhG2 only supports version 2;
-version 1 was the first attempt and is now obsolete.
-
-The version is ignored by DhG2; it is retained for compatibility and might be re-introduced in the future
-if the structure changes.
-
-### ToDo
-
-This line and any continuation lines are ignored by DhG2. You can use the keyword to remind you of research
+* ToDo: - This line and any continuation lines are ignored by DhG2. You can use the keyword to remind you of research
 that is still needed.
 
-### Nickname
+* Nickname: - You can use this to record a nickname that the person was known by.
 
-You can use this to record a nickname that the person was known by.
+* Alias: - You can use this to record another name by which the person was known.
 
-### Alias
+* Occupation: - If the person kept the same occupation for most of their life, you might want to record it using
+this keyword.  Continuation lines are processed.
 
-You can use this to record another name by which the person was known.
+* Photo: - You might use this keyword to introduce a photo of the person. However, the usage isn't defined yet.
 
-### Occupation
-
-If the person kept the same occupation for most of their life, you might want to record it using this keyword.
+* Source: - Gives information about the source of the information provided in the header.
 Continuation lines are processed.
 
-### Photo
-
-You might use this keyword to introduce a photo of the person. However, the usage isn't defined yet.
-
-### Source
-
-Gives information about the source of the information provided in the header.
-Continuation lines are processed.
-
-### Note or Notes
-
-Additional free-format information. Continuation lines are processed.
+* Note: or Notes: - Additional free-format information. Continuation lines are accepted.
 
 ## The event section
 
