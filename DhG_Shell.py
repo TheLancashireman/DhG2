@@ -122,8 +122,8 @@ class DhG_Shell(cmd.Cmd):
 		return
 
 	# Preprocess the command: try to find a match for an abbreviated command.
-	# If there's more than one match, prepend the ambiguous_command_error command to the line
-	# and let the do_ambiguous_command_error() handler report the error. This means that,
+	# If there's more than one match, prepend the zz_error_ambiguous_command command to the line
+	# and let the do_zz_error_ambiguous_command() handler report the error. This means that,
 	# if necessary, the emptyline() function can do something useful.
 	#
 	def precmd(self, line):
@@ -142,7 +142,7 @@ class DhG_Shell(cmd.Cmd):
 		keylen = len(keyword)
 		cmdmatch = []
 		for name in self.get_names():
-			if name != 'do_ambiguous_command_error' and name[0:3] == 'do_' and name[3:keylen+3] == keyword:
+			if name != 'do_zz_error_ambiguous_command' and name[0:3] == 'do_' and name[3:keylen+3] == keyword:
 #				print('Possible match:', name[3:])
 				if name[3:] == keyword:
 					return line				# Exact match
@@ -152,7 +152,7 @@ class DhG_Shell(cmd.Cmd):
 #			print('Completed command:', line)
 		elif len(cmdmatch) > 1:
 #			print('Ambiguous command: \''+keyword+'\'')
-			line = 'ambiguous_command_error'
+			line = 'zz_error_ambiguous_command'
 			for m in cmdmatch:
 				line = line + ' ' + m
 		return line
@@ -181,7 +181,8 @@ class DhG_Shell(cmd.Cmd):
 
 	# Report the ambiguous command error
 	#
-	def do_ambiguous_command_error(self, arg):
+	def do_zz_error_ambiguous_command(self, arg):
+		'Artificial command for reporting ambiguous abbreviations. Not for normal use.'
 		print('Ambiguous command. Possible matches are: ', arg)
 		return
 
@@ -514,9 +515,9 @@ class DhG_Shell(cmd.Cmd):
 			self.PrintPersonList(l, arg)
 		return
 
-	def do_test(self, arg):
-		'For testing code snippets. ToDo: delete'
-		print('do_test(): ', arg)
+	def do_zz_test(self, arg):
+		'Artificial command for testing code snippets. Not for normal use.'
+		print('do_zz_test(): ', arg)
 		if arg == 'foo':
 			print('foo')
 		else:
