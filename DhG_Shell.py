@@ -206,7 +206,8 @@ class DhG_Shell(cmd.Cmd):
 DhG2 responds to commands that you type at the prompt.
 
 Type "help <command>" for documentation on a specific command.
-Type "help general" for detailed information about DhG2 command parameters.
+Type "help general" for information about DhG2 command parameters.
+Type "help config" for information about DhG2 configuration.
 
 The available commands are:
 		''')
@@ -242,8 +243,8 @@ You can then identify the correct person and retype the command using their ID.
 		''')
 		return
 
-	# =
-	# Print help text for the "!" command
+	# ====================================
+	# Print help text for the "!" command.
 	#
 	def PrintPlingHelp(self):
 		print('''
@@ -257,6 +258,53 @@ Examples:
    !ls  - Lists the contents of the current working directory.
 
 Note: '!' is a shortcut for "shell".
+		''')
+		return
+
+	# =================================================
+	# Print help text for the configuration parameters.
+	#
+	def PrintConfigHelp(self):
+		print('''
+Configuration parameters:
+
+   cfgfile      - The name of the configuration file.
+      This parameter is set on the comand line when starting DhG2. Setting it within the program has no effect.
+      The default value is "~/.DhG/config".
+
+   branch       - The current family branch, if any.
+      This parameter adds an extra subdirectory level the path used by the "new" command.
+
+   dateformat   - The date format to use in most interactive queries.
+      raw      - Exactly as given in the card file.
+      cooked   - Converts the symbols <, > abd ~ to text, converts Qn to the middle month with "abt."
+      yearonly - Only the year.
+
+   db_dir       - The base directory of the card database.
+      This parameter must be set in the configuration file. Setting it within the program has no effect.
+      There is no default value.
+
+   depth        - Specifies the maximum depth to display for interactive trees.
+
+   editor       - Specifies the name of the program to use for the "edit" command.
+
+   generate     - Specifies the privacy for HTML generation.
+      public  - Persons designated as "private" are omitted.
+      all     - All persons are included.
+		
+   html_dir     - The directory in which to place the generated HTML files.
+
+   prompt       - The prompt to display when DhG2 can accept a command.
+
+   server_path  - The base path to use for local links in the generated HTML files.
+
+   text-suffix  - The suffix of transcript files that can be included verbatim in generated HTML files.
+
+   text_path    - The directory in which text transcripts can be found.
+      DhG2 searches for files in all subdirectories in of this directory.
+
+   tmpl_path    - The list of directories to search for templates.
+      The individual directories are separated using ":".
 		''')
 		return
 
@@ -327,20 +375,6 @@ The "quit" command closes DhG2.
 
 Usage:
    quit  - Closes DhG2. Parameters are ignored.
-
-Note: "exit" and "quit" have identical behaviour.
-		'''
-		exit(0)
-
-	# =====================================
-	# Implementation of the "exit" command.
-	#
-	def do_exit(self, arg):
-		'''
-The "exit" command closes DhG2.
-
-Usage:
-   exit  - Closes DhG2. Parameters are ignored.
 
 Note: "exit" and "quit" have identical behaviour.
 		'''
@@ -678,14 +712,14 @@ Usage:
 The "gedimport" command imports a GEDCOM file into an empty database.
 The command allows you to use the query and HTML generation features of DhG2 on the contents
 of an existing GEDCOM file. However, importing a GEDCOM file into an existing database is not
-supported. Neither is is possible to save the imported file into card files.
+supported. Neither is it possible to save the imported database into a set of card files.
 
 Usage:
    gedimport <gedcomfile>  - Import <gedcomfile> into an empty database.
 
 Warning: If you use the "new" command after importing a GEDCOM file, the new person is
 added to the database as a card file. This means that you can no longer use the "gedimport"
-command unless you manually delete any card files that you created.
+command unless you manually delete the card files that you created.
 
 Caveat: The "gedimport" command was written with a specific GEDCOM file in mind. It might not
 work with other GEDCOM files from different sources.
