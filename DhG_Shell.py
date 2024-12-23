@@ -129,6 +129,7 @@ class DhG_Shell(cmd.Cmd):
 		for name in self.get_names():
 			if name[0:3] == 'do_' and name[0:6] != 'do_zz_':
 				cmdlist.append(name[3:])
+		cmdlist.append('!')
 		return cmdlist
 
 	# Get a list of all the commands that match a given partial command
@@ -175,7 +176,7 @@ class DhG_Shell(cmd.Cmd):
 				line = line + ' ' + m
 		return line
 
-	# Report that list of matches is ambiguous
+	# Print a list of all the persons in the database.
 	#
 	def PrintPersonList(self, l, arg):
 		if len(l) < 1:
@@ -185,7 +186,7 @@ class DhG_Shell(cmd.Cmd):
 				print(p.GetVitalLine())		# ToDo: parameters
 		return
 
-	# Edit a card using the specified editor
+	# Edit a card using the specified editor.
 	#
 	def EditCard(self, editor, arg):
 		l = self.db.GetMatchingPersons(arg)
@@ -197,7 +198,8 @@ class DhG_Shell(cmd.Cmd):
 			self.PrintPersonList(l, arg)
 		return
 
-	# Print some general help text
+	# =============================
+	# Print some general help text.
 	#
 	def PrintCommandList(self, arg):
 		print('''
@@ -213,10 +215,16 @@ The available commands are:
 		print()
 		return
 
-	# Print some general help text
+	# =============================
+	# Print some general help text.
 	#
-	def PrintGeneralHelp(self, arg):
+	def PrintGeneralHelp(self):
 		print('''
+DhG2 loads a database in the form of individual card files, one per person, into memory.
+The commands provided by DhG2 perform queries and operations on the database.
+With the exception of the "new" command, DhG2 never modifies your card files.
+You must do that yourself using one of the editing commands.
+
 To use DhG2, type a sequence of command lines. A command line is a command followed by additional text.
 The nature of the additional text depends on the command. Many commands expect that the text
 identifies a person in the database.
@@ -234,50 +242,125 @@ You can then identify the correct person and retype the command using their ID.
 		''')
 		return
 
-	# Report the ambiguous command error
+	# =
+	# Print help text for the "!" command
+	#
+	def PrintPlingHelp(self):
+		print('''
+The "!" command invokes a program from your computer's operating system. The current working
+directory (cwd) of the program is the same as the cwd in which DhG2 was origninally invoked.
+
+Usage:
+   ! <command>  - Invokes <command> in a child shell.
+
+Examples:
+   !ls  - Lists the contents of the current working directory.
+
+Note: '!' is a shortcut for "shell".
+		''')
+		return
+
+	# ===================================
+	# Report the ambiguous command error.
 	#
 	def do_zz_error_ambiguous_command(self, arg):
-		'Artificial command for reporting ambiguous abbreviations. Not for normal use.'
+		'''
+zz_error_ambiguous_command is an internal command for reporting ambiguous command abbreviations. Not for normal use.
+		'''
 		print('Ambiguous command. Possible matches are: ', arg)
 		return
 
-	# All the "real" commands:
+	# ================================
+	# An internal command for testing.
+	#
+	def do_zz_test(self, arg):
+		'''
+zz_test is an internal command for testing purposes. Not for normal use.
+		'''
+		print('do_zz_test(): ', arg)
+		if arg == 'foo':
+			print('foo')
+		else:
+			print('not foo:', arg, type(arg))
+		return
+
+	# =====================================
+	# Implementation of the "help" command.
 	#
 	def do_help(self, arg):
 		'''
-The help command provides built-in documentation.
+The "help" command provides built-in documentation.
 
 Usage:
-   help            - provides a list of the available commands.
-   help general    - provides some general documentation.
-   help <command>  - provides help for the specified command.
+   help            - Provides a list of the available commands.
+   help <command>  - Provides help for the specified command.
+   help general    - Provides some general documentation.
+   help config     - Provides information about configuration parameters.
 		'''
 		if arg == None or arg == '':
 			self.PrintCommandList(arg)
 			return
 		if arg == 'general':
-			self.PrintGeneralHelp(arg)
+			self.PrintGeneralHelp()
+			return
+		if arg == 'config':
+			self.PrintConfigHelp()
+			return
+		if arg == '!':
+			self.PrintPlingHelp()
 			return
 
 		cmdmatch = self.get_matching_commands(arg)
 		if len(cmdmatch) == 0:
-			print('DhG2 has no commands thatr match "'+arg+'".')
+			print('DhG2 has no command that matches "'+arg+'".')
 		else:
 			for cmd in cmdmatch:
 				super().do_help(cmd)
 		return
 
+	# =====================================
+	# Implementation of the "quit" command.
+	#
 	def do_quit(self, arg):
 		'''
-The quit command closes DhG2.
+The "quit" command closes DhG2.
 
 Usage:
-	quit
+   quit  - Closes DhG2. Parameters are ignored.
+
+Note: "exit" and "quit" have identical behaviour.
 		'''
 		exit(0)
 
+	# =====================================
+	# Implementation of the "exit" command.
+	#
+	def do_exit(self, arg):
+		'''
+The "exit" command closes DhG2.
+
+Usage:
+   exit  - Closes DhG2. Parameters are ignored.
+
+Note: "exit" and "quit" have identical behaviour.
+		'''
+		exit(0)
+
+	# ====================================
+	# Implementation of the "set" command.
+	#
 	def do_set(self, arg):
-		'Set a configuration parameter'
+		'''
+The "set" command sets a configuration parameter.
+
+Usage:
+   set                 - Lists all the configuration parameters and their values.
+   set <name>=<value>  - Sets the configuration parameter <name> to <value>.
+
+Spaces immediately before and after the '=' sign are ignored.
+
+Type "help config" to see a list of the configuration parameters.
+		'''
 		if arg == '':
 			Config.Print()
 			return
@@ -285,42 +368,94 @@ Usage:
 			print('Error : invalid syntax for the set command')
 		return
 
+	# ======================================
+	# Implementation of the "reload" command
+	#
 	def do_reload(self, arg):
-		'Reload the database'
+		'''
+The "reload" command reloads the entire database from the card files into memory.
+
+Normally you should not need to do this. The command is useful if you
+edit many card files outside of a running DhG2 process.
+Hint: if you edit a single card file it might be quicker just to open
+the file within DhG2 and close it without making changes.
+
+Usage:
+   reload  - Reloads the database. Parameters are ignored.
+		'''
 		self.db.Reload()
 		return
 
+	# ======================================
+	# Implementation of the "unused" command
+	#
 	def do_unused(self, arg):
-		'List all the unused IDs in the database'
+		'''
+The "unused" command lists all the unique IDs that are not used, up to the highest known ID that is used.
+
+Usage:
+   unused  - Lists all the IDs that are not used in the database. Parameters are ignored.
+		'''
 		l = self.db.GetUnused()
 		for i in l:
 			print('['+str(i)+']')
 		return
 
+	# =====================================
+	# Implementation of the "list" command.
+	#
 	def do_list(self, arg):
-		'List all the persons in the database'
+		'''
+The "list" command lists all the persons in the database. It ignores any parameters that you give.
+
+Usage:
+   list  - Lists all the persons in the database. Parameters are ignored.
+		'''
 		self.do_find('')
 		return
 
+	# =====================================
+	# Implementation of the "find" command.
+	#
 	def do_find(self, arg):
-		'Print a list of persons that match the given terms'
+		'''
+The "find" command displays a list of persons that match the given parameters.
+
+Usage:
+   find <person>  - displays a list of matching persons.
+
+Note: "search" and "find" have identical behaviour.
+		'''
 		l = self.db.GetMatchingPersons(arg)
 		for p in l:
 			print(p.GetVitalLine())		# ToDo: parameters
 		return
 
+	# =======================================
+	# Implementation of the "search" command.
+	#
 	def do_search(self, arg):
-		'Print a list of persons that match the given terms'
+		'''
+The "search" command displays a list of persons that match the given parameters.
+
+Usage:
+   search <person>  - displays a list of matching persons.
+
+Note: "search" and "find" have identical behaviour.
+		'''
 		self.do_find(arg)
 		return
 
-	def do_tl(self, arg):
-		'Print the timeline for a person'
-		self.do_timeline(arg)
-		return
-
+	# =========================================
+	# Implementation of the "timeline" command.
+	#
 	def do_timeline(self, arg):
-		'Print the timeline for a person'
+		'''
+The "timeline" command displays the timeline for the specified person.
+
+Usage:
+   timeline <person> - Displays the timeline for <person>.
+		'''
 		l = self.db.GetMatchingPersons(arg)
 		if len(l) == 1:
 			tl = l[0].GetTimeline()
@@ -330,23 +465,79 @@ Usage:
 			self.PrintPersonList(l, arg)
 		return
 
+	# ===================================
+	# Implementation of the "tl" command.
+	#
+	def do_tl(self, arg):
+		'''
+The "tl" command displays the timeline for the specified person. "tl" is an abbreviation for "timeline".
+
+Usage:
+   tl <person> - Displays the timeline for <person>.
+		'''
+		self.do_timeline(arg)
+		return
+
+	# ===================================
+	# Implementation of the "vi" command.
+	#
 	def do_vi(self, arg):
-		'Edit a person\'s card using vi'
+		'''
+The "vi" command edits a person's card file using the vi editor.
+The vi program must be present in your shell's search path.
+
+Usage:
+   vi <person>  - Invokes vi to edit the person's card file.
+		'''
 		self.EditCard('vi', arg)
 		return
 
+	# ====================================
+	# Implementation of the "vim" command.
+	#
 	def do_vim(self, arg):
-		'Edit a person\'s card using vim'
+		'''
+The "vim" command edits a person's card file using the vim editor.
+The vim program must be present in your shell's search path.
+
+Usage:
+   vim <person>  - Invokes vim to edit the person's card file.
+		'''
 		self.EditCard('vim', arg)
 		return
 
+	# =====================================
+	# Implementation of the "edit" command.
+	#
 	def do_edit(self, arg):
-		'Edit a card using config.editor'
+		'''
+The "edit" command edits a person's card file using your configured editor.
+
+Usage:
+   edit <person>  - Invokes your configured editor to edit the person's card file.
+		'''
 		self.EditCard(Config.Get('editor'), arg)
 		return
 
-	def do_new(self, arg):					# ToDo: refactor this function
-		'Create a new person in the database'
+	# ====================================
+	# Implementation of the "new" command.
+	#
+	def do_new(self, arg):					# Refactor this function
+		'''
+The "new" command creates a card file for a new person and automatically loads the new
+file into memory.
+DhG2 automatically assigns a unique ID for the person.
+The parameter is the full name of the person as normally written.
+
+Usage:
+   new <name>  - Create a new person in the database.
+
+Example: The command "new Kevin Philip Bong" creates a card file called KevinPhilipBong-nnn.card in the
+subdirectory Bong (optionally in the current branch subdirectory) of your database. nnn is the unique ID
+that is assigned autonatically.
+
+See also the configuration parameters "branch", "father" and "mother". Type "help config" for information.
+		'''
 		(name, uniq) = Person.ParseCombinedNameString(arg)
 		#db.CreateNewPerson(name, uniq)
 		if name == '':
@@ -382,8 +573,16 @@ Usage:
 			print('Created new person ', name, '['+str(uniq)+']')
 		return
 
+	# =======================================
+	# Implementation of the "family" command.
+	#
 	def do_family(self, arg):
-		'Show a person\'s immediate family'
+		'''
+The "family" command displays the immediate family (parents, siblings and children) of the specified person.
+
+Usage:
+   family <person>  - Displays a person's immediate family.
+		'''
 		l = self.db.GetMatchingPersons(arg)
 		if len(l) == 1:
 			fam = self.db.GetFamily(l[0].uniq)
@@ -392,8 +591,17 @@ Usage:
 			self.PrintPersonList(l, arg)
 		return
 
+	# ==========================================
+	# Implementation of the "descendants" command.
+	#
 	def do_descendants(self, arg):
-		'Print a descendants tree for a given person'
+		'''
+The "descendants" command displays a descendants tree for the specified person.
+The depth of the tree is limited to the value of the "depth" configuration parameter.
+
+Usage:
+   descendants <person>  - Displays a descendants tree for <person>.
+		'''
 		l = self.db.GetMatchingPersons(arg)
 		if len(l) == 1:
 			save = Config.Get('generate')
@@ -408,8 +616,17 @@ Usage:
 			self.PrintPersonList(l, arg)
 		return
 
+	# ==========================================
+	# Implementation of the "ancestors" command.
+	#
 	def do_ancestors(self, arg):
-		'Print an ancestors tree for a given person'
+		'''
+The "ancestors" command displays an ancestry tree (also known as an Ahnentafel) for the specified person.
+The depth of the tree is limited to the value of the "depth" configuration parameter.
+
+Usage:
+   ancestors <person>  - Displays an ancestors tree for <person>.
+		'''
 		l = self.db.GetMatchingPersons(arg)
 		if len(l) == 1:
 			anc = self.db.GetAncestorsObsolete(l[0].uniq)
@@ -418,29 +635,95 @@ Usage:
 			self.PrintPersonList(l, arg)
 		return
 
+	# ======================================
+	# Implementation of the "heads" command.
+	#
 	def do_heads(self, arg):
-		'List all the patriarchs and/or matriarchs (those whose parents and parents of spouses are not recorded).\nThe argument is one of male, female, both. Default is both'
+		'''
+The "heads" command displays a list of all the patriarchs and/or matriarchs in the database.
+A patriarch (male) or matriarch (female) is defined as a person whose parents AND whose spouse's parents
+are not recorded in the database. The command accepts a single parameter.
+
+Usage:
+   heads male    - Displays a list of all patriarchs in the database.
+   heads female  - Displays a list of all matriarchs in the database.
+   heads both    - Displays a list of all patriarchs and matriarchs in the database.
+   heads         - Equivalent to "heads both"
+		'''
 		self.db.ListHeads(arg)
 		return
 
+	# =======================================
+	# Implementation of the "verify" command.
+	#
 	def do_verify(self, arg):
-		'Verify all the person references in the database'
+		'''
+The "verify" command verifies that all persons that are referenced in the database actually
+exist and have the same name as the reference. The verification applies to parents and spouses,
+but not to other people like witnesses, where the name given in the record might differ from
+their official name.
+
+Usage:
+   verify  -- Verify the person references in the database. Parameters are ignored.
+		'''
 		if self.db.VerifyRefs() == 0:
 			print('Verification complete; no errors')
 		return
 
-	def do_gedi(self, arg):
-		'Import a GEDCOM file'
+	# ==========================================
+	# Implementation of the "gedimport" command.`
+	#
+	def do_gedimport(self, arg):
+		'''
+The "gedimport" command imports a GEDCOM file into an empty database.
+The command allows you to use the query and HTML generation features of DhG2 on the contents
+of an existing GEDCOM file. However, importing a GEDCOM file into an existing database is not
+supported. Neither is is possible to save the imported file into card files.
+
+Usage:
+   gedimport <gedcomfile>  - Import <gedcomfile> into an empty database.
+
+Warning: If you use the "new" command after importing a GEDCOM file, the new person is
+added to the database as a card file. This means that you can no longer use the "gedimport"
+command unless you manually delete any card files that you created.
+
+Caveat: The "gedimport" command was written with a specific GEDCOM file in mind. It might not
+work with other GEDCOM files from different sources.
+		'''
 		self.db.ImportGedcom(arg)
 		return
 
+	# ======================================
+	# Implementation of the "shell" command.
+	#
 	def do_shell(self, arg):
-		'Run a command in a shell'
+		'''
+The "shell" command invokes a program from your computer's operating system. The current working
+directory (cwd) of the program is the same as the cwd in which DhG2 was origninally invoked.
+
+Usage:
+   shell <command>  - Invokes <command> in a child shell.
+
+Examples:
+   shell ls  - Lists the contents of the current working directory.
+
+Note: '!' is a shortcut for "shell".
+		'''
 		os.system(arg)
 		return
 
+	# ================================================
+	# Implementation of the "htmldescendants" command.
+	#
 	def do_htmldescendants(self, arg):
-		'Create a descendants tree in HTML for a given person'
+		'''
+The "htmldescendants" command creates a descendants tree in HTML format for the specified person or persons.
+The HTML file is called trees/SURNAME/FULLNAME-ID-descendants.html and is placed in the configured HTML directory.
+
+Usage:
+   htmldescendants <person>   - Creates a descendants tree in HTML for <person>.
+   htmldescendants @filename  - Creates a descendants tree in HTML for each person listed in the specified file.
+		'''
 		if len(arg) > 0 and arg[0] == '@':
 			f = open(arg[1:], 'r')
 			erase = '          '
@@ -472,13 +755,35 @@ Usage:
 			self.PrintPersonList(l, arg)
 		return
 
-	def do_hd(self, arg):	# Abbreviated command
-		'Create a descendants tree in HTML for a given person. Abbreviation of htmldescendants'
+	# ===================================
+	# Implementation of the "hd" command.
+	#
+	def do_hd(self, arg):
+		'''
+The "hd" command creates a descendants tree in HTML format for the specified person or persons.
+The HTML file is called trees/SURNAME/FULLNAME-ID-descendants.html and is placed in the configured HTML directory.
+"hd" is an abbreviation for "htmldescendants".
+
+Usage:
+   hd <person>   - Creates a descendants tree in HTML for <person>.
+   hd @filename  - Creates a descendants tree in HTML for each person listed in the specified file.
+		'''
 		self.do_htmldescendants(arg)
 		return
 
+	# ==============================================
+	# Implementation of the "htmlancestors" command.
+	#
 	def do_htmlancestors(self, arg):
-		'Create an ancestor tree (Ahnentafel) in HTML for a given person'
+		'''
+The "htmlancestors" command creates an ancestors tree (also known as an Ahnentafel) in HTML format
+for the specified person or persons.
+The HTML file is called trees/SURNAME/FULLNAME-ID-ancestors.html and is placed in the configured HTML directory.
+
+Usage:
+   htmlancestors <person>   - Creates an ancestor tree in HTML for <person>.
+   htmlancestors @filename  - Creates an ancestor tree in HTML for each person listed in the specified file.
+		'''
 		if len(arg) > 0 and arg[0] == '@':
 			f = open(arg[1:], 'r')
 			erase = '          '
@@ -510,13 +815,36 @@ Usage:
 			self.PrintPersonList(l, arg)
 		return
 
+	# ===================================
+	# Implementation of the "ha" command.
+	#
 	def do_ha(self, arg):	# Abbreviated command
-		'Create an ancestor tree (Ahnentafel) in HTML for a given person. Abbreviation of htmlancestors'
+		'''
+The "ha" command creates an ancestors tree (also known as an Ahnentafel) in HTML format
+for the specified person or persons.
+The HTML file is called trees/SURNAME/FULLNAME-ID-ancestors.html and is placed in the configured HTML directory.
+"ha" is an abbreviation for "htmlancestors".
+
+Usage:
+   ha <person>   - Creates an ancestor tree in HTML for <person>.
+   ha @filename  - Creates an ancestor tree in HTML for each person listed in the specified file.
+		'''
 		self.do_htmlancestors(arg)
 		return
 
+	# =========================================
+	# Implementation of the "htmlcard" command.
+	#
 	def do_htmlcard(self, arg):
-		'Create a cardfile in HTML for a given person'
+		'''
+The "htmlcard" command creates an information card in HTML format for the specified person or persons.
+The HTML file is called cards/SURNAME/FULLNAME-ID.html and is placed in the configured HTML directory.
+
+Usage:
+   htmlcard <person>  - Creates an HTML card file for <person>.
+   htmlcard @all      - Creates HTML card files for all persons in the database.
+   htmlcard @public   - Creates HTML card files for all persons that are not designated as private. 
+		'''
 		if len(arg) > 0 and arg[0] == '@':
 			listfile = arg[1:]
 			# Special cases of listfile
@@ -554,13 +882,34 @@ Usage:
 			self.PrintPersonList(l, arg)
 		return
 
+	# ===================================
+	# Implementation of the "hc" command.
+	#
 	def do_hc(self, arg):
-		'Create a cardfile in HTML for a given person. Abbreviation of htmlcard'
+		'''
+The "hc" command creates an information card in HTML format for the specified person or persons.
+The HTML file is called cards/SURNAME/FULLNAME-ID.html and is placed in the configured HTML directory.
+"hc" is an abbreviation for "htmlcard".
+
+Usage:
+   hc <person>  - Creates an HTML card file for <person>.
+   hc @all      - Creates HTML card files for all persons in the database.
+   hc @public   - Creates HTML card files for all persons that are not designated as private. 
+		'''
 		self.do_htmlcard(arg)
 		return
 
+	# ==========================================
+	# Implementation of the "htmlindex" command.
+	#
 	def do_htmlindex(self, arg):
-		'Create a surname index in HTML'
+		'''
+The "htmlindex" command creates an index to the HTML card files in HTML format.
+
+Usage:
+   htmlindex @all     - Creates an HTML index containing all persons in the database.
+   htmlindex @public  - Creates and HTML index containing all persons that are not designated as private.
+		'''
 		private = False
 		if len(arg) > 0:
 			if arg == '@all':
@@ -575,18 +924,48 @@ Usage:
 		DoTemplate('surname-index-html.tmpl', info, file, trim = True)
 		return
 
+	# ===================================
+	# Implementation of the "hi" command.
+	#
 	def do_hi(self, arg):
-		'Create a name index in HTML. Abbreviation of htmlindex'
+		'''
+The "hi" command creates an index to the HTML card files in HTML format.
+"hi" is an abbreviation for "htmlcard".
+
+Usage:
+   hi @all     - Creates an HTML index containing all persons in the database.
+   hi @public  - Creates and HTML index containing all persons that are not designated as private.
+		'''
 		self.do_htmlindex(arg)
 		return
 
+	# =============================================
+	# Implementation of the "clearprivacy" command.
+	#
 	def do_clearprivacy(self, arg):
-		'Clear the calculated privacy of all persons in the database.'
+		'''
+The "clearprivacy" command clears the calculated privacy of all persons in the database.
+Calculating the privacy status for a large database is a time-consuming process, so once
+calculated the value is stored. However, explicitly changing a person's privacy by setting
+the person to private or deleting their death record might affect other persons' status
+too.
+
+Usage:
+   clearprivacy  - Clears the calculated privacy status for the whole database. Parameters are ignored.
+		'''
 		self.db.ClearPrivacy()
 		return
 
+	# ============================================
+	# Implementation of the "showprivacy" command.
+	#
 	def do_showprivacy(self, arg):
-		'Show the privacy status of a person.'
+		'''
+The "showprivacy" command shows the privacy status of a specified person.
+
+Usage:
+   showprivacy <person>  - shows the privacy status for <person>.
+		'''
 		l = self.db.GetMatchingPersons(arg)
 		if len(l) == 1:
 			person = l[0]
@@ -597,15 +976,6 @@ Usage:
 			print(person.GetVitalLine(), 'is', str)
 		else:
 			self.PrintPersonList(l, arg)
-		return
-
-	def do_zz_test(self, arg):
-		'Artificial command for testing code snippets. Not for normal use.'
-		print('do_zz_test(): ', arg)
-		if arg == 'foo':
-			print('foo')
-		else:
-			print('not foo:', arg, type(arg))
 		return
 
 if __name__ == '__main__':
