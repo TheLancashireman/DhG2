@@ -504,7 +504,8 @@ Usage:
 	#
 	def do_tl(self, arg):
 		'''
-The "tl" command displays the timeline for the specified person. "tl" is an abbreviation for "timeline".
+The "tl" command displays the timeline for the specified person.
+"tl" is an abbreviation for "timeline".
 
 Usage:
    tl <person> - Displays the timeline for <person>.
@@ -964,7 +965,7 @@ Usage:
 	def do_hi(self, arg):
 		'''
 The "hi" command creates an index to the HTML card files in HTML format.
-"hi" is an abbreviation for "htmlcard".
+"hi" is an abbreviation for "htmlindex".
 
 Usage:
    hi @all     - Creates an HTML index containing all persons in the database.
