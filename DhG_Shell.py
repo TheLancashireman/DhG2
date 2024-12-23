@@ -121,6 +121,30 @@ class DhG_Shell(cmd.Cmd):
 	def emptyline(self):
 		return
 
+	# Get a list of all the public commands that are available.
+	# This is a list all functions that start with "do_", excluding those
+	# that start with "do_zz".
+	def get_commands(self):
+		cmdlist = []
+		for name in self.get_names():
+			if name[0:3] == 'do_' and name[0:6] != 'do_zz_':
+				cmdlist.append(name[3:])
+		return cmdlist
+
+	# Get a list of all the commands that match a given partial command
+	# If there is an exact match, the list contains only that match
+	#
+	def get_matching_commands(self, keyword):
+		keylen = len(keyword)
+		cmdmatch = []
+		for name in self.get_names():
+			if name[0:3] == 'do_' and name[3:keylen+3] == keyword:
+#				print('Possible match:', name[3:])
+				if name[3:] == keyword:
+					return [keyword]				# Exact match
+				cmdmatch.append(name[3:])
+		return cmdmatch
+
 	# Preprocess the command: try to find a match for an abbreviated command.
 	# If there's more than one match, prepend the zz_error_ambiguous_command command to the line
 	# and let the do_zz_error_ambiguous_command() handler report the error. This means that,
@@ -140,13 +164,7 @@ class DhG_Shell(cmd.Cmd):
 		else:
 			keyword = line
 		keylen = len(keyword)
-		cmdmatch = []
-		for name in self.get_names():
-			if name != 'do_zz_error_ambiguous_command' and name[0:3] == 'do_' and name[3:keylen+3] == keyword:
-#				print('Possible match:', name[3:])
-				if name[3:] == keyword:
-					return line				# Exact match
-				cmdmatch.append(name[3:])
+		cmdmatch = self.get_matching_commands(keyword)
 		if len(cmdmatch) == 1:
 			line = cmdmatch[0] + ' ' + line[keylen:]
 #			print('Completed command:', line)
@@ -179,6 +197,43 @@ class DhG_Shell(cmd.Cmd):
 			self.PrintPersonList(l, arg)
 		return
 
+	# Print some general help text
+	#
+	def PrintCommandList(self, arg):
+		print('''
+DhG2 responds to commands that you type at the prompt.
+
+Type "help <command>" for documentation on a specific command.
+Type "help general" for detailed information about DhG2 command parameters.
+
+The available commands are:
+		''')
+		commands = self.get_commands()
+		self.columnize(commands)
+		print()
+		return
+
+	# Print some general help text
+	#
+	def PrintGeneralHelp(self, arg):
+		print('''
+To use DhG2, type a sequence of command lines. A command line is a command followed by additional text.
+The nature of the additional text depends on the command. Many commands expect that the text
+identifies a person in the database.
+
+You can abbreviate commands using as many initial letters as necessary to uniquely specify the command.
+If you type an ambiguous command, DhG2 responds with a message telling you which commands match what you
+typed.
+Tab completion is also possible.
+
+For the commands that expect a parameter that identifies a person in
+the database, you can specify the person by ID in the form [n] or just n.
+Alternatively, you can specify the person by full or partial name.
+If the name you provide matches several persons, DhG2 displays a list of matches.
+You can then identify the correct person and retype the command using their ID.
+		''')
+		return
+
 	# Report the ambiguous command error
 	#
 	def do_zz_error_ambiguous_command(self, arg):
@@ -188,17 +243,46 @@ class DhG_Shell(cmd.Cmd):
 
 	# All the "real" commands:
 	#
+	def do_help(self, arg):
+		'''
+The help command provides built-in documentation.
+
+Usage:
+   help            - provides a list of the available commands.
+   help general    - provides some general documentation.
+   help <command>  - provides help for the specified command.
+		'''
+		if arg == None or arg == '':
+			self.PrintCommandList(arg)
+			return
+		if arg == 'general':
+			self.PrintGeneralHelp(arg)
+			return
+
+		cmdmatch = self.get_matching_commands(arg)
+		if len(cmdmatch) == 0:
+			print('DhG2 has no commands thatr match "'+arg+'".')
+		else:
+			for cmd in cmdmatch:
+				super().do_help(cmd)
+		return
+
 	def do_quit(self, arg):
-		'Quit the program'
+		'''
+The quit command closes DhG2.
+
+Usage:
+	quit
+		'''
 		exit(0)
 
 	def do_set(self, arg):
-		'Set a config parameter'
+		'Set a configuration parameter'
 		if arg == '':
 			Config.Print()
 			return
 		if not Config.SetParameter(arg):
-			print('Error : invalid syntax for set')
+			print('Error : invalid syntax for the set command')
 		return
 
 	def do_reload(self, arg):
