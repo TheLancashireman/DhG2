@@ -85,7 +85,10 @@ Version:    2
 | 1052  John Butson  Birtley  Sept'r 22nd  61 years  John Dodd Sub Curate
 ```
 
-Details about the sections and their content follows.
+This is a real card in my own database. You can see his
+[page on my website](https://thelancashireman.org/family-history/cards/Butson/JohnButson-3463.html).
+
+Detailed information about the sections and their content follows.
 
 ## The header section
 
