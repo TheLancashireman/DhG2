@@ -5,14 +5,14 @@ This is a rewrite of the original DhG, using python instead of perl and cleaning
 cruft caused by major concept and design changes over the years.
 
 DhG2 is unashamedly command-line driven. It doesn't give you a pretty interface to a hidden database.
-Instead, it helps you to create structured text files called cardfiles, one per person, then analyses
+Instead, it helps you to create structured text files called card files, one per person, then analyses
 the files to produce ancestor and descendant trees and immediate family reports. It can even produce a
 static HTML web site.
 
-The cardfile approach means that you always have full control of your data. DhG2 only reads the
-cardfiles, never writes. Think of each cardfile as an old-fashioned index card, except without the
-physical space limit. You edit the cardfiles with an editor of your choice, and you can keep backup
-copies as you please.
+The card file approach means that you always have full control of your data. DhG2 only reads the existing
+card files, never modifies. The only write operation is the "new" command.
+Think of each card file as an old-fashioned index card, except without the physical space limit.
+You edit the cardfiles with an editor of your choice, and you can keep backup copies as you please.
 
 Recommendation: use a revision control system like git to store the cardfiles and track changes.
 
@@ -25,17 +25,21 @@ editing capability.
 
 DhG2 is in a usable state with most major features implemented.
 
-HTML generation is partially implemented:
+* The built-in help is working and fairly self-explanatory.
+* There's a desciption of the card file structure in the [doc/](doc/CardFormat,md) directory.
+
+HTML generation is fully implemented:
 * Descendant trees can be generated, individually or from a list.
 * Ancestor trees can be generated, individually or from a list.
-* Card files can be generated, individually or all/public.
-* Name index etc. still to do.
+* Pages for individuals files can be generated, individually or all/public.
+* Name index can be generated.
 
 ### To do
 
 There is always lots to do. :-)
 
-* Consider refactoring the timeline command to use the same data ad HTML card, but a different template.
+* Write more documentation.
+* Consider refactoring the timeline command to use the same data as HTML card, but a different template.
 * OR: keep the text output as it is and implement a new command.
 * Add a translation table for captions in event info. Does DhG have a list? Add Mapref -> Map reference.
 * Check how Misc events are presented
