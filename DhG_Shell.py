@@ -147,9 +147,10 @@ class DhG_Shell(cmd.Cmd):
 		return cmdmatch
 
 	# Preprocess the command: try to find a match for an abbreviated command.
-	# If there's more than one match, prepend the zz_error_ambiguous_command command to the line
-	# and let the do_zz_error_ambiguous_command() handler report the error. This means that,
-	# if necessary, the emptyline() function can do something useful.
+	# If there's no match, change the line to "zz_error_no_command" followed by the abbreviation.
+	# If there's more than one match, change the line to "zz_error_ambiguous_command" follwed by
+	# a list of commands that match (space-separated).
+	# This means that, if necessary, the emptyline() function can do something useful.
 	#
 	def precmd(self, line):
 		line = line.rstrip().lstrip()
@@ -166,7 +167,9 @@ class DhG_Shell(cmd.Cmd):
 			keyword = line
 		keylen = len(keyword)
 		cmdmatch = self.get_matching_commands(keyword)
-		if len(cmdmatch) == 1:
+		if len(cmdmatch) == 0:
+			line = 'zz_error_no_command ' + keyword
+		elif len(cmdmatch) == 1:
 			line = cmdmatch[0] + ' ' + line[keylen:]
 #			print('Completed command:', line)
 		elif len(cmdmatch) > 1:
@@ -316,6 +319,16 @@ Configuration parameters:
 zz_error_ambiguous_command is an internal command for reporting ambiguous command abbreviations. Not for normal use.
 		'''
 		print('Ambiguous command. Possible matches are: ', arg)
+		return
+
+	# =====================================
+	# Report the no matching command error.
+	#
+	def do_zz_error_no_command(self, arg):
+		'''
+zz_error_no_command is an internal command for reporting unknown command error. Not for normal use.
+		'''
+		print('DhG2 has no command that matches "'+arg+'".')
 		return
 
 	# ================================
