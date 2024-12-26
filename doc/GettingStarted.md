@@ -128,6 +128,6 @@ For example, if you type "e j pew", the command lists both Jack and Jill. You ca
 using the unique identifier: "e 3" or "e 4", depending on whether you want to edit Jack or Jill.
 
 You can give the unique identifier as a bare number or in (square) brackets exactly as displayed by the
-orignial command. If you give a partial name and an assigned identifer in brackets, the command ignores the
+original command. If you give a partial name and an assigned identifer in brackets, the command ignores the
 name and uses the identifier. However, if you give a partial name and a bare number then the number is treated
 as part of the name and there is unlikely to be a match.
