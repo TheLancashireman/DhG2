@@ -21,6 +21,12 @@ You have to import into an empty database, and there is no way to save the resul
 After importing, the browsing and HTML generation features can be used, but of course there is no
 editing capability.
 
+### Documentation
+
+* [Getting started](doc/GettingStarted.md)
+* [Card file structure](doc/CardFormat.md)
+* [Command reference](doc/CommandRef.md)
+
 ### Development status
 
 DhG2 is in a usable state with most major features implemented.
@@ -28,7 +34,6 @@ DhG2 is in a usable state with most major features implemented.
 Documentation is work-in-progress:
 
 * The built-in help is working and explains the commands and basic operation quite well.
-* There's a desciption of the card file structure [here](doc/CardFormat.md).
 
 HTML generation is fully implemented:
 
