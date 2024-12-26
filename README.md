@@ -26,10 +26,12 @@ editing capability.
 DhG2 is in a usable state with most major features implemented.
 
 Documentation is work-in-progress:
+
 * The built-in help is working and explains the commands and basic operation quite well.
-* There's a desciption of the card file structure in the [doc/](doc/CardFormat.md) directory.
+* There's a desciption of the card file structure [here](doc/CardFormat.md).
 
 HTML generation is fully implemented:
+
 * Descendant trees can be generated, individually or from a list.
 * Ancestor trees can be generated, individually or from a list.
 * Pages for individuals files can be generated, individually or all/public.
