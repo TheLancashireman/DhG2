@@ -32,4 +32,4 @@ The program accepts options and parameters as described below:
 	If invoked with this option, DhG2 uses the specified configuration instead of the default ~/.DhG/config.
 	If you use this option more than once, DhG2 uses the last one.
 
-The **-e** and *--exit** options and the script-file arguments are currently ignored.
+The **-e** and **--exit** options and the script-file arguments are currently ignored.
