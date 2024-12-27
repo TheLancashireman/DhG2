@@ -44,11 +44,13 @@ class DhG_Shell(cmd.Cmd):
 	# Message that is displayed in response to -h/--help and when the command line is incorrect
 	usage = 'Usage: ' + sys.argv[0] + ' [options] [script-file ...]\n'+\
 		'  Valid options:\n'+\
-		'    -h --help                     print some help text and exit\n'+\
+		'    -h --help                     print the usage text and exit\n'+\
 		'    -v --version                  print the version and exit\n'+\
+		'    -q --quiet                    do not print any messages at startup\n'+\
+		'    -e --exit                     close after loading database and executing script files\n'+\
 		'    -c cfgfile  --config=cfgfile  use cfgfile as the configuration file. Default ~/.DhG/config\n'+\
 		'  If more than one cfgfile is specified, the last one is used.\n'+\
-		'  The script-file arguments are currently ignored.'
+		'  The -e option and the script-file arguments are currently ignored.'
 #		'  Each argument is treated as a script file.\n'+\
 #		'  The commands in the scripts are executed after loading the database.\n'+\
 #		'  After executing the scripts, ' + sys.argv[0] + ' drops into interactive mode.\n'+\
@@ -70,11 +72,12 @@ class DhG_Shell(cmd.Cmd):
 	#
 	def __init__(self):
 		self.quiet = False
+		self.exit = False
 		dropout = False
 		cfgfile = None
 		super().__init__()
 		try:
-			(opts, args) = getopt.gnu_getopt(sys.argv[1:], "qhvc:", ["quiet", "help", "version", "config="])
+			(opts, args) = getopt.gnu_getopt(sys.argv[1:], "qehvc:", ["quiet", "exit", "help", "version", "config="])
 		except getopt.GetoptError as err:
 			# print help information and exit:
 			print(err)  # will print something like "option -a not recognized"
@@ -91,6 +94,8 @@ class DhG_Shell(cmd.Cmd):
 				cfgfile = optarg
 			elif opt == '-q' or opt == '--quiet':
 				self.quiet = True
+			elif opt == '-e' or opt == '--exit':
+				self.exit = True
 		self.scripts = args
 		if dropout:
 			exit(0)
