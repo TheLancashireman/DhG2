@@ -27,7 +27,7 @@ The program accepts options and parameters as described below:
 
 	If invoked with this option, DhG2 closes after loading the database and executing the script files.
 
-* **-c <cfgfile>** or **--config=<cfgfile>**
+* **-c \<cfgfile\>** or **--config=\<cfgfile\>**
 
 	If invoked with this option, DhG2 uses the specified configuration instead of the default ~/.DhG/config.
 	If you use this option more than once, DhG2 uses the last one.
