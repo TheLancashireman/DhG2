@@ -54,8 +54,8 @@ class DhG_Shell(cmd.Cmd):
 #		'  After executing the scripts, ' + sys.argv[0] + ' drops into interactive mode.\n'+\
 #		'  A quit command in one of the scripts terminates the program immediately.'
 
-	# Message that is displayed on startup
-	intro = '\nType help or ? to list commands.'
+	# Message that is displayed on startup. We want to control this with "-q" so set it to None.
+	intro = None
 
 	# List of scripts, taken from the command line
 	scripts = []
@@ -69,11 +69,12 @@ class DhG_Shell(cmd.Cmd):
 	# In the constructor, read the command line
 	#
 	def __init__(self):
+		self.quiet = False
 		dropout = False
 		cfgfile = None
 		super().__init__()
 		try:
-			(opts, args) = getopt.gnu_getopt(sys.argv[1:], "hvc:", ["help", "version", "config="])
+			(opts, args) = getopt.gnu_getopt(sys.argv[1:], "qhvc:", ["quiet", "help", "version", "config="])
 		except getopt.GetoptError as err:
 			# print help information and exit:
 			print(err)  # will print something like "option -a not recognized"
@@ -83,11 +84,13 @@ class DhG_Shell(cmd.Cmd):
 			if opt == '-h' or opt == '--help':
 				self.Usage()
 				dropout = True
-			if opt == '-v' or opt == '--version':
+			elif opt == '-v' or opt == '--version':
 				self.Version()
 				dropout = True
-			if opt == '-c' or opt == '--config':
+			elif opt == '-c' or opt == '--config':
 				cfgfile = optarg
+			elif opt == '-q' or opt == '--quiet':
+				self.quiet = True
 		self.scripts = args
 		if dropout:
 			exit(0)
@@ -106,6 +109,11 @@ class DhG_Shell(cmd.Cmd):
 	# Before the command loop, create and load the database
 	#
 	def preloop(self):
+		if not self.quiet:
+			self.Version()
+			print('Loading database ...')
+			print()
+			print('Type help or ? to list commands.')
 		self.db = Database(Config.Get('db_dir'))
 		self.db.Reload()
 
@@ -1027,7 +1035,5 @@ Usage:
 		return
 
 if __name__ == '__main__':
-	print(DhG_Shell.version)
-	print('Loading database ...')
 	while True:
 		DhG_Shell().cmdloop()
