@@ -38,6 +38,9 @@ DhG2 is in a usable state with most major features implemented.
 Documentation is work-in-progress:
 
 * The built-in help is working and explains the commands and basic operation quite well.
+* Most of the documentation listed above is done to "beta" standard.
+	* Advanced topics isn't written yet.
+	* The FAQ will be a never-ending story.
 
 HTML generation is fully implemented:
 
@@ -46,17 +49,23 @@ HTML generation is fully implemented:
 * Pages for individuals files can be generated, individually or all/public.
 * Name index can be generated.
 
+### Known bugs
+
+* If you set the **depth** variable to a non-numeric value you get an exception that's trapped at the outer level.
+
 ### To do
 
 There is always lots to do. :-)
 
 * Write more documentation.
+* Refactor the **ancestors** command (and possibly the template) to use the same info as **htmlancestors**.
 * Consider refactoring the timeline command to use the same data as HTML card, but a different template.
 * OR: keep the text output as it is and implement a new command.
 * Add a translation table for captions in event info. Does DhG have a list? Add Mapref -> Map reference.
 * Check how Misc events are presented
 * Photo statements at the file level - include photo in html?
-* Syntax check of events when reading file. Currently happens on HTML card generation.
+* Syntax check of events when reading file. Currently happens on HTML card generation. **verify** only checks person refs.
+* Implement a **do** command to execute scripts, and the ability to execute script files specified on the command line.
 
 ## License
 
