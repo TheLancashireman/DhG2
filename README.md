@@ -29,6 +29,7 @@ editing capability.
 * The [Configuration](doc/Configuration.md) variables
 * [Command reference](doc/CommandRef.md)
 * [Advanced topics](doc/Advanced.md)
+* [Frequently-asked questions](doc/FAQ.md)
 
 ### Development status
 
