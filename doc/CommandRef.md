@@ -8,7 +8,7 @@ what you type is not unique, DhG2 gives you a list of the commands that match.
 When a command expects a *PERSON* as its parameter, you can specify the person by their
 unique identifier, either as a bare number or enclosed in brackets.
 
-You can also specify a persion by parts of a name. Any person whose name contains all the specified
+You can also specify a person by parts of a name. Any person whose name contains all the specified
 parts is considered as a match. If there is more than one match, the command displays a list of
 matching persons along with their identifiers and dates. You can then retype the command using
 the identifier.
