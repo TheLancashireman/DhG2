@@ -26,7 +26,7 @@ editing capability.
 * [Getting started](doc/GettingStarted.md)
 * [Card file structure](doc/CardFormat.md)
 * [Invoking DhG2](doc/Invocation.md)
-* The [Configuration file](doc/Configuration.md)
+* The [Configuration](doc/Configuration.md) variables
 * [Command reference](doc/CommandRef.md)
 * [Advanced topics](doc/Advanced.md)
 
