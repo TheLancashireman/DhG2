@@ -265,7 +265,7 @@ You can then identify the correct person and retype the command using their ID.
 	def PrintPlingHelp(self):
 		print('''
 The "!" command invokes a program from your computer's operating system. The current working
-directory (cwd) of the program is the same as the cwd in which DhG2 was origninally invoked.
+directory (cwd) of the program is the same as the cwd in which DhG2 was originally invoked.
 
 Usage:
    ! <command>  - Invokes <command> in a child shell.
@@ -401,8 +401,6 @@ The "quit" command closes DhG2.
 
 Usage:
    quit  - Closes DhG2. Parameters are ignored.
-
-Note: "exit" and "quit" have identical behaviour.
 		'''
 		exit(0)
 
@@ -760,7 +758,7 @@ work with other GEDCOM files from different sources.
 	def do_shell(self, arg):
 		'''
 The "shell" command invokes a program from your computer's operating system. The current working
-directory (cwd) of the program is the same as the cwd in which DhG2 was origninally invoked.
+directory (cwd) of the program is the same as the cwd in which DhG2 was originally invoked.
 
 Usage:
    shell <command>  - Invokes <command> in a child shell.
@@ -779,7 +777,7 @@ Note: '!' is a shortcut for "shell".
 	def do_htmldescendants(self, arg):
 		'''
 The "htmldescendants" command creates a descendants tree in HTML format for the specified person or persons.
-The HTML file is called trees/SURNAME/FULLNAME-ID-descendants.html and is placed in the configured HTML directory.
+The HTML file is called trees/FULLNAME-ID-descendants.html and is placed in the configured HTML directory.
 
 Usage:
    htmldescendants <person>   - Creates a descendants tree in HTML for <person>.
@@ -822,7 +820,7 @@ Usage:
 	def do_hd(self, arg):
 		'''
 The "hd" command creates a descendants tree in HTML format for the specified person or persons.
-The HTML file is called trees/SURNAME/FULLNAME-ID-descendants.html and is placed in the configured HTML directory.
+The HTML file is called trees/FULLNAME-ID-descendants.html and is placed in the configured HTML directory.
 "hd" is an abbreviation for "htmldescendants".
 
 Usage:
@@ -839,7 +837,7 @@ Usage:
 		'''
 The "htmlancestors" command creates an ancestors tree (also known as an Ahnentafel) in HTML format
 for the specified person or persons.
-The HTML file is called trees/SURNAME/FULLNAME-ID-ancestors.html and is placed in the configured HTML directory.
+The HTML file is called trees/FULLNAME-ID-ancestors.html and is placed in the configured HTML directory.
 
 Usage:
    htmlancestors <person>   - Creates an ancestor tree in HTML for <person>.
@@ -883,7 +881,7 @@ Usage:
 		'''
 The "ha" command creates an ancestors tree (also known as an Ahnentafel) in HTML format
 for the specified person or persons.
-The HTML file is called trees/SURNAME/FULLNAME-ID-ancestors.html and is placed in the configured HTML directory.
+The HTML file is called trees/FULLNAME-ID-ancestors.html and is placed in the configured HTML directory.
 "ha" is an abbreviation for "htmlancestors".
 
 Usage:
@@ -1025,7 +1023,7 @@ Usage:
 The "showprivacy" command shows the privacy status of a specified person.
 
 Usage:
-   showprivacy <person>  - shows the privacy status for <person>.
+   showprivacy <person>  - Shows the privacy status for <person>.
 		'''
 		l = self.db.GetMatchingPersons(arg)
 		if len(l) == 1:
