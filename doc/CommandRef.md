@@ -172,51 +172,6 @@ The **help** command provides the built-in documentation.
 
 The **htmlancestors** command creates an ancestors tree (also known as an Ahnentafel) in HTML format
 for the specified person or persons.
-The HTML file is called `trees/FULLNAME-ID-ancestors.html` and is placed in the configured HTML directory.
-
-
-## heads
-
-### Synopsis
-
-The **heads** command displays a list of all the patriarchs and/or matriarchs in the database.
-A patriarch (male) or matriarch (female) is defined as a person whose parents AND whose spouse's parents
-are not recorded in the database.
-
-### Usage
-
-* **heads male**
-	* Displays a list of all patriarchs in the database.
-* **heads female**
-	* Displays a list of all matriarchs in the database.
-* **heads both**
-	* Displays a list of all patriarchs and matriarchs in the database.
-* **heads**
-	* Equivalent to **heads both**
-
-## help
-
-### Synopsis
-
-The **help** command provides the built-in documentation.
-
-### Usage
-
-* **help**
-	* Provides a list of the available commands.
-* **help** *COMMAND*
-	* Provides help for the specified command.
-* **help general**
-	* Provides some general documentation.
-* **help config**
-	* Provides information about configuration parameters.
-
-## htmlancestors
-
-### Synopsis
-
-The **htmlancestors** command creates an ancestors tree (also known as an Ahnentafel) in HTML format
-for the specified person or persons.
 The HTML file is called `FULLNAME-ID-ancestors.html` and is placed in the `trees/` subdirectory
 of the configured HTML directory.
 
@@ -451,12 +406,12 @@ The `vi` program must be present in your shell's search path.
 
 ### Synopsis
 
-The **vi** command edits a person's card file using the `vim` editor.
+The **vim** command edits a person's card file using the `vim` editor.
 The `vim` program must be present in your shell's search path.
 
 ### Usage
 
-* **vi** *PERSON*
+* **vim** *PERSON*
 	* Invokes `vim` to edit the specified person's card.
 
 ## !
