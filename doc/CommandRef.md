@@ -204,7 +204,7 @@ The **help** command provides the built-in documentation.
 
 * **help**
 	* Provides a list of the available commands.
-* **help** *command*
+* **help** *COMMAND*
 	* Provides help for the specified command.
 * **help general**
 	* Provides some general documentation.
@@ -241,7 +241,7 @@ of the configured HTML directory.
 
 ### Usage
 
-* **htmlcard** *person*
+* **htmlcard** *PERSON*
 	* Creates an HTML card file for the specified person.
 * **htmlcard @all**
 	* Creates an HTML card file for every person in the database.
@@ -260,7 +260,7 @@ of the configured HTML directory.
 
 ### Usage
 
-* **htmldescendants** *person*
+* **htmldescendants** *PERSON*
 	* Creates a descendants tree in HTML for the specified person.
 * **htmldescendants** &#64;*filename*
 	* Creates a descendants tree in HTML for each person listed in the specified file.
