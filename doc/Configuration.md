@@ -29,10 +29,11 @@ or trailing space in the value.
 The name of the variable can be any sequence of characters. DhG2 doesn't check the name, so you can define
 your own variables. The complete set of variables gets passed to the template engine.
 
-There are two mandatory configuration variables: db_dir and tmpl_path. The rest are optional and have
+There is only one mandatory configuration variables: db_dir. The rest are optional and have
 reasonable default values.
 
-There's an example configuration file example.cfg in the DhG2 installation directory.
+There's an minimal configuration file (minimal.cfg) and a comprehensive configuration file (example.cfg)
+in the DhG2 installation directory.
 
 ## Configuration variables
 
@@ -51,8 +52,11 @@ database directory.
 
 ### cfgfile
 
-The cfgfile variable contains the name and location of the configuration file. The configuration
-file is only read when DhG2 starts, so setting it with the "set" command makes little sense.
+This isn't a true configuration variable but it gets displayed when you use the "set" command with
+no parameters. It contains the location of the configuration file.
+
+To set this variable you must use the command line option, either "-c" or "--config". You cannot set
+it from within the program.
 
 ### dateformat
 
@@ -74,7 +78,7 @@ might be assigned incorrectly. It is therefore not recommended to change db_dir 
 ### depth
 
 The maximum depth that DhG2 descends when displaying family trees. You must set the value of
-this parameter to a number, otherwise you might get strange error messages.
+this parameter to a number.
 
 The default value is 999999.
 
@@ -119,7 +123,9 @@ must be separated by colon (':') characters.
 Normally, the template directly in the DhG2 installation is the last in the list. If you have any
 customised templates, put them in a directory that appears before the installation templates.
 
-tmpl_path is a mandatory variable. If it is not set, many of the features of DhG2 do not work.
+The default value of tmpl_path is "~/.DhG/templates:/path/to/DhG2/templates". This means DhG2
+first looks in the same place as the default configuration file and then in the installation
+directory.
 
 ## Configuration variables for HTML generation
 

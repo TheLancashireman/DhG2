@@ -309,11 +309,14 @@ the file within DhG2 and close it without making changes.
 
 The **set** command sets the configuration variable *NAME* to *VALUE*.
 
-*NAME* can be any sequence of characters starting with a non-space character.
+*NAME* can be any sequence of characters starting with a non-space character, **except** "cfgfile".
 
 Spaces immediately before and after the '=' sign are ignored, as are any trailing spaces at the end of the line.
 Quotation marks around *VALUE* are removed after the leading and trailing spaces have been removed, so if you
 want to set a value containing a leading or trailing space, use quotation marks.
+
+If used without parameters, **set** displays the name of the configuration file followed by all the
+configuration variables that have been set, in alphabetical order.
 
 See the [configuration guide](Configuration.md) for details of the configuration variables that DhG2 uses.
 
@@ -322,7 +325,7 @@ See the [configuration guide](Configuration.md) for details of the configuration
 * **set** *NAME* = *VALUE*
 	* Sets the configuration variable *NAME* to *VALUE*.
 * **set**
-	* Lists all the configuration variables and their values.
+	* Displays all the configuration variables and their values.
 
 ## shell
 

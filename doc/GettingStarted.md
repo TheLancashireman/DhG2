@@ -24,15 +24,11 @@ Unpack the downloaded file into somewhere suitable. Unfortunately, the downloade
 
 ## Setup
 
-Create a directory in your home directory called .DhG and copy the example.cfg file from the DhG2 installation
-to "~/.DhG/config". Edit the new file; You need to change two of the configuration parameters in there:
-
-* db_dir specifies the location directory of your card file database.
-* tmpl_path specifies the locations of templates.
+Create a directory in your home directory called .DhG and copy the minimal.cfg file from the DhG2 installation
+to "~/.DhG/config". Edit the new file; You need to change the value of the db_dir variable so that it
+specifies the location of the directory of your card file database.
 
 You can place your database wherever you like. Create the directory before running DhG.
-
-To start with, set tmpl_path to point to the templates subdirectory of your DhG2 installation.
 
 In addition, the default "editor" setting might not suit your personal taste. Choose a text editor that
 you're comforable with. "gedit" or "nano" might be better than the default "vi" for many people.
