@@ -27,7 +27,9 @@ import re
 #
 
 class Config():
-	cfgfile = os.path.expanduser('~') + '/.DhG/config'		# Set on command line with -c
+	# Default configuration file. Can be overwritten with the -c option on the command line.
+	cfgfile = os.path.expanduser('~') + '/.DhG/config'
+
 	config = {}
 
 	# Initialize the class
@@ -36,11 +38,14 @@ class Config():
 		if cfgfile != None:
 			Config.cfgfile = cfgfile
 
-		# These values MUST be set in the config file
+		# Default template path: look in ~/.DhG/templates, then in installation directory.
+		tmpl_path = os.path.expanduser('~') + '/.DhG/templates' + ':' + os.path.dirname(__file__) + '/templates'
+
+		# db_dir MUST be set in the config file
 		Config.config['db_dir'] = None				# Location of database (must be set!)
-		Config.config['tmpl_path'] = None			# Location(s) of templates. Colon-separated
 
 		# Some default values
+		Config.config['tmpl_path'] = tmpl_path		# Location(s) of templates. Colon-separated
 		Config.config['prompt'] = '(DhG) '			# Command prompt
 		Config.config['editor'] = 'vi'				# Editor to use for 'edit' command
 		Config.config['dateformat'] = 'raw'			# Format for dates
@@ -52,9 +57,6 @@ class Config():
 		Config.ReadConfig()
 		if Config.config['db_dir'] == None:
 			print('Error: db_dir is not set in the config file')
-			exit(1)
-		if Config.config['tmpl_path'] == None:
-			print('Error: tmpl_path is not set in the config file')
 			exit(1)
 		return
 
@@ -74,6 +76,10 @@ class Config():
 	@staticmethod
 	def Set(var, val):
 		lcvar = var.lower()
+		# Special case: cfgfile cannot be set (avoids strangeness)
+		if lcvar == 'cfgfile':
+			print('Error: the value of the cfgfile variable cannot be set from within DhG2.')
+			return
 		# Special case: ensure that 'depth' is a number
 		if lcvar == 'depth':
 			try:

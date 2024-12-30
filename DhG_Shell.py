@@ -352,10 +352,8 @@ zz_error_no_command is an internal command for reporting unknown command error. 
 zz_test is an internal command for testing purposes. Not for normal use.
 		'''
 		print('do_zz_test(): ', arg)
-		if arg == 'foo':
-			print('foo')
-		else:
-			print('not foo:', arg, type(arg))
+		zzz = os.path.dirname(__file__)+'/templates'
+		print(zzz)
 		return
 
 	# =====================================
