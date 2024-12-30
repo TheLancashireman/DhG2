@@ -73,7 +73,16 @@ class Config():
 	#
 	@staticmethod
 	def Set(var, val):
-		Config.config[var.lower()] = val
+		lcvar = var.lower()
+		# Special case: ensure that 'depth' is a number
+		if lcvar == 'depth':
+			try:
+				val = int(val)
+			except:
+				# Use var.lower() here to simplify adding new cases; just 'or' them into the 'if' clause.
+				print('Error: the value of the', lcvar, 'variable must be a number')
+				return
+		Config.config[lcvar] = val
 
 	# Print the config
 	#

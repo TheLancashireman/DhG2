@@ -51,7 +51,7 @@ HTML generation is fully implemented:
 
 ### Known bugs
 
-* If you set the **depth** variable to a non-numeric value you get an exception that's trapped at the outer level.
+None
 
 ### To do
 
