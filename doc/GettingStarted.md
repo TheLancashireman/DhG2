@@ -16,7 +16,8 @@ window. This should create a new directory called DhG2 that contains the applica
 the simplest way, because to update DhG2 you only need to change directory to the DhG2 directory
 and type "git pull".
 
-If git isn't installed, download and install an archive from https://codeberg.org/TheLancashireman/DhG2.
+If git isn't installed, download and install an archive from
+[https://codeberg.org/TheLancashireman/DhG2](https://codeberg.org/TheLancashireman/DhG2).
 There's a "..." button on the right, near the top. Click the option to download a ZIP file, or TAR.GZ.
 Unpack the downloaded file into somewhere suitable. Unfortunately, the downloaded archives unpack to
 "dhg2" instead of "DhG2" so either rename the directory or take the change into account in later instructions.
