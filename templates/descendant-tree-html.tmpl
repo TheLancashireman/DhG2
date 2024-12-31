@@ -37,6 +37,7 @@
 	Each person (subj, left, right) is an instance of a class; see person class in person-card-html.tmpl
 	Only vital and file are used.
 #}
+{%	set PRIVATE = tp['config'].Get('server_path') + '/private.html' %}
 {%  set CARDBASE = tp['cardbase'] %}
 {%  set HEAD = 'html-head.tmpl' %}
 {%  set FOOT = 'html-foot.tmpl' %}
@@ -69,7 +70,7 @@
         <ul class="desctree">
 {%      if obj.children == 'private' %}
           <li style="list-style-type: '{{ obj.level+1 }}. '">
-            <span class="private"><a href="/family-history/private.html"><span class="private_mark"></span></a></span>
+            <span class="private"><a href="{{ PRIVATE }}"><span class="private_mark"></span></a></span>
           </li>
 {%      else %}
 {{        loop(obj.children) | indent(first=True) }}
