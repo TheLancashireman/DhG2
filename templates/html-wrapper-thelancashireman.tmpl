@@ -26,7 +26,9 @@
 {%  set CARDBASE = tp['cardbase']  %}
 {%	set PRIVATE = tp['config'].Get('server_path') + '/private.html' %}
 {%  set BODY = tp['tmpl_name'] %}
-{%	set SCRIPT = '/styles/collapsible.js' %}
+{%  if BODY == 'surname-index-html.tmpl' %}
+{%    set SCRIPT = '/styles/collapsible.js' %}
+{%  endif %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -40,11 +42,9 @@
   <link  href="/styles/family-history.css" rel="stylesheet" type="text/css" media="screen">
   <script src="/styles/family-history.js"> </script>
   <script src="/styles/patch-w3.js"> </script>
-{%	if BODY == 'surname-index-html.tmpl' %}
-{%		if SCRIPT %}
+{%  if SCRIPT %}
   <script src="{{ SCRIPT }}"> </script>
-{%		endif %}
-{%	endif %}
+{%  endif %}
 
   <title>The Lancashireman's family history</title>
 </head>
@@ -69,7 +69,7 @@
     </div>
   </div>
   <hr>
-{%	include BODY +%}
+{%  include BODY +%}
   <hr>
   <table class="pagefoot">
     <tr class="pagefoot">

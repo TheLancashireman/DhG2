@@ -37,11 +37,9 @@
   <meta name="generator" content="DhG2">
 
   <link  href="/styles/family-history.css" rel="stylesheet" type="text/css" media="screen">
-{%	if BODY == 'surname-index-html.tmpl' %}
-{%		if SCRIPT %}
+{%  if SCRIPT %}
   <script src="{{ SCRIPT }}"> </script>
-{%		endif %}
-{%	endif %}
+{%  endif %}
 
   <title>The Lancashireman's family history</title>
 </head>
@@ -61,7 +59,7 @@
     </div>
   </div>
   <hr>
-{%	include BODY +%}
+{%  include BODY +%}
   <hr>
   <table class="pagefoot">
     <tr class="pagefoot">

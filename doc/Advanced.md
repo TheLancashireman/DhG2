@@ -126,22 +126,19 @@ following information:
 
 * tp['config'] contains a reference to the configuration class so that the template can access configuration variables.
 * tp['timestamp'] contains the time of generation in UTC as a string.
+* tp['tmpl_name'] contains the name of the template to be used. For non-HTML templates it's just the template file name.
    
 ### Adapting the HTML templates
 
-Adapting the main templates would be a fairly complex task that might even require modifications to the
+Adapting the main HTML templates would be a fairly complex task that might even require modifications to the
 Python code of DhG2. However, it's fairly straightforward to change the style of the web pages by
-changing just the header and footer templates (`html-head.tmpl` and `html-foot.tmpl`). These files
-are included into other HTML templates to provide a uniform appearance for all the pages.
+changing just the wrapper template (`html-wrapper.tmpl`). This file is used as the outer template for
+all HTML files. It includes another template to generate the main content of the page. The name of
+the included template is passed in tp['tmpl_name'].
 
-As for the new card example above, copy the `html-head.tmpl` and `html-foot.tmpl` files from the DhG2
-installation to your personal template location, then edit them as necessary. The header and footer
-files that generate the author's website are provided for reference. The reference files include
+As for the new card example above, copy the `html-wrapper.tmpl` file from the DhG2
+installation to your personal template location, then edit them as necessary. The wrapper
+file that generates the author's website are provided for reference. The reference file includes
 various small javascript snippets that you can obtain from the author's site. For example, the
 `collapsible.js` script used in the HTML index page expands and collapses the initials and surnames
 lists when you click on them. Without this script, the entire index is visible all the time.
-
-The `descendant-tree-html.tmpl` and `person-card-html.tmpl` templates set a variable near the top that
-gives the relative URL of the file that explains the privacy policy. If this is not suitable you
-will need to adapt these templates. Unfortunately you cannot set Jinja2 variables at the outer
-level from within an included template, so it is not possible to control this from `html-head.tmpl`.
