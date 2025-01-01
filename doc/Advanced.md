@@ -136,9 +136,9 @@ changing just the wrapper template (`html-wrapper.tmpl`). This file is used as t
 all HTML files. It includes another template to generate the main content of the page. The name of
 the included template is passed in tp['tmpl_name'].
 
-As for the new card example above, copy the `html-wrapper.tmpl` file from the DhG2
-installation to your personal template location, then edit them as necessary. The wrapper
-file that generates the author's website are provided for reference. The reference file includes
+Copy the `html-wrapper.tmpl` file from the DhG2
+installation to your personal template location, then edit it as necessary. The wrapper
+file that generates the author's website is provided for reference. The reference file includes
 various small javascript snippets that you can obtain from the author's site. For example, the
 `collapsible.js` script used in the HTML index page expands and collapses the initials and surnames
 lists when you click on them. Without this script, the entire index is visible all the time.
