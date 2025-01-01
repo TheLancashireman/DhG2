@@ -1,0 +1,103 @@
+{# html-wrapper-thelancashireman.tmpl - a wrapper template for all HTML files
+
+	(c) David Haworth
+
+	This file is part of DhG.
+
+	DhG is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	DhG is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with DhG.  If not, see <http://www.gnu.org/licenses/>.
+
+	This file produces the top and bottom an HTML file, including the page banner.
+	The file is used for evey HTML page.
+	It includes the body template passed in the template parameters.
+
+	This wrapper generates the family history pages on thelancashireman.org
+-#}
+{%  set CARDBASE = tp['cardbase']  %}
+{%	set PRIVATE = tp['config'].Get('server_path') + '/private.html' %}
+{%  set BODY = tp['tmpl_name'] %}
+{%	set SCRIPT = '/styles/collapsible.js' %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="TheLancashireman">
+  <meta name="generator" content="DhG2">
+
+  <link  href="/styles/family-history.css" rel="stylesheet" type="text/css" media="screen">
+  <script src="/styles/family-history.js"> </script>
+  <script src="/styles/patch-w3.js"> </script>
+{%	if BODY == 'surname-index-html.tmpl' %}
+{%		if SCRIPT %}
+  <script src="{{ SCRIPT }}"> </script>
+{%		endif %}
+{%	endif %}
+
+  <title>The Lancashireman's family history</title>
+</head>
+
+<body>
+  <div>
+    <table class="pagehead">
+      <tr class="pagehead">
+        <td class="pagehead_left">
+          <h2>The Lancashireman's family history</h2>
+        </td>
+        <td class="pagehead_right">
+          <a href="http://www.forl.co.uk/graphics.php">
+            <img style="border:0; width:100px; height:100px"
+                 src="/images/forlrose01.gif"
+                 alt="Red rose of Lancashire">
+          </a>
+        </td>
+      </tr>
+    </table>
+    <div id="menubar">
+    </div>
+  </div>
+  <hr>
+{%	include BODY +%}
+  <hr>
+  <table class="pagefoot">
+    <tr class="pagefoot">
+      <td class="pagefoot_left">
+        Last updated {{ tp['timestamp'] }}<br>
+        &copy; David Haworth<br>
+        <a href="/about.html">About this site (Impressum)</a>.
+      </td>
+      <td class="pagefoot_centre">
+        <a href="http://www.forl.co.uk/"><img
+               style="border:0; width:384px; height:60px"
+               src="/images/dont_say.gif"
+               alt="Don't say Greater Manchester, Merseyside or Cumbria when you mean Lancashire"></a>
+      </td>
+      <td class="pagefoot_right">
+        <a id="w3HtmlValidator" href="https://validator.w3.org/check?uri=referer"><img
+               style="border:0; width:88px; height:31px"
+               src="/images/w3c-valid-html.png"
+               alt="Valid HTML"></a>
+        <a id="w3CssValidator" href="https://jigsaw.w3.org/css-validator/check/referer"><img
+               style="border:0; width:88px; height:31px"
+               src="/images/w3c-valid-css.png"
+               alt="Valid CSS"></a>
+      </td>
+    </tr>
+  </table>
+  <hr>
+
+</body>
+
+</html>

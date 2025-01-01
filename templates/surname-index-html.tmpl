@@ -38,12 +38,6 @@
 
 	All the lists are sorted alphabetically.
 #}
-{%  set CARDBASE = tp['cardbase'] %}
-{%  set HEAD = 'html-head.tmpl' %}
-{%  set FOOT = 'html-foot.tmpl' %}
-{%	set SCRIPT = '/styles/collapsible.js' %}
-{%  include HEAD +%}
-
   <h1>Index of surnames</h1>
   <p>Click on the initial letters and the surnames to open and close the lists.
   </p>
@@ -79,5 +73,3 @@
 {%  endfor %}
     </ul>
   </div>
-
-{%  include FOOT +%}

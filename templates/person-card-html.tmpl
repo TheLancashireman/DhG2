@@ -62,12 +62,6 @@
 		type		: Image, transcript, document with page no...
 		filename	: Unique name of the file
 -#}
-{%	set PRIVATE = tp['config'].Get('server_path') + '/private.html' %}
-{%  set CARDBASE = tp['cardbase'] %}
-{%  set HEAD = 'html-head.tmpl' %}
-{%  set FOOT = 'html-foot.tmpl' %}
-{%  include HEAD +%}
-
 {%  set subj = tp['subj'] %}
   <h1>{{ subj.name }}</h1>
 {%  if subj.dob_dod != None %}
@@ -387,5 +381,3 @@
   <p>
   </p>
 {%  endif %}
-
-{%  include FOOT +%}

@@ -29,11 +29,6 @@
 		parents		: an array of two T_AncestorNode objects for the parents. None if no parents.
 					: If only one parent is known, the other can be None
 #}
-{%  set CARDBASE = tp['cardbase'] %}
-{%  set HEAD = 'html-head.tmpl' %}
-{%  set FOOT = 'html-foot.tmpl' %}
-{%  include HEAD +%}
-
 {%  set nlevels = tp['nlevels'] %}
 {%  set root = tp['root'] %}
 {%  set subj = root[0].subj %}
@@ -74,5 +69,3 @@
 {%  endfor %}
     </table>
   </div>
-
-{%  include FOOT +%}

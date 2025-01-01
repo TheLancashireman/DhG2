@@ -55,15 +55,19 @@ class DoTemplate():
 
 	# Do everything in the constructor
 	#
-	#	tmpl	= template name
-	#	tp		= template parameters
-	#	out		= output file. None ==> stdout
+	#	tmpl_name	= template name
+	#	tp			= template parameters
+	#	out			= output file. None ==> stdout
 	#
 	def __init__(self, tmpl_name, tp, out, trim=False):
 		tp['config'] = Config
 		tp['timestamp'] = strftime('%Y-%m-%d %H:%M UTC', gmtime())
+		tp['tmpl_name'] = tmpl_name
 		env = Environment(trim_blocks=trim, lstrip_blocks=trim, loader=DhG_Loader(Config.Get('tmpl_path')))
-		template = env.get_template(tmpl_name)
+		if 'html' in tmpl_name:
+			template = env.get_template('html-wrapper.tmpl')
+		else:
+			template = env.get_template(tmpl_name)
 		out_text = template.render(tp = tp)
 		if out == None:
 			print(out_text)

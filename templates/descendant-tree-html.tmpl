@@ -37,12 +37,6 @@
 	Each person (subj, left, right) is an instance of a class; see person class in person-card-html.tmpl
 	Only vital and file are used.
 #}
-{%	set PRIVATE = tp['config'].Get('server_path') + '/private.html' %}
-{%  set CARDBASE = tp['cardbase'] %}
-{%  set HEAD = 'html-head.tmpl' %}
-{%  set FOOT = 'html-foot.tmpl' %}
-{%  include HEAD +%}
-
 {%  set subj = tp['subj'] %}
   <h1>Descendants of {{ subj.vital }}</h1>
 
@@ -82,5 +76,3 @@
     </ul>
 
   </div>
-
-{%  include FOOT +%}
