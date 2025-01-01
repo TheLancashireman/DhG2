@@ -1,0 +1,81 @@
+{# html-wrapper.tmpl - a plain vanilla wrapper template for all HTML files
+
+	(c) David Haworth
+
+	This file is part of DhG.
+
+	DhG is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	DhG is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with DhG.  If not, see <http://www.gnu.org/licenses/>.
+
+	This file produces the top and bottom an HTML file, including the page banner.
+	The file is used for evey HTML page.
+	It includes the body template passed in the template parameters.
+
+	This wrapper generates the family history pages on thelancashireman.org
+-#}
+{%  set CARDBASE = tp['cardbase']  %}
+{%	set PRIVATE = tp['config'].Get('server_path') + '/private.html' %}
+{%  set BODY = tp['tmpl_name'] %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <meta name="generator" content="DhG2">
+
+  <link  href="/styles/family-history.css" rel="stylesheet" type="text/css" media="screen">
+{%	if BODY == 'surname-index-html.tmpl' %}
+{%		if SCRIPT %}
+  <script src="{{ SCRIPT }}"> </script>
+{%		endif %}
+{%	endif %}
+
+  <title>The Lancashireman's family history</title>
+</head>
+
+<body>
+  <div>
+    <table class="pagehead">
+      <tr class="pagehead">
+        <td class="pagehead_left">
+          <h2>Family history</h2>
+        </td>
+        <td class="pagehead_right">
+        </td>
+      </tr>
+    </table>
+    <div id="menubar">
+    </div>
+  </div>
+  <hr>
+{%	include BODY +%}
+  <hr>
+  <table class="pagefoot">
+    <tr class="pagefoot">
+      <td class="pagefoot_left">
+        Last updated {{ tp['timestamp'] }}
+      </td>
+      <td class="pagefoot_centre">
+      </td>
+      <td class="pagefoot_right">
+      </td>
+    </tr>
+  </table>
+  <hr>
+
+</body>
+
+</html>
