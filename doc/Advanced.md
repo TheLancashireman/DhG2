@@ -49,7 +49,7 @@ for those individuals that are detemined to be private.
 The **htmlancestors** trees are not a problem because you explicitly tell it whose trees to generate. The
 assumption is that you do not generate ancestor trees for individuals that are private.
 
-In the desecndants trees, the generation needs to stop whenever a private individual is found. The
+In the descendants trees, the generation needs to stop whenever a private individual is found. The
 **generate** configuration variable controls this; if you set **generate** to *public*, generation
 of the level stops when a private individual is encountered. The entire set of children is replaced
 with a link to a generic page that you can write to explain the privacy policy.
