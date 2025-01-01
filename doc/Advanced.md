@@ -140,3 +140,8 @@ files that generate the author's website are provided for reference. The referen
 various small javascript snippets that you can obtain from the author's site. For example, the
 `collapsible.js` script used in the HTML index page expands and collapses the initials and surnames
 lists when you click on them. Without this script, the entire index is visible all the time.
+
+The `descendant-tree-html.tmpl` and `person-card-html.tmpl` templates set a variable near the top that
+gives the relative URL of the file that explains the privacy policy. If this is not suitable you
+will need to adapt these templates. Unfortunately you cannot set Jinja2 variables at the outer
+level from within an included template, so it is not possible to control this from `html-head.tmpl`.
