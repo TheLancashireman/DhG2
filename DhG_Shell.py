@@ -172,6 +172,8 @@ class DhG_Shell(cmd.Cmd):
 			return line
 		if line[0] == '!':
 			return 'shell ' + line[1:]
+		if line[0] == '?':
+			return line
 		match = re.search(r'[ 0-9\[]', line)
 		if match:
 			keyword = line[0:match.start()]
