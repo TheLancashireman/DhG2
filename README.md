@@ -51,7 +51,7 @@ HTML generation is fully implemented:
 
 ### Known bugs
 
-* The "?" command as an alias for "help" isn't working. Use "help" instead.
+* None
 
 ### To do
 
