@@ -1,0 +1,31 @@
+#!/bin/sh
+#
+# In my records, I reference files containing evidence (images, etc.) by their basename (i.e. no location).
+# The name must be unique in the entire evidence directory.
+# This script (run in the root of the evidence directory) finds a file and invokes a suitable viewer for it.
+#
+# Usage: dhv <basename>
+
+full=$(find . -name "*$1*")
+typ=$(echo "${full}" | sed -e 's/^.*\.\([^\.]*\)$/\1/')
+
+#echo "Debug: Full = ${full},  Type = ${typ}"
+
+if [ "${typ}" = "pdf" ] || [ "${typ}" = "PDF" ] ; then
+	xpdf "${full}"
+elif [ "${typ}" = "djvu" ] || [ "${typ}" = "DJVU" ] ; then
+	djview "${full}"
+elif [ "${typ}" = "txt" ] || [ "${typ}" = "text" ] ; then
+	less "${full}"
+elif [ "${typ}" = "odt" ] || [ "${typ}" = "ods" ] ; then
+	libreoffice "${full}"
+elif [ "${typ}" = "csv" ] || [ "${typ}" = "CSV" ] ; then
+	libreoffice "${full}"
+elif [ "${typ}" = "docx" ] || [ "${typ}" = "doc" ] ; then
+	libreoffice "${full}"
+elif [ "${typ}" = "xlsx" ] || [ "${typ}" = "xls" ] ; then
+	libreoffice "${full}"
+# ToDo: add more extensions here
+else
+	nsxiv "${full}"
+fi
