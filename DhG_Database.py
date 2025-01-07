@@ -107,6 +107,8 @@ class Database:
 	def MFGuess(self):
 		self.mf = {}
 		for p in filter(lambda x: x != None, self.persons):
+			if p.sex == 'u':
+				continue
 			firstname = p.name.split()[0]
 			try:
 				if self.mf[firstname] == p.sex or self.mf[firstname] == '?':
