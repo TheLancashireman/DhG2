@@ -10,26 +10,37 @@
 #
 # Usage: dhv <basename>
 
-full=$(find . -name "*$1*")
-typ=$(echo "${full}" | sed -e 's/^.*\.\([^\.]*\)$/\1/')
+base=$(basename "$1")
+full=$(find . -name "*${base}*")
 
-case "${typ}" in
-	"pdf" | "PDF" )
-		viewer=xpdf
-		;;
-	"djvu" | "DJVU" )
-		viewer=djview
-		;;
-	"txt" | "TXT" | "text" )
-		viewer=djview
-		;;
-	"odt" | "ods" | "csv" | "CSV" | "docx" | "doc" | "xlsx" | "xls" )
-		viewer=libreoffice 
-		;; 
-	*)
-		viewer=nsxiv 
-		;; 
-esac
+if [ "${full}" = "" ] ; then
+	echo "dhv: cannot find ${base}"
+	exit 1
+fi
+
+if [ -d "${full}" ] ; then
+	viewer=ls
+else
+	typ=$(echo "${full}" | sed -e 's/^.*\.\([^\.]*\)$/\1/')
+
+	case "${typ}" in
+		"pdf" | "PDF" )
+			viewer=xpdf
+			;;
+		"djvu" | "DJVU" )
+			viewer=djview
+			;;
+		"txt" | "TXT" | "text" )
+			viewer=less
+			;;
+		"odt" | "ods" | "csv" | "CSV" | "docx" | "doc" | "xlsx" | "xls" )
+			viewer=libreoffice 
+			;; 
+		*)
+			viewer=nsxiv 
+			;; 
+	esac
+fi
 
 echo "${full}  using ${viewer} viewer"
 
