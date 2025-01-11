@@ -19,29 +19,29 @@ if [ "${full}" = "" ] ; then
 fi
 
 if [ -d "${full}" ] ; then
-	viewer=ls
+	viewer="ls"
 else
 	typ=$(echo "${full}" | sed -e 's/^.*\.\([^\.]*\)$/\1/')
 
 	case "${typ}" in
 		"pdf" | "PDF" )
-			viewer=xpdf
+			viewer="xpdf"
 			;;
 		"djvu" | "DJVU" )
-			viewer=djview
+			viewer="djview"
 			;;
 		"txt" | "TXT" | "text" )
-			viewer=less
+			viewer="less"
 			;;
 		"odt" | "ods" | "csv" | "CSV" | "docx" | "doc" | "xlsx" | "xls" )
-			viewer=libreoffice 
-			;; 
+			viewer="libreoffice"
+			;;
 		*)
-			viewer=nsxiv 
-			;; 
+			viewer="nsxiv"
+			;;
 	esac
 fi
 
 echo "${full}  using ${viewer} viewer"
 
-${viewer} "${full}"
+exec ${viewer} "${full}"
