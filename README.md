@@ -38,9 +38,8 @@ DhG2 is in a usable state with most major features implemented.
 Documentation is work-in-progress:
 
 * The built-in help is working and explains the commands and basic operation quite well.
-* Most of the documentation listed above is done to "beta" standard.
-	* Advanced topics isn't written yet.
-	* The FAQ will be a never-ending story.
+* The documentation listed above is done but might contain typos
+* The FAQ will be a never-ending story.
 
 HTML generation is fully implemented:
 
