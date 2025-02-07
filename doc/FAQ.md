@@ -24,3 +24,16 @@ Using an unrecognised value means you get the message as a reminder to edit the 
 
 If you don't want to use the gender information at all, you could create a custom template for
 new cards. See [advanced topics](Advanced.md) for more information.
+
+## What is DhG_Specials.py?
+
+This file contains some extensions to DhG_Shell.py that perform special operations in the
+author's database. The operations depend on the conventions used by the author; for example,
+that England and Wales census records have a Source of the form "Census record HO107..." or
+"Census record RG...". If you don't follow this convention, the features won't be very useful.
+
+To use DhG_Specials.py, just invoke it instead of DhG_Shell.py. Apart from the extra commands,
+it behaves in an identical manner. Note: the author only uses DhG_Specials.py when the extra
+features are needed, and usually in a non-interactive script.
+
+There is no documentation for the special features apart from the built-in help.
