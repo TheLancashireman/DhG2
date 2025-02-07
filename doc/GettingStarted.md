@@ -111,7 +111,7 @@ For example, in your Pewty database of four people, "find ji" finds Jill, wherea
 The "family" command shows the immediate relatives (parents, siblings and children) of an individual.
 
 The full set of commands is available in the built-in documentation by using the "help" command. There's also
-full documentation in the [command reference](CommandReference.md).
+full documentation in the [command reference](CommandRef.md).
 
 ## Specifying an individual
 
