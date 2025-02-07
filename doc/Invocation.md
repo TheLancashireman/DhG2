@@ -23,6 +23,11 @@ The program accepts options and parameters as described below:
 
 	If invoked with this option, DhG2 does not print any information messages when it starts.
 
+* **-s** or **--silent**
+
+	If invoked with this option, DhG2 does not print any information messages when it starts and also
+    does not print a prompt. This is useful for automatic scripting.
+
 * **-e** or **--exit**
 
 	If invoked with this option, DhG2 closes after loading the database and executing the script files.
