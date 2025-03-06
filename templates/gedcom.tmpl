@@ -1,0 +1,86 @@
+{# gedcom.tmpl - a template for the GEDCOM export
+
+	(c) David Haworth
+
+	This file is part of DhG.
+
+	DhG is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	DhG is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with DhG.  If not, see <http://www.gnu.org/licenses/>.
+
+	Input is a dictionary containing the following items:
+		timestamp	- date and time of generation
+		date		- date of generation
+        indi		- list of individuals
+		fam			- list of families
+
+	Each individual in 'indi' is a dictionary containing the following items:
+		uniq		- the unique ID of the individual
+		name		- the name of the individual. The surname is surrounded with slashes, e.g. John /Smith/
+		sex			- the gender of the individual, M or F, or None if not known
+		birthdate	- the date of birth of the individual, '?' if not known
+		deathdate	- the date of death of the individual, '?' if not known, None if alive or assumed alive
+		famc		- the index in fami (see above) in which the individual is a child. None if not a child.
+		fams		- a list of indexes in fami in which the individual is a partner
+
+	Each family in 'fami' is a dictionary containing the following items:
+		husb		- the unique ID of the individual considered to be the 'father' in this family
+		wife		- the unique ID of the individual considered to be the 'mother' in this family
+		chil		- a list of the unique IDs of all the children of husb and wife
+#}
+0 HEAD
+1 GEDC
+2 VERS 5.5.1
+2 FORM LINEAGE-LINKED
+3 VERS 5.5.1
+1 CHAR UTF-8
+1 SOUR DhG2
+2 NAME DhG
+2 VERS 2
+1 DATE {{ tp['date'] }}
+1 TIME {{ tp['timestamp'] }}
+{%  for p in tp['indi'] %}
+0 @I{{ p.uniq }}@ INDI
+1 NAME {{ p.name }}
+{%		if p.sex != None %}
+1 SEX {{ p.sex }}
+{%		endif %}
+1 BIRT
+{%		if p.birthdate != None and p.birthdate != '?' %}
+2 DATE {{ p.birthdate }}
+{%		endif %}
+{%		if p.deathdate != None %}
+1 DEAT
+{%			if p.birthdate != '?' %}
+2 DATE {{ p.deathdate }}
+{%			endif %}
+{%		endif %}
+{%		if p.famc != None %}
+1 FAMC @F{{ p.famc }}@
+{%		endif %}
+{%  	for f in p.fams %}
+1 FAMS @F{{ f }}@
+{%  	endfor %}
+{%  endfor %}
+{%  for f in tp['fam'] %}
+0 @F{{ loop.index }} FAM
+{%		if f.husb != None %}
+1 HUSB @I{{ f.husb }}@
+{%		endif %}
+{%		if f.wife != None %}
+1 WIFE @I{{ f.wife }}@
+{%		endif %}
+{%  	for c in f.chil %}
+1 CHIL @I{{ c }}@
+{%  	endfor %}
+{%  endfor %}
+0 TRLR
