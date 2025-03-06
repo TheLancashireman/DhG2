@@ -25,6 +25,7 @@ from DhG_Person import Person
 from DhG_Template import T_Person, T_Descendants, T_AncestorNode, T_IndexList
 from DhG_Event import TEventFactory
 from DhG_GedcomImporter import GedcomImporter
+from DhG_GedcomExporter import GedcomExporter
 
 # A class to represent the entire database
 #
@@ -814,5 +815,16 @@ class Database:
 			return 1
 
 		g = GedcomImporter(path, self)
+
+		return 0
+
+	# Export a GEDCOM file
+	#
+	def ExportGedcom(self, path):
+		if os.path.exists(path):
+			print("Error:", path, "already exists. Overwriting an existing file is not supported.")
+			return 1
+
+		g = GedcomExporter(path, self)
 
 		return 0

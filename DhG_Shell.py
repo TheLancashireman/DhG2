@@ -760,6 +760,30 @@ work with other GEDCOM files from different sources.
 		self.db.ImportGedcom(arg)
 		return
 
+	# ==========================================
+	# Implementation of the "gedexport" command.`
+	#
+	def do_gedexport(self, arg):
+		'''
+The "gedexport" command exports the entire database to a GEDCOM file. The information exported
+is restricted to name, id, gender, DoB and DoD for INDI records. FAM records are generated from
+explicit partnerships (marriage etc.) and assumed partnerships (father and mother)
+
+Usage:
+   gedexport <gedcomfile>  - Export the database to <gedcomfile>.
+
+The "gedexport" command refuses to overwrite an existing file. If <gedcomfile> already exists
+the command fails with an error message.
+
+Caveat: The "gedimport" command was written in order to use the LifeLines genealogy program to
+generate certain reports. The exported information is minimal. The command could be extended to
+export more information but it is unlikely that GEDCOM can represent all the information
+that is contained in a DhG2 database. Even if it can be represented, it is unlikely that another
+family tree program could make use of the information.
+		'''
+		self.db.ExportGedcom(arg)
+		return
+
 	# ======================================
 	# Implementation of the "shell" command.
 	#

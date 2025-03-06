@@ -38,10 +38,10 @@ from DhG_Event import Event
 #	- A death event with no additional attributes should have a Y after the opening DEAT tag. This importer
 #	ignores that requirement and assumes a death at an unknown date.
 #	- It isn't clear whether birth events follow the same rule. However, the mere existence of an individual
-#	- A MARR event (usually in a FAM object) should similarly have either Y or nothing. This importer adds
-#	any additional text as a Note for the event. In some cases it looks a bit strange.
 #	should be enough to infer a birth, even if there's no information. This importer automatically creates
 #	a birth event for every individual, regardless of whether the gedcom has one.
+#	- A MARR event (usually in a FAM object) should similarly have either Y or nothing. This importer adds
+#	any additional text as a Note for the event. In some cases it looks a bit strange.
 #	- Dates are handled flexibly, assuming English text:
 #		- Fields that exactly match months or reserved words like AFT, BEF etc. are handled as intended
 #		- Other fields: 4 characters means year, 1 or 2 characters are day-of-month.
