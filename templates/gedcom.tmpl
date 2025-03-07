@@ -19,11 +19,10 @@
 
 	Input is a dictionary containing the following items:
 		timestamp	- date and time of generation
-		date		- date of generation
         indi		- list of individuals
 		fam			- list of families
 
-	Each individual in 'indi' is a dictionary containing the following items:
+	Each individual in 'indi' is an object of a class containing the following items:
 		uniq		- the unique ID of the individual
 		name		- the name of the individual. The surname is surrounded with slashes, e.g. John /Smith/
 		sex			- the gender of the individual, M or F, or None if not known
@@ -32,9 +31,10 @@
 		famc		- the index in fami (see above) in which the individual is a child. None if not a child.
 		fams		- a list of indexes in fami in which the individual is a partner
 
-	Each family in 'fami' is a dictionary containing the following items:
+	Each family in 'fam' is an object of a class containing the following items:
 		husb		- the unique ID of the individual considered to be the 'father' in this family
 		wife		- the unique ID of the individual considered to be the 'mother' in this family
+		marrdate	- the date of the marriage. None if no marriage, '?' if date not known
 		chil		- a list of the unique IDs of all the children of husb and wife
 #}
 0 HEAD
@@ -46,41 +46,50 @@
 1 SOUR DhG2
 2 NAME DhG
 2 VERS 2
-1 DATE {{ tp['date'] }}
-1 TIME {{ tp['timestamp'] }}
+1 DATE {{ tp['timestamp'] }}
 {%  for p in tp['indi'] %}
+{%		if p != None %}
 0 @I{{ p.uniq }}@ INDI
 1 NAME {{ p.name }}
-{%		if p.sex != None %}
+{%			if p.sex != None %}
 1 SEX {{ p.sex }}
-{%		endif %}
-1 BIRT
-{%		if p.birthdate != None and p.birthdate != '?' %}
-2 DATE {{ p.birthdate }}
-{%		endif %}
-{%		if p.deathdate != None %}
-1 DEAT
-{%			if p.birthdate != '?' %}
-2 DATE {{ p.deathdate }}
 {%			endif %}
-{%		endif %}
-{%		if p.famc != None %}
+1 BIRT
+{%			if p.birthdate != None and p.birthdate != '?' %}
+2 DATE {{ p.birthdate }}
+{%			endif %}
+{%			if p.deathdate != None %}
+1 DEAT Y
+{%				if p.deathdate != '?' %}
+2 DATE {{ p.deathdate }}
+{%				endif %}
+{%			endif %}
+{%			if p.famc != None %}
 1 FAMC @F{{ p.famc }}@
-{%		endif %}
-{%  	for f in p.fams %}
+{%			endif %}
+{%  		for f in p.fams %}
 1 FAMS @F{{ f }}@
-{%  	endfor %}
+{%  		endfor %}
+{%		endif %}
 {%  endfor %}
 {%  for f in tp['fam'] %}
-0 @F{{ loop.index }} FAM
-{%		if f.husb != None %}
+{%		if not loop.first  %}
+0 @F{{ f.idx }}@ FAM
+{%			if f.husb != None %}
 1 HUSB @I{{ f.husb }}@
-{%		endif %}
-{%		if f.wife != None %}
+{%			endif %}
+{%			if f.wife != None %}
 1 WIFE @I{{ f.wife }}@
-{%		endif %}
-{%  	for c in f.chil %}
+{%			endif %}
+{%			if f.marrdate != None %}
+1 MARR Y
+{%				if f.marrdate != '?' %}
+2 DATE {{ f.marrdate }}
+{%				endif %}
+{%			endif %}
+{%  		for c in f.chil %}
 1 CHIL @I{{ c }}@
-{%  	endfor %}
+{%  		endfor %}
+{%		endif %}
 {%  endfor %}
 0 TRLR

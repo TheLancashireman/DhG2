@@ -269,3 +269,25 @@ class T_IndexList():
 	def AddObject(self, key, object):
 		self.objects[key] = object
 		return
+
+# A class to hold a GEDCOM individual
+#
+class T_Indi():
+	def __init__(self, uniq, name):
+		self.uniq = uniq
+		self.name = name
+		self.sex = None
+		self.birthdate = '?'
+		self.deathdate = None
+		self.famc = None
+		self.fams = []
+
+# A class to hold a GEDCOM family
+#
+class T_Fam():
+	def __init__(self, idx, husb, wife):
+		self.idx = idx
+		self.husb = husb
+		self.wife = wife
+		self.marrdate = None
+		self.chil = []

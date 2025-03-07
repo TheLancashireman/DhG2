@@ -31,6 +31,7 @@ class Config():
 	cfgfile = os.path.expanduser('~') + '/.DhG/config'
 
 	config = {}
+	gedmonths = ['XXX', 'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
 
 	# Initialize the class
 	@staticmethod
@@ -272,6 +273,8 @@ class Config():
 			mod = ''
 		if mod != '':
 			odate = odate[0:-1]
+			if fmt == 'gedcom':
+				mod = mod[0:3].upper() + ' '
 
 		# Split into YYYY, MM and DD maybe not all present.
 		parts = odate.split('-')
@@ -292,7 +295,24 @@ class Config():
 				mm = qmm[int(mm[1])]
 			except:
 				pass
-			return 'abt.'+yy+'-'+mm
+			if fmt == 'gedcom':
+				try:
+					gedmonth = Config.gedmonths[int(mm)]
+				except:
+					gedmonth = Config.gedmonths[0]
+				return 'ABT ' + gedmonth + ' ' + yy
+			return 'abt.' + yy + '-' + mm
+
+		if fmt == 'gedcom':
+			try:
+				gedmonth = Config.gedmonths[int(mm)]
+			except:
+				gedmonth = Config.gedmonths[0]
+			if len(parts) <= 2:
+				dd = ''
+			else:
+				dd = parts[2] + ' '
+			return mod + dd + gedmonth + ' ' + yy
 
 		# Nothing else specified. Return "raw" date but with standardised modifier as prefix
 		return mod+odate
